@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import ConversationView from './pages/ConversationView';
 import SearchPage from './pages/SearchPage';
 import ThreadsPage from './pages/ThreadsPage';
+import SettingsPage from './pages/SettingsPage';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -19,6 +20,7 @@ function App() {
               <Route path="/search" element={<SearchPage />} />
               <Route path="/threads" element={<ThreadsPage />} />
               <Route path="/threads/:threadId" element={<ThreadsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Routes>
           </div>
         </Router>

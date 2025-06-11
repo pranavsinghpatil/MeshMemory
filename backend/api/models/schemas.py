@@ -69,6 +69,12 @@ class ThreadResponse(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     summary: Optional[str] = None
 
+class MergeThreadRequest(BaseModel):
+    targetThreadId: str
+
+class SplitThreadRequest(BaseModel):
+    chunkId: str
+
 # Micro-thread Schemas
 class MicroThreadRequest(BaseModel):
     chunkId: str
@@ -79,4 +85,46 @@ class MicroThreadResponse(BaseModel):
     threadId: str
     answer: str
     modelUsed: str
+    timestamp: Union[datetime, str]
+
+# User Settings Schemas
+class ApiKeyData(BaseModel):
+    openai: Optional[str] = None
+    gemini: Optional[str] = None
+    claude: Optional[str] = None
+
+class UserPreferences(BaseModel):
+    defaultModel: str = "gpt-4"
+    autoThreadGeneration: bool = True
+    searchResultsCount: int = 10
+
+class UserSettings(BaseModel):
+    userId: str
+    theme: str = "system"
+    notificationsEnabled: bool = True
+    apiKeys: Optional[ApiKeyData] = None
+    preferences: Optional[UserPreferences] = None
+    createdAt: Union[datetime, str]
+    updatedAt: Union[datetime, str]
+
+# Usage Logs Schema
+class UsageLog(BaseModel):
+    id: str
+    userId: Optional[str] = None
+    modelUsed: str
+    promptTokens: int
+    completionTokens: int
+    totalTokens: int
+    latencyMs: int
+    success: bool
+    errorMessage: Optional[str] = None
+    timestamp: Union[datetime, str]
+
+# Thread Changelog Schema
+class ThreadChangelogEntry(BaseModel):
+    id: str
+    threadId: str
+    changeType: str  # "merge", "split", "create", "update", "delete"
+    description: str
+    metadata: Optional[Dict[str, Any]] = None
     timestamp: Union[datetime, str]

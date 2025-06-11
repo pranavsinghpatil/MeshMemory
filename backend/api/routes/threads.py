@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, Path, Query
+from fastapi import APIRouter, HTTPException, Path, Query, Body
 from typing import List, Optional
-from ..models.schemas import ThreadResponse, ThreadSummary
+from ..models.schemas import ThreadResponse, ThreadSummary, MergeThreadRequest, SplitThreadRequest
 from ..services.thread_service import ThreadService
 
 router = APIRouter()
@@ -88,6 +88,50 @@ async def create_thread(
             "threadId": thread["id"],
             "title": thread["title"],
             "chunkCount": len(chunk_ids)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/threads/{thread_id}/merge")
+async def merge_threads(
+    thread_id: str,
+    request: MergeThreadRequest = Body(...)
+):
+    """
+    Merge two threads together
+    """
+    try:
+        result = await thread_service.merge_threads(thread_id, request.targetThreadId)
+        
+        return {
+            "message": "Threads merged successfully",
+            "threadId": result["thread_id"],
+            "title": result["title"],
+            "chunkCount": result["chunk_count"]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/threads/{thread_id}/split")
+async def split_thread(
+    thread_id: str,
+    request: SplitThreadRequest = Body(...)
+):
+    """
+    Split a thread at a specific chunk
+    """
+    try:
+        result = await thread_service.split_thread(thread_id, request.chunkId)
+        
+        return {
+            "message": "Thread split successfully",
+            "originalThreadId": result["original_thread_id"],
+            "newThreadId": result["new_thread_id"],
+            "newThreadTitle": result["new_thread_title"],
+            "chunksInOriginal": result["chunks_in_original"],
+            "chunksInNew": result["chunks_in_new"]
         }
         
     except Exception as e:

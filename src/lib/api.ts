@@ -150,6 +150,20 @@ export const threadsAPI = {
     const response = await api.get('/threads/stats');
     return response.data;
   },
+  
+  mergeThreads: async (threadId: string, targetThreadId: string) => {
+    const response = await api.post(`/threads/${threadId}/merge`, {
+      targetThreadId
+    });
+    return response.data;
+  },
+  
+  splitThread: async (threadId: string, chunkId: string) => {
+    const response = await api.post(`/threads/${threadId}/split`, {
+      chunkId
+    });
+    return response.data;
+  }
 };
 
 // Micro-threads API
@@ -186,6 +200,42 @@ export const microThreadsAPI = {
       };
     }
   },
+};
+
+// User API
+export const userAPI = {
+  getApiKeys: async () => {
+    try {
+      const response = await api.get('/user/settings/api-keys');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching API keys:', error);
+      return {};
+    }
+  },
+  
+  saveApiKeys: async (keys: Record<string, string>) => {
+    const response = await api.post('/user/settings/api-keys', { keys });
+    return response.data;
+  },
+  
+  testApiKey: async (provider: string, key: string) => {
+    const response = await api.post('/user/settings/test-api-key', {
+      provider,
+      key
+    });
+    return response.data;
+  },
+  
+  getSettings: async () => {
+    const response = await api.get('/user/settings');
+    return response.data;
+  },
+  
+  updateSettings: async (settings: Record<string, any>) => {
+    const response = await api.post('/user/settings', settings);
+    return response.data;
+  }
 };
 
 export default api;

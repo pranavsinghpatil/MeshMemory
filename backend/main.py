@@ -9,7 +9,7 @@ from datetime import datetime
 import uuid
 
 # Import route modules
-from api.routes import import_routes, conversations, threads, search, micro_threads
+from api.routes import import_routes, conversations, threads, search, micro_threads, user_settings
 
 app = FastAPI(
     title="KnitChat API",
@@ -35,6 +35,7 @@ app.include_router(conversations.router, prefix="/api", tags=["conversations"])
 app.include_router(threads.router, prefix="/api", tags=["threads"])
 app.include_router(search.router, prefix="/api", tags=["search"])
 app.include_router(micro_threads.router, prefix="/api", tags=["micro-threads"])
+app.include_router(user_settings.router, prefix="/api", tags=["user-settings"])
 
 @app.get("/")
 async def root():

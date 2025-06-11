@@ -10,7 +10,8 @@ import {
   LogOut,
   UserCheck,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -28,6 +29,7 @@ export default function Sidebar({ onImportClick, collapsed = false, onToggleColl
     { name: 'Dashboard', href: '/', icon: Home },
     { name: 'Search', href: '/search', icon: Search },
     { name: 'Explore Threads', href: '/threads', icon: Layers },
+    { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
   const handleSignOut = async () => {
