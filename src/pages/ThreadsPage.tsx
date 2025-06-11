@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, MessageSquare, Clock, TrendingUp } from 'lucide-react';
+import { Layers, MessageSquare, Clock, TrendingUp, Eye, Calendar, Hash } from 'lucide-react';
 import Layout from '../components/Layout';
+import ThreadCard from '../components/ThreadCard';
 import { supabase } from '../lib/supabase';
 
 export default function ThreadsPage() {
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('updated_at');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     fetchThreads();
@@ -28,6 +30,8 @@ export default function ThreadsPage() {
       const threadsWithCounts = data?.map(thread => ({
         ...thread,
         chunkCount: thread.chunks?.length || 0,
+        // Generate dummy topics for now
+        topics: generateDummyTopics(),
       })) || [];
 
       setThreads(threadsWithCounts);
@@ -36,6 +40,19 @@ export default function ThreadsPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function generateDummyTopics() {
+    const allTopics = [
+      'React', 'JavaScript', 'AI/ML', 'Career', 'Productivity', 
+      'Design', 'Backend', 'Database', 'DevOps', 'Mobile',
+      'Web3', 'Security', 'Testing', 'Performance', 'Architecture'
+    ];
+    
+    // Return 2-4 random topics
+    const count = Math.floor(Math.random() * 3) + 2;
+    const shuffled = allTopics.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
   }
 
   if (loading) {
@@ -56,12 +73,37 @@ export default function ThreadsPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Explore Threads</h1>
+                <h1 className="text-3xl font-bold text-gray-900">Thread Explorer</h1>
                 <p className="mt-2 text-lg text-gray-600">
                   Discover conversation patterns and topics across your sources
                 </p>
               </div>
               <div className="flex items-center space-x-4">
+                {/* View Mode Toggle */}
+                <div className="flex rounded-lg border border-gray-300 p-1">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                      viewMode === 'grid'
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Grid
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                      viewMode === 'list'
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    List
+                  </button>
+                </div>
+
+                {/* Sort Dropdown */}
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -77,11 +119,11 @@ export default function ThreadsPage() {
 
           {/* Stats */}
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-white overflow-hidden shadow-md rounded-2xl">
               <div className="p-5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <Layers className="h-6 w-6 text-gray-400" />
+                    <Layers className="h-6 w-6 text-indigo-600" />
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
@@ -97,11 +139,11 @@ export default function ThreadsPage() {
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-white overflow-hidden shadow-md rounded-2xl">
               <div className="p-5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <MessageSquare className="h-6 w-6 text-gray-400" />
+                    <MessageSquare className="h-6 w-6 text-blue-600" />
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
@@ -117,11 +159,11 @@ export default function ThreadsPage() {
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-white overflow-hidden shadow-md rounded-2xl">
               <div className="p-5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <TrendingUp className="h-6 w-6 text-gray-400" />
+                    <TrendingUp className="h-6 w-6 text-green-600" />
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
@@ -141,64 +183,23 @@ export default function ThreadsPage() {
             </div>
           </div>
 
-          {/* Threads Grid */}
+          {/* Threads Display */}
           {threads.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className={
+              viewMode === 'grid' 
+                ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" 
+                : "space-y-4"
+            }>
               {threads.map((thread: any) => (
-                <div
+                <ThreadCard
                   key={thread.id}
-                  className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                >
-                  <div className="p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-lg bg-indigo-100 flex items-center justify-center">
-                          <Layers className="h-6 w-6 text-indigo-600" />
-                        </div>
-                      </div>
-                      <div className="ml-4 flex-1 min-w-0">
-                        <h3 className="text-lg font-medium text-gray-900 truncate">
-                          {thread.title}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          {thread.chunkCount} message{thread.chunkCount !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Clock className="h-4 w-4 mr-2" />
-                        Created {new Date(thread.created_at).toLocaleDateString()}
-                      </div>
-                      {thread.updated_at !== thread.created_at && (
-                        <div className="flex items-center text-sm text-gray-500">
-                          <TrendingUp className="h-4 w-4 mr-2" />
-                          Updated {new Date(thread.updated_at).toLocaleDateString()}
-                        </div>
-                      )}
-                    </div>
-
-                    {thread.metadata && Object.keys(thread.metadata).length > 0 && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <div className="flex flex-wrap gap-2">
-                          {Object.entries(thread.metadata).slice(0, 3).map(([key, value]) => (
-                            <span
-                              key={key}
-                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                            >
-                              {key}: {String(value).slice(0, 20)}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  thread={thread}
+                  viewMode={viewMode}
+                />
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-white shadow rounded-lg">
+            <div className="text-center py-12 bg-white shadow-md rounded-2xl">
               <Layers className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No threads found</h3>
               <p className="mt-1 text-sm text-gray-500">

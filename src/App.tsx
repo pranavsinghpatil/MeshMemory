@@ -16,6 +16,7 @@ function App() {
             <Route path="/conversations/:sourceId" element={<ConversationView />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/threads" element={<ThreadsPage />} />
+            <Route path="/threads/:threadId" element={<ThreadsPage />} />
           </Routes>
         </div>
       </Router>
