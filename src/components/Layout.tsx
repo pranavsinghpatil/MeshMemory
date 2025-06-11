@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import Sidebar from './Sidebar';
@@ -13,9 +13,23 @@ interface LayoutProps {
 
 export default function Layout({ children, title }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    // Check if there's a saved preference in localStorage
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved ? saved === 'true' : false;
+  });
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const { user, isGuest, continueAsGuest } = useAuth();
+
+  // Save sidebar collapsed state to localStorage
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
+
+  const toggleSidebarCollapse = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
 
   if (!user && !isGuest) {
     return (
@@ -72,17 +86,24 @@ export default function Layout({ children, title }: LayoutProps) {
               <X className="h-6 w-6 text-white" />
             </button>
           </div>
-          <Sidebar onImportClick={() => setImportModalOpen(true)} />
+          <Sidebar 
+            onImportClick={() => setImportModalOpen(true)} 
+            collapsed={false}
+          />
         </div>
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
-        <Sidebar onImportClick={() => setImportModalOpen(true)} />
+      <div className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 transition-all duration-300 ${sidebarCollapsed ? 'md:w-16' : 'md:w-64'}`}>
+        <Sidebar 
+          onImportClick={() => setImportModalOpen(true)} 
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={toggleSidebarCollapse}
+        />
       </div>
 
       {/* Main content */}
-      <div className="md:pl-64 flex flex-col flex-1">
+      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'} flex flex-col flex-1`}>
         <TopBar 
           onMenuClick={() => setSidebarOpen(true)} 
           title={title}

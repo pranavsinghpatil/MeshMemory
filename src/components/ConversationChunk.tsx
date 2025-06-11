@@ -23,18 +23,18 @@ export default function ConversationChunk({
     if (isUser) {
       return {
         container: 'ml-auto max-w-xs sm:max-w-md',
-        bubble: 'bg-indigo-600 text-white',
+        bubble: 'bg-indigo-600 text-white dark:bg-indigo-700',
         icon: User,
-        iconBg: 'bg-indigo-100',
-        iconColor: 'text-indigo-600'
+        iconBg: 'bg-indigo-100 dark:bg-indigo-900',
+        iconColor: 'text-indigo-600 dark:text-indigo-400'
       };
     } else {
       return {
         container: 'mr-auto max-w-xs sm:max-w-md',
-        bubble: 'bg-white border border-gray-200 text-gray-900',
+        bubble: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white',
         icon: Bot,
-        iconBg: 'bg-gray-100',
-        iconColor: 'text-gray-600'
+        iconBg: 'bg-gray-100 dark:bg-gray-700',
+        iconColor: 'text-gray-600 dark:text-gray-400'
       };
     }
   };
