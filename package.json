@@ -1,5 +1,5 @@
 {
-  "name": "chat-analysis",
+  "name": "knitchat-app",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -15,7 +15,8 @@
     "lucide-react": "^0.300.0",
     "openai": "^4.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
