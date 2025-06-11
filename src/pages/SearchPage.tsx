@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Loader2, MessageSquare } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Loader2, MessageSquare, Clock, AlertCircle } from 'lucide-react';
 import Layout from '../components/Layout';
 import MicroThreadModal from '../components/MicroThreadModal';
 import SearchResultCard from '../components/SearchResultCard';
@@ -13,6 +13,33 @@ export default function SearchPage() {
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [selectedChunk, setSelectedChunk] = useState<any>(null);
   const [microThreadModalOpen, setMicroThreadModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [processingTime, setProcessingTime] = useState<number | null>(null);
+
+  // Get search suggestions when query changes
+  useEffect(() => {
+    const getSuggestions = async () => {
+      if (query.length >= 3) {
+        try {
+          const response = await searchAPI.getSuggestions(query);
+          setSuggestions(response.suggestions || []);
+        } catch (error) {
+          console.error('Error fetching suggestions:', error);
+        }
+      } else {
+        setSuggestions([]);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      if (query.length >= 3) {
+        getSuggestions();
+      }
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [query]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,15 +49,21 @@ export default function SearchPage() {
     setSearchPerformed(true);
     setResults([]);
     setAiResponse('');
+    setError(null);
+    setProcessingTime(null);
 
     try {
+      const startTime = performance.now();
       const response = await searchAPI.search(query);
+      const endTime = performance.now();
       
       setResults(response.results || []);
       setAiResponse(response.aiResponse || '');
+      setProcessingTime(Math.round(endTime - startTime));
       
     } catch (error) {
       console.error('Search error:', error);
+      setError('An error occurred while searching. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -44,6 +77,13 @@ export default function SearchPage() {
   const handleViewContext = (result: any) => {
     // Navigate to the full conversation
     window.open(`/conversations/${result.source?.id}`, '_blank');
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setQuery(suggestion);
+    // Trigger search immediately
+    const formEvent = { preventDefault: () => {} } as React.FormEvent;
+    handleSearch(formEvent);
   };
 
   return (
@@ -61,19 +101,32 @@ export default function SearchPage() {
           {/* Search Form */}
           <form onSubmit={handleSearch} className="mb-8">
             <div className="flex gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-                  </div>
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Ask across all your AI conversations..."
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:placeholder-gray-400 dark:focus:placeholder-gray-500 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-lg transition-colors"
-                  />
+              <div className="flex-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Ask across all your AI conversations..."
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:placeholder-gray-400 dark:focus:placeholder-gray-500 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-lg transition-colors"
+                />
+                
+                {/* Search suggestions */}
+                {suggestions.length > 0 && !loading && !searchPerformed && (
+                  <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto">
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <button
                 type="submit"
@@ -89,6 +142,25 @@ export default function SearchPage() {
             </div>
           </form>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-8 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertCircle className="h-5 w-5 text-red-400" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
+                    Search Error
+                  </h3>
+                  <p className="mt-2 text-sm text-red-700 dark:text-red-400">
+                    {error}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* AI Response */}
           {aiResponse && (
             <div className="mb-8 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-6">
@@ -101,6 +173,13 @@ export default function SearchPage() {
                 <div className="flex-1">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">AI Response</h3>
                   <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{aiResponse}</p>
+                  
+                  {processingTime && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 flex items-center">
+                      <Clock className="h-3 w-3 mr-1" />
+                      Processed in {processingTime}ms
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

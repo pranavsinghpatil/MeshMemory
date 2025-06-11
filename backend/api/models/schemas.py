@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 
 # Import/Export Schemas
@@ -23,6 +23,7 @@ class ChunkResponse(BaseModel):
     participantLabel: Optional[str] = None
     modelName: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
+    microThreads: Optional[List[Any]] = None
 
 class ConversationResponse(BaseModel):
     sourceId: str
@@ -30,6 +31,7 @@ class ConversationResponse(BaseModel):
     sourceType: str
     chunks: List[ChunkResponse]
     metadata: Optional[Dict[str, Any]] = None
+    summary: Optional[str] = None
 
 # Search Schemas
 class SearchResult(BaseModel):
@@ -38,20 +40,21 @@ class SearchResult(BaseModel):
     similarity: float
     source: Dict[str, Any]
     participant_label: Optional[str] = None
-    timestamp: datetime
+    timestamp: Union[datetime, str]
 
 class SearchResponse(BaseModel):
     query: str
     results: List[SearchResult]
     aiResponse: Optional[str] = None
     totalResults: int
+    metadata: Optional[Dict[str, Any]] = None
 
 # Thread Schemas
 class ThreadSummary(BaseModel):
     id: str
     title: str
-    created_at: datetime
-    updated_at: datetime
+    created_at: Union[datetime, str]
+    updated_at: Union[datetime, str]
     chunkCount: int
     topics: List[str]
     metadata: Optional[Dict[str, Any]] = None
@@ -61,9 +64,10 @@ class ThreadResponse(BaseModel):
     title: str
     chunks: List[ChunkResponse]
     centroidEmbedding: Optional[List[float]] = None
-    created_at: datetime
-    updated_at: datetime
+    created_at: Union[datetime, str]
+    updated_at: Union[datetime, str]
     metadata: Optional[Dict[str, Any]] = None
+    summary: Optional[str] = None
 
 # Micro-thread Schemas
 class MicroThreadRequest(BaseModel):
@@ -75,4 +79,4 @@ class MicroThreadResponse(BaseModel):
     threadId: str
     answer: str
     modelUsed: str
-    timestamp: datetime
+    timestamp: Union[datetime, str]

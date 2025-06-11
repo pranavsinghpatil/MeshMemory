@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Send, Loader2, MessageSquare, Plus } from 'lucide-react';
+import { X, Send, Loader2, MessageSquare, Plus, Copy, Share } from 'lucide-react';
 import { microThreadsAPI } from '../lib/api';
 
 interface MicroThreadModalProps {
@@ -19,6 +19,7 @@ export default function MicroThreadModal({
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState('');
   const [modelUsed, setModelUsed] = useState('');
+  const [copied, setCopied] = useState(false);
 
   if (!isOpen || !chunk) return null;
 
@@ -48,6 +49,31 @@ export default function MicroThreadModal({
     // This would add the micro-thread to the main conversation thread
     // Implementation depends on your threading logic
     console.log('Adding to main thread...');
+  };
+  
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  
+  const shareContent = () => {
+    if (!response) return;
+    
+    const text = `Q: ${question}\n\nA: ${response}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'KnitChat Follow-up',
+        text: text
+      }).catch(err => {
+        console.error('Error sharing:', err);
+        copyToClipboard(text);
+      });
+    } else {
+      copyToClipboard(text);
+    }
   };
 
   return (
@@ -106,11 +132,29 @@ export default function MicroThreadModal({
             {/* Response */}
             {response && (
               <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border-l-4 border-green-500 dark:border-green-400">
-                <div className="flex items-center mb-2">
-                  <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
-                  <h4 className="text-sm font-medium text-green-800 dark:text-green-300">
-                    AI Response ({modelUsed})
-                  </h4>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
+                    <h4 className="text-sm font-medium text-green-800 dark:text-green-300">
+                      AI Response ({modelUsed})
+                    </h4>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => copyToClipboard(response)}
+                      className="p-1 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 rounded-full transition-colors"
+                      title={copied ? "Copied!" : "Copy response"}
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={shareContent}
+                      className="p-1 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 rounded-full transition-colors"
+                      title="Share"
+                    >
+                      <Share className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <p className="text-green-700 dark:text-green-300 text-sm leading-relaxed">{response}</p>
                 

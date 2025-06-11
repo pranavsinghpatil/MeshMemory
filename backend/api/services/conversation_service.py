@@ -1,10 +1,13 @@
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+import asyncio
 from .database_service import DatabaseService
+from .llm_service import LLMService
 
 class ConversationService:
     def __init__(self):
         self.db_service = DatabaseService()
+        self.llm_service = LLMService()
 
     async def get_conversation_by_source(self, source_id: str) -> Optional[Dict[str, Any]]:
         """Get full conversation data for a source"""
@@ -75,6 +78,21 @@ class ConversationService:
             "chunkCount": chunk_count,
             "metadata": source.get("metadata", {})
         }
+        
+    async def generate_conversation_summary(self, source_id: str) -> Optional[str]:
+        """Generate a summary of the conversation"""
+        chunks = await self.db_service.get_chunks_by_source(source_id)
+        if not chunks:
+            return None
+            
+        # Concatenate chunks for summarization
+        # Limit to first 10 chunks to avoid token limits
+        text_chunks = [chunk["text_chunk"] for chunk in chunks[:10]]
+        conversation_text = "\n\n".join(text_chunks)
+        
+        # Generate summary using LLM
+        summary = await self.llm_service.generate_summary(conversation_text)
+        return summary
 
     def _determine_role(self, participant_label: str) -> str:
         """Determine if participant is user or assistant"""

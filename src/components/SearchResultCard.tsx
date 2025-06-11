@@ -1,5 +1,5 @@
-import React from 'react';
-import { Clock, ExternalLink, MessageCircle, Eye } from 'lucide-react';
+import React, { useState } from 'react';
+import { Clock, ExternalLink, MessageCircle, Eye, Share, Copy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface SearchResultCardProps {
@@ -15,6 +15,8 @@ export default function SearchResultCard({
   onFollowUp, 
   onViewContext 
 }: SearchResultCardProps) {
+  const [copied, setCopied] = useState(false);
+  
   const getSimilarityColor = (similarity: number) => {
     if (similarity >= 0.9) return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
     if (similarity >= 0.8) return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
@@ -32,6 +34,27 @@ export default function SearchResultCard({
         return '📄';
       default:
         return '💬';
+    }
+  };
+  
+  const handleCopyText = () => {
+    navigator.clipboard.writeText(result.text_chunk).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `KnitChat - ${result.source?.title || 'Search Result'}`,
+        text: result.text_chunk,
+        url: window.location.href
+      }).catch(err => {
+        console.error('Error sharing:', err);
+      });
+    } else {
+      handleCopyText();
     }
   };
 
@@ -61,6 +84,20 @@ export default function SearchResultCard({
             title="View in full context"
           >
             <Eye className="h-4 w-4" />
+          </button>
+          <button
+            onClick={handleCopyText}
+            className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-full transition-colors"
+            title={copied ? "Copied!" : "Copy text"}
+          >
+            <Copy className="h-4 w-4" />
+          </button>
+          <button
+            onClick={handleShare}
+            className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-full transition-colors"
+            title="Share"
+          >
+            <Share className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -104,6 +141,13 @@ export default function SearchResultCard({
         <div className="mt-3 flex items-center text-xs text-gray-400 dark:text-gray-500">
           <Clock className="h-3 w-3 mr-1" />
           From {result.participant_label} • {new Date(result.timestamp).toLocaleString()}
+        </div>
+      )}
+      
+      {/* Copied indicator */}
+      {copied && (
+        <div className="absolute top-2 right-2 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium px-2.5 py-0.5 rounded">
+          Copied!
         </div>
       )}
     </div>
