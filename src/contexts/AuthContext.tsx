@@ -5,9 +5,11 @@ import { supabase } from '../lib/supabase';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isGuest: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  continueAsGuest: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,8 +17,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
+    // Check for guest mode
+    const guestMode = localStorage.getItem('guestMode');
+    if (guestMode === 'true') {
+      setIsGuest(true);
+      setLoading(false);
+      return;
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -28,6 +39,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (event, session) => {
         setUser(session?.user ?? null);
         setLoading(false);
+        if (session?.user) {
+          setIsGuest(false);
+          localStorage.removeItem('guestMode');
+        }
       }
     );
 
@@ -40,6 +55,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
     if (error) throw error;
+    setIsGuest(false);
+    localStorage.removeItem('guestMode');
   };
 
   const signUp = async (email: string, password: string) => {
@@ -48,15 +65,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
     if (error) throw error;
+    setIsGuest(false);
+    localStorage.removeItem('guestMode');
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    setIsGuest(false);
+    localStorage.removeItem('guestMode');
+  };
+
+  const continueAsGuest = () => {
+    setIsGuest(true);
+    setLoading(false);
+    localStorage.setItem('guestMode', 'true');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      isGuest, 
+      signIn, 
+      signUp, 
+      signOut, 
+      continueAsGuest 
+    }}>
       {children}
     </AuthContext.Provider>
   );
