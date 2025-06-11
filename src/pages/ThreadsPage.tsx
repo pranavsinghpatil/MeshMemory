@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Loader2 } from 'lucide-react';
+import { Layers, Loader2, TrendingUp, MessageSquare } from 'lucide-react';
 import Layout from '../components/Layout';
 import ThreadCard from '../components/ThreadCard';
 import { threadsAPI } from '../lib/api';
@@ -194,6 +194,3 @@ export default function ThreadsPage() {
     </Layout>
   );
 }
-
-// Import missing component
-import { TrendingUp, MessageSquare } from 'lucide-react';

@@ -104,6 +104,27 @@ class DatabaseService:
         
         return chunk_id
 
+    async def get_chunk(self, chunk_id: str) -> Optional[Dict[str, Any]]:
+        """Get chunk by ID"""
+        conn = await self.get_connection()
+        
+        if conn:
+            try:
+                row = await conn.fetchrow('''
+                    SELECT * FROM chunks WHERE id = $1
+                ''', chunk_id)
+                
+                if row:
+                    return dict(row)
+                return None
+            except Exception as e:
+                print(f"Database error getting chunk: {e}")
+            finally:
+                await self.release_connection(conn)
+        
+        # Fallback to in-memory
+        return self.chunks.get(chunk_id)
+
     async def get_chunks_by_source(self, source_id: str) -> List[Dict[str, Any]]:
         """Get all chunks for a source"""
         conn = await self.get_connection()

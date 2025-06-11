@@ -18,7 +18,7 @@ class MicroThreadService:
         """Create a micro-thread (follow-up conversation)"""
         
         # Get the original chunk for context
-        chunk = self.db_service.chunks.get(chunk_id)
+        chunk = await self.db_service.get_chunk(chunk_id)
         if not chunk:
             raise ValueError("Chunk not found")
         
