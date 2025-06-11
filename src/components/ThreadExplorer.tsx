@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, MessageSquare, ArrowsRightLeft, Scissors, AlertCircle, Loader2 } from 'lucide-react';
+import { Layers, MessageSquare, ArrowRightLeft as ArrowsRightLeft, Scissors, AlertCircle, Loader2 } from 'lucide-react';
 import { threadsAPI } from '../lib/api';
 import ThreadCard from './ThreadCard';
 
