@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
-import { Clock, MessageCircle, Pin, Eye, User, Bot } from 'lucide-react';
+import { Clock, MessageCircle, Pin, Eye, User, Bot, Flag, GitBranch } from 'lucide-react';
 
 interface ConversationChunkProps {
   chunk: any;
   onFollowUp: (chunk: any) => void;
   onPinToThread: (chunk: any) => void;
   onSeeContext: (chunk: any) => void;
+  onFlagBenchmark?: (chunk: any) => void;
+  onSpawnParallel?: (chunk: any) => void;
 }
 
 export default function ConversationChunk({ 
   chunk, 
   onFollowUp, 
   onPinToThread, 
-  onSeeContext 
+  onSeeContext,
+  onFlagBenchmark,
+  onSpawnParallel
 }: ConversationChunkProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -23,18 +27,18 @@ export default function ConversationChunk({
     if (isUser) {
       return {
         container: 'ml-auto max-w-xs sm:max-w-md',
-        bubble: 'bg-indigo-600 text-white',
+        bubble: 'bg-indigo-600 text-white dark:bg-indigo-700',
         icon: User,
-        iconBg: 'bg-indigo-100',
-        iconColor: 'text-indigo-600'
+        iconBg: 'bg-indigo-100 dark:bg-indigo-900',
+        iconColor: 'text-indigo-600 dark:text-indigo-400'
       };
     } else {
       return {
         container: 'mr-auto max-w-xs sm:max-w-md',
-        bubble: 'bg-white border border-gray-200 text-gray-900',
+        bubble: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white',
         icon: Bot,
-        iconBg: 'bg-gray-100',
-        iconColor: 'text-gray-600'
+        iconBg: 'bg-gray-100 dark:bg-gray-700',
+        iconColor: 'text-gray-600 dark:text-gray-400'
       };
     }
   };
@@ -96,6 +100,24 @@ export default function ConversationChunk({
                 >
                   <Eye className="h-3 w-3" />
                 </button>
+                {onFlagBenchmark && (
+                  <button
+                    onClick={() => onFlagBenchmark(chunk)}
+                    className="p-1.5 bg-amber-600 text-white rounded-full shadow-lg hover:bg-amber-700 transition-colors"
+                    title="Flag as benchmark"
+                  >
+                    <Flag className="h-3 w-3" />
+                  </button>
+                )}
+                {onSpawnParallel && (
+                  <button
+                    onClick={() => onSpawnParallel(chunk)}
+                    className="p-1.5 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 transition-colors"
+                    title="Spawn parallel chat"
+                  >
+                    <GitBranch className="h-3 w-3" />
+                  </button>
+                )}
               </div>
             )}
           </div>

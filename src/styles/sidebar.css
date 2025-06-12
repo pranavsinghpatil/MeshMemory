@@ -1,0 +1,61 @@
+/* Sidebar hover effects */
+.sidebar-hover-zone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 100%;
+  z-index: 40;
+}
+
+/* Sidebar transition styles */
+.sidebar-expanded {
+  width: 256px;
+  transition: width 0.3s ease-in-out;
+}
+
+.sidebar-collapsed {
+  width: 64px;
+  transition: width 0.3s ease-in-out;
+}
+
+/* Sidebar item hover effects */
+.sidebar-item {
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-item::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background-color: white;
+  opacity: 0.1;
+  transition: width 0.2s ease;
+}
+
+.sidebar-item:hover::after {
+  width: 4px;
+}
+
+.sidebar-item.active::after {
+  width: 4px;
+  background-color: white;
+  opacity: 1;
+}
+
+/* Group animation */
+.nav-group {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  opacity: 0;
+}
+
+.nav-group.expanded {
+  max-height: 500px;
+  opacity: 1;
+}

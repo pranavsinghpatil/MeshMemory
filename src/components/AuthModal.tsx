@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import GuestModeButton from './GuestModeButton';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -41,15 +42,15 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose} />
         
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                 {isSignUp ? 'Create Account' : 'Sign In'}
               </h3>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
               >
                 <X className="h-6 w-6" />
               </button>
@@ -57,7 +58,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Email
                 </label>
                 <input
@@ -66,12 +67,12 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Password
                 </label>
                 <input
@@ -80,12 +81,12 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
 
               {error && (
-                <div className="text-red-600 text-sm">{error}</div>
+                <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>
               )}
 
               <button
@@ -101,10 +102,25 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </button>
             </form>
 
+            <div className="mt-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or</span>
+                </div>
+              </div>
+              
+              <div className="mt-4">
+                <GuestModeButton />
+              </div>
+            </div>
+
             <div className="mt-4 text-center">
               <button
                 onClick={() => setIsSignUp(!isSignUp)}
-                className="text-sm text-indigo-600 hover:text-indigo-500 transition-colors"
+                className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
               >
                 {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
               </button>

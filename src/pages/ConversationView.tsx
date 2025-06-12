@@ -1,20 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, 
   MessageSquare, 
-  User, 
-  Bot, 
   Clock, 
-  MoreHorizontal,
   MessageCircle,
   Pin,
   Eye,
-  Layers
+  Layers,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Share,
+  Download
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import MicroThreadModal from '../components/MicroThreadModal';
-import { supabase } from '../lib/supabase';
+import ConversationChunk from '../components/ConversationChunk';
+import ThreadSummary from '../components/ThreadSummary';
+import { conversationsAPI, microThreadsAPI } from '../lib/api';
 
 export default function ConversationView() {
   const { sourceId } = useParams();
@@ -24,51 +29,72 @@ export default function ConversationView() {
   const [loading, setLoading] = useState(true);
   const [selectedChunk, setSelectedChunk] = useState<any>(null);
   const [microThreadModalOpen, setMicroThreadModalOpen] = useState(false);
-  const [hoveredChunk, setHoveredChunk] = useState<string | null>(null);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [expandedMicroThreads, setExpandedMicroThreads] = useState<Record<string, boolean>>({});
+  const [copySuccess, setCopySuccess] = useState<string | null>(null);
+  const [threadId, setThreadId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (sourceId) {
-      fetchConversationData();
-    }
-  }, [sourceId]);
-
-  async function fetchConversationData() {
+  const fetchConversationData = useCallback(async () => {
+    if (!sourceId) return;
+    
     try {
-      // Fetch source details
-      const { data: sourceData } = await supabase
-        .from('sources')
-        .select('*')
-        .eq('id', sourceId)
-        .single();
-
-      setSource(sourceData);
-
-      // Fetch chunks for this source
-      const { data: chunksData } = await supabase
-        .from('chunks')
-        .select('*')
-        .eq('source_id', sourceId)
-        .order('timestamp', { ascending: true });
-
-      setChunks(chunksData || []);
-
-      // Fetch micro-threads for chunks in this source
-      if (chunksData?.length) {
-        const chunkIds = chunksData.map(chunk => chunk.id);
-        const { data: microThreadsData } = await supabase
-          .from('micro_threads')
-          .select('*')
-          .in('parent_chunk_id', chunkIds)
-          .order('created_at', { ascending: true });
-
-        setMicroThreads(microThreadsData || []);
+      setLoading(true);
+      
+      // Fetch conversation data with micro-threads included
+      const conversation = await conversationsAPI.getConversation(sourceId);
+      
+      setSource({
+        id: conversation.sourceId,
+        title: conversation.title,
+        type: conversation.sourceType,
+        created_at: new Date().toISOString(), // Fallback
+        metadata: conversation.metadata
+      });
+      
+      // Process chunks and their micro-threads
+      const processedChunks = conversation.chunks.map((chunk: any) => ({
+        id: chunk.id,
+        text_chunk: chunk.text,
+        participant_label: chunk.participantLabel,
+        timestamp: chunk.timestamp,
+        model_name: chunk.modelName,
+        microThreads: chunk.microThreads || []
+      }));
+      
+      setChunks(processedChunks);
+      
+      // Collect all micro-threads
+      const allMicroThreads = processedChunks.reduce((acc: any[], chunk: any) => {
+        return [...acc, ...(chunk.microThreads || [])];
+      }, []);
+      
+      setMicroThreads(allMicroThreads);
+      
+      // Check if chunks belong to a thread
+      const firstChunkWithThread = processedChunks.find((chunk: any) => chunk.thread_id);
+      if (firstChunkWithThread) {
+        setThreadId(firstChunkWithThread.thread_id);
       }
+      
+      // Try to get a summary
+      try {
+        const summaryResponse = await conversationsAPI.getConversationSummary(sourceId);
+        setSummary(summaryResponse.summary);
+      } catch (error) {
+        console.error('Error fetching summary:', error);
+        setSummary(null);
+      }
+      
     } catch (error) {
       console.error('Error fetching conversation data:', error);
     } finally {
       setLoading(false);
     }
-  }
+  }, [sourceId]);
+
+  useEffect(() => {
+    fetchConversationData();
+  }, [fetchConversationData]);
 
   const handleFollowUp = (chunk: any) => {
     setSelectedChunk(chunk);
@@ -85,30 +111,52 @@ export default function ConversationView() {
     console.log('Showing context for chunk:', chunk.id);
   };
 
-  const getChunkStyle = (chunk: any) => {
-    const isUser = chunk.participant_label?.toLowerCase().includes('user') || 
-                   chunk.participant_label?.toLowerCase().includes('human');
+  const toggleMicroThread = (chunkId: string) => {
+    setExpandedMicroThreads(prev => ({
+      ...prev,
+      [chunkId]: !prev[chunkId]
+    }));
+  };
+
+  const copyConversationToClipboard = () => {
+    if (!chunks.length) return;
     
-    if (isUser) {
-      return {
-        container: 'ml-auto max-w-xs sm:max-w-md',
-        bubble: 'bg-indigo-600 text-white',
-        tail: 'border-l-indigo-600'
-      };
-    } else {
-      return {
-        container: 'mr-auto max-w-xs sm:max-w-md',
-        bubble: 'bg-white border border-gray-200 text-gray-900',
-        tail: 'border-r-gray-200'
-      };
-    }
+    const text = chunks.map((chunk: any) => {
+      return `${chunk.participant_label || 'Unknown'}: ${chunk.text_chunk}`;
+    }).join('\n\n');
+    
+    navigator.clipboard.writeText(text).then(() => {
+      setCopySuccess('Copied!');
+      setTimeout(() => setCopySuccess(null), 2000);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      setCopySuccess('Failed to copy');
+    });
+  };
+
+  const downloadConversation = () => {
+    if (!chunks.length) return;
+    
+    const text = chunks.map((chunk: any) => {
+      return `${chunk.participant_label || 'Unknown'} (${new Date(chunk.timestamp).toLocaleString()}):\n${chunk.text_chunk}`;
+    }).join('\n\n');
+    
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${source?.title || 'conversation'}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   if (loading) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
         </div>
       </Layout>
     );
@@ -118,8 +166,8 @@ export default function ConversationView() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900">Source not found</h2>
-          <Link to="/" className="text-indigo-600 hover:text-indigo-500 mt-4 inline-block">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Source not found</h2>
+          <Link to="/" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 mt-4 inline-block transition-colors">
             Return to Dashboard
           </Link>
         </div>
@@ -135,98 +183,134 @@ export default function ConversationView() {
           <div className="mb-6">
             <Link
               to="/"
-              className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 mb-4 transition-colors"
+              className="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-4 transition-colors"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back to Dashboard
             </Link>
-            <div className="flex items-center space-x-3">
-              <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-lg bg-indigo-100 flex items-center justify-center">
-                  <MessageSquare className="h-6 w-6 text-indigo-600" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="h-10 w-10 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                    <MessageSquare className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {source.title || 'Untitled Source'}
+                  </h1>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {source.type} • Created {new Date(source.created_at).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {source.title || 'Untitled Source'}
-                </h1>
-                <p className="text-sm text-gray-500">
-                  {source.type} • Created {new Date(source.created_at).toLocaleDateString()}
-                </p>
+              
+              <div className="flex space-x-2">
+                <button 
+                  onClick={copyConversationToClipboard}
+                  className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  title="Copy conversation"
+                >
+                  {copySuccess ? (
+                    <span className="text-green-600 dark:text-green-400 text-xs font-medium">{copySuccess}</span>
+                  ) : (
+                    <Copy className="h-5 w-5" />
+                  )}
+                </button>
+                <button 
+                  onClick={downloadConversation}
+                  className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  title="Download conversation"
+                >
+                  <Download className="h-5 w-5" />
+                </button>
+                <button 
+                  className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  title="Share conversation"
+                >
+                  <Share className="h-5 w-5" />
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Conversation Thread */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-6">Conversation Thread</h3>
-              
-              <div className="space-y-4">
-                {chunks.map((chunk: any) => {
-                  const style = getChunkStyle(chunk);
-                  const isHovered = hoveredChunk === chunk.id;
-                  
-                  return (
-                    <div key={chunk.id} className="relative">
-                      <div className={`relative ${style.container}`}>
-                        <div
-                          className={`relative px-4 py-3 rounded-lg shadow-sm ${style.bubble} transition-all duration-200 ${
-                            isHovered ? 'shadow-md transform scale-[1.02]' : ''
-                          }`}
-                          onMouseEnter={() => setHoveredChunk(chunk.id)}
-                          onMouseLeave={() => setHoveredChunk(null)}
-                        >
-                          <p className="text-sm leading-relaxed">{chunk.text_chunk}</p>
-                          
-                          {chunk.participant_label && (
-                            <p className="text-xs opacity-75 mt-2">
-                              — {chunk.participant_label}
-                            </p>
-                          )}
-                          
-                          <p className="text-xs opacity-60 mt-1 flex items-center">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {new Date(chunk.timestamp).toLocaleString()}
-                          </p>
+          {/* Thread Summary */}
+          {threadId && (
+            <div className="mb-6">
+              <ThreadSummary 
+                threadId={threadId}
+                initialSummary={summary}
+                onSummaryUpdate={setSummary}
+              />
+            </div>
+          )}
 
-                          {/* Hover Actions */}
-                          {isHovered && (
-                            <div className="absolute -top-2 -right-2 flex space-x-1">
-                              <button
-                                onClick={() => handleFollowUp(chunk)}
-                                className="p-1.5 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 transition-colors"
-                                title="Follow up"
-                              >
-                                <MessageCircle className="h-3 w-3" />
-                              </button>
-                              <button
-                                onClick={() => handlePinToThread(chunk)}
-                                className="p-1.5 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700 transition-colors"
-                                title="Pin to Thread"
-                              >
-                                <Pin className="h-3 w-3" />
-                              </button>
-                              <button
-                                onClick={() => handleSeeContext(chunk)}
-                                className="p-1.5 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 transition-colors"
-                                title="See context"
-                              >
-                                <Eye className="h-3 w-3" />
-                              </button>
-                            </div>
+          {/* Summary (if available and no thread) */}
+          {summary && !threadId && (
+            <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Summary</h3>
+              <p className="text-sm text-blue-700 dark:text-blue-200">{summary}</p>
+            </div>
+          )}
+
+          {/* Conversation Thread */}
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg transition-colors">
+            <div className="px-4 py-5 sm:p-6">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Conversation Thread</h3>
+              
+              <div className="space-y-6">
+                {chunks.map((chunk: any) => (
+                  <div key={chunk.id} className="space-y-2">
+                    <ConversationChunk
+                      chunk={chunk}
+                      onFollowUp={() => handleFollowUp(chunk)}
+                      onPinToThread={() => handlePinToThread(chunk)}
+                      onSeeContext={() => handleSeeContext(chunk)}
+                    />
+                    
+                    {/* Micro-threads for this chunk */}
+                    {chunk.microThreads && chunk.microThreads.length > 0 && (
+                      <div className="ml-12 mt-2">
+                        <button
+                          onClick={() => toggleMicroThread(chunk.id)}
+                          className="flex items-center text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
+                        >
+                          {expandedMicroThreads[chunk.id] ? (
+                            <>
+                              <ChevronUp className="h-3 w-3 mr-1" />
+                              Hide {chunk.microThreads.length} follow-up{chunk.microThreads.length !== 1 ? 's' : ''}
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="h-3 w-3 mr-1" />
+                              Show {chunk.microThreads.length} follow-up{chunk.microThreads.length !== 1 ? 's' : ''}
+                            </>
                           )}
-                        </div>
+                        </button>
+                        
+                        {expandedMicroThreads[chunk.id] && (
+                          <div className="mt-2 space-y-3 border-l-2 border-indigo-200 dark:border-indigo-800 pl-3">
+                            {chunk.microThreads.map((thread: any) => (
+                              <div key={thread.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-sm">
+                                <div className="font-medium text-gray-900 dark:text-white mb-1">Q: {thread.userPrompt}</div>
+                                <div className="text-gray-700 dark:text-gray-300">A: {thread.assistantResponse}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                  {thread.modelUsed} • {new Date(thread.createdAt).toLocaleString()}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  );
-                })}
+                    )}
+                  </div>
+                ))}
                 
                 {chunks.length === 0 && (
                   <div className="text-center py-8">
-                    <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No conversation content</h3>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <MessageSquare className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No conversation content</h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                       This source hasn't been processed yet or contains no content.
                     </p>
                   </div>
@@ -237,42 +321,42 @@ export default function ConversationView() {
 
           {/* Micro-threads */}
           {microThreads.length > 0 && (
-            <div className="mt-8 bg-white shadow rounded-lg">
+            <div className="mt-8 bg-white dark:bg-gray-800 shadow-md rounded-lg transition-colors">
               <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                  <Layers className="h-5 w-5 mr-2 text-indigo-600" />
-                  Follow-up Conversations
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                  <Layers className="h-5 w-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+                  All Follow-up Conversations ({microThreads.length})
                 </h3>
                 <div className="space-y-6">
                   {microThreads.map((thread: any) => (
-                    <div key={thread.id} className="border rounded-lg p-4 bg-gray-50">
+                    <div key={thread.id} className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 transition-colors">
                       <div className="space-y-3">
                         <div className="flex items-start space-x-3">
                           <div className="flex-shrink-0">
-                            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                              <User className="h-4 w-4 text-blue-600" />
+                            <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                              <MessageCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                             </div>
                           </div>
                           <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">You</p>
-                            <p className="text-gray-700">{thread.user_prompt}</p>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">You</p>
+                            <p className="text-gray-700 dark:text-gray-300">{thread.userPrompt}</p>
                           </div>
                         </div>
                         <div className="flex items-start space-x-3">
                           <div className="flex-shrink-0">
-                            <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                              <Bot className="h-4 w-4 text-green-600" />
+                            <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                              <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
                             </div>
                           </div>
                           <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">
-                              AI ({thread.model_used})
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                              AI ({thread.modelUsed})
                             </p>
-                            <p className="text-gray-700">{thread.assistant_response}</p>
+                            <p className="text-gray-700 dark:text-gray-300">{thread.assistantResponse}</p>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-400">
-                          {new Date(thread.created_at).toLocaleString()}
+                        <p className="text-xs text-gray-400 dark:text-gray-500">
+                          {new Date(thread.createdAt).toLocaleString()}
                         </p>
                       </div>
                     </div>

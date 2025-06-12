@@ -1,5 +1,9 @@
-import React from 'react';
-import { Menu, Bell, Settings } from 'lucide-react';
+import * as React from 'react';
+import * as Icons from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
+import { useAuth } from '../contexts/AuthContext';
+import { useAppStore } from '../store/useStore';
+import { useNavigate } from 'react-router-dom';
 
 interface TopBarProps {
   onMenuClick: () => void;
@@ -7,27 +11,12 @@ interface TopBarProps {
 }
 
 export default function TopBar({ onMenuClick, title }: TopBarProps) {
+  const { isGuest } = useAuth();
+  const toggleSidebar = useAppStore((state) => state.toggleSidebar);
+  const navigate = useNavigate();
+
   return (
-    <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow-sm border-b border-gray-200">
-      <button
-        onClick={onMenuClick}
-        className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
-      >
-        <Menu className="h-6 w-6" />
-      </button>
-      
-      <div className="flex-1 px-4 flex justify-between items-center">
-        <div className="flex-1">
-          {title && (
-            <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
-          )}
-        </div>
-        
-        <div className="ml-4 flex items-center md:ml-6 space-x-3">
-          <button className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            <Bell className="h-6 w-6" />
-          </button>
-          <button className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+    <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white dark:bg-knitter-dark-base shadow-sm border-b border-gray-200 dark:border-knitter-dark-accent transition-colors">
             <Settings className="h-6 w-6" />
           </button>
         </div>
