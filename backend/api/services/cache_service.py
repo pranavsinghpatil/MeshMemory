@@ -21,7 +21,7 @@ class CacheService:
     def _generate_key(self, prefix: str, identifier: str) -> str:
         """Generate a cache key with prefix and hashed identifier"""
         hash_id = hashlib.md5(identifier.encode()).hexdigest()
-        return f"knitchat:{prefix}:{hash_id}"
+        return f"knitter:{prefix}:{hash_id}"
 
     async def get(self, key: str) -> Optional[Any]:
         """Get value from cache"""
@@ -109,7 +109,7 @@ class CacheService:
             return False
         
         try:
-            pattern = f"knitchat:*:{user_id}*"
+            pattern = f"knitter:*:{user_id}*"
             keys = self.redis.keys(pattern)
             if keys:
                 return bool(self.redis.delete(*keys))

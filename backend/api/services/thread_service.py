@@ -101,6 +101,7 @@ class ThreadService:
         
         # Generate or retrieve summary if requested
         if include_summary:
+<<<<<<< HEAD
             summary = await self.get_or_generate_summary(thread_id)
             if summary:
                 result["summary"] = summary["summary"]
@@ -239,6 +240,13 @@ class ThreadService:
         
         raise Exception("Database connection failed")
 
+=======
+            summary = await self._get_thread_summary(thread_id)
+            result["summary"] = summary
+        
+        return result
+
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
     async def create_thread(self, title: str, chunk_ids: List[str]) -> Dict[str, Any]:
         """Create a new thread from existing chunks"""
         # Validate chunks exist
@@ -530,6 +538,33 @@ class ThreadService:
         import random
         return random.sample(all_topics, random.randint(2, 4))
 
+<<<<<<< HEAD
+=======
+    async def _get_thread_summary(self, thread_id: str) -> Optional[str]:
+        """Get or generate a summary for a thread"""
+        # In production, this would be stored in the thread metadata
+        # For demo purposes, generate a new summary
+        
+        # Get chunks for this thread
+        chunks = [chunk for chunk in self.db_service.chunks.values() 
+                 if chunk.get("thread_id") == thread_id]
+        
+        if not chunks:
+            return None
+        
+        # Concatenate chunks for summarization (limit to avoid token limits)
+        text_chunks = [chunk["text_chunk"] for chunk in chunks[:10]]
+        conversation_text = "\n\n".join(text_chunks)
+        
+        # Generate summary using LLM
+        try:
+            summary = await self.llm_service.generate_summary(conversation_text)
+            return summary
+        except Exception as e:
+            print(f"Error generating thread summary: {e}")
+            return None
+
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
     def _determine_role(self, participant_label: str) -> str:
         """Determine if participant is user or assistant"""
         if not participant_label:

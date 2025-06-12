@@ -12,6 +12,7 @@ export default {
       },
       colors: {
         primary: {
+<<<<<<< HEAD
           50: '#eef2ff',
           100: '#e0e7ff',
           200: '#c7d2fe',
@@ -55,6 +56,13 @@ export default {
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+=======
+          50: '#eff6ff',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+        }
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
       }
     },
   },

@@ -1,5 +1,5 @@
 /*
-  # Complete KnitChat Database Schema
+  # Complete knitter.app Database Schema
 
   1. New Tables
     - `sources` - Store imported conversation sources (ChatGPT, Claude, etc.)

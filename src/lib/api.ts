@@ -48,6 +48,7 @@ export const importAPI = {
 // Conversations API
 export const conversationsAPI = {
   getConversation: async (sourceId: string, includeMicroThreads = true) => {
+<<<<<<< HEAD
     try {
       const response = await api.get(`/conversations/${sourceId}`, {
         params: { include_micro_threads: includeMicroThreads }
@@ -81,6 +82,12 @@ export const conversationsAPI = {
         metadata: {}
       };
     }
+=======
+    const response = await api.get(`/conversations/${sourceId}`, {
+      params: { include_micro_threads: includeMicroThreads }
+    });
+    return response.data;
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
   },
   
   getConversationChunks: async (sourceId: string) => {
@@ -93,6 +100,7 @@ export const conversationsAPI = {
     return response.data;
   },
   
+<<<<<<< HEAD
   getConversationSummary: async (sourceId: string, regenerate = false) => {
     try {
       const response = await api.get(`/conversations/${sourceId}/summary`, {
@@ -107,6 +115,11 @@ export const conversationsAPI = {
         summary: "This conversation covers React state management, hooks, and performance optimization techniques. The user asks about best practices for managing state in React applications, and the assistant provides detailed explanations about useState, useReducer, Context API, and external libraries like Redux and Zustand. The discussion also touches on performance considerations when using Context and strategies to minimize unnecessary re-renders."
       };
     }
+=======
+  getConversationSummary: async (sourceId: string) => {
+    const response = await api.get(`/conversations/${sourceId}/summary`);
+    return response.data;
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
   }
 };
 
@@ -177,6 +190,7 @@ export const threadsAPI = {
   },
   
   getThread: async (threadId: string) => {
+<<<<<<< HEAD
     try {
       const response = await api.get(`/threads/${threadId}`);
       return response.data;
@@ -207,6 +221,10 @@ export const threadsAPI = {
         { id: 'thread-3', title: 'Frontend Performance Tips', similarity: 0.76 },
       ];
     }
+=======
+    const response = await api.get(`/threads/${threadId}`);
+    return response.data;
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
   },
   
   autoGenerateThreads: async () => {
@@ -231,6 +249,7 @@ export const threadsAPI = {
       chunkId
     });
     return response.data;
+<<<<<<< HEAD
   },
   
   regenerateSummary: async (threadId: string) => {
@@ -400,6 +419,8 @@ export const threadsAPI = {
       // Return mock success for demo purposes
       return { success: true };
     }
+=======
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
   }
 };
 

@@ -1,5 +1,5 @@
 /*
-  # Enhanced KnitChat Database Schema
+  # Enhanced knitter.app Database Schema
 
   1. New Tables
     - user_profiles: Extended user information

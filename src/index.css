@@ -6,6 +6,7 @@
   html {
     font-family: 'Inter', system-ui, sans-serif;
   }
+<<<<<<< HEAD
   
   /* Custom slider styles */
   input[type="range"] {
@@ -102,6 +103,8 @@
     top: 50%;
     margin-top: -4px;
   }
+=======
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
 }
 
 @layer components {
@@ -120,6 +123,7 @@
   .card {
     @apply bg-white shadow-md rounded-2xl p-6 hover:shadow-lg transition-all duration-200;
   }
+<<<<<<< HEAD
   
   /* Skeleton animation */
   .animate-pulse {
@@ -235,4 +239,6 @@
   .light .knitter-button:hover {
     background-color: var(--light-darker);
   }
+=======
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
 }

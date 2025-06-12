@@ -23,7 +23,7 @@ class EncryptionService:
 
     def _derive_key(self, password: str) -> str:
         """Derive a Fernet key from a password"""
-        salt = b'knitchat_salt_2024'  # In production, use a random salt per user
+        salt = b'knitter_salt_2024'  # In production, use a random salt per user
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,

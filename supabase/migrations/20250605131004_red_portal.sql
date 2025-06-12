@@ -1,5 +1,5 @@
 /*
-  # Initial Schema Setup for KnitChat.app
+  # Initial Schema Setup for knitter.app
 
   1. New Tables
     - `chunks`: Stores text chunks with embeddings

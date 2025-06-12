@@ -80,7 +80,7 @@ export const useUserStore = create<UserState>()(
       setApiKeys: (apiKeys) => set({ apiKeys }),
     }),
     {
-      name: 'knitchat-user-storage',
+      name: 'knitter-user-storage',
       getStorage: () => localStorage,
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -111,7 +111,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       setWorkspaces: (workspaces) => set({ workspaces }),
     }),
     {
-      name: 'knitchat-workspace-storage',
+      name: 'knitter-workspace-storage',
       getStorage: () => localStorage,
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -159,7 +159,7 @@ export const useUIStore = create<UIState>()(
       toggleContextPanel: () => set((state) => ({ contextPanelOpen: !state.contextPanelOpen })),
     }),
     {
-      name: 'knitchat-ui-storage',
+      name: 'knitter-ui-storage',
       getStorage: () => localStorage,
       onRehydrateStorage: () => (state) => {
         if (state) {

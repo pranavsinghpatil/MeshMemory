@@ -55,7 +55,7 @@ async def delete_source(
                 ''', source_id)
                 
                 # Clear related cache
-                await cache_service.delete(f"knitchat:conversation:{source_id}")
+                await cache_service.delete(f"knitter:conversation:{source_id}")
                 
                 return {"message": "Source and all related data deleted successfully"}
                 

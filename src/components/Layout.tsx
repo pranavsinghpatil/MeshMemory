@@ -13,6 +13,7 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, title }: LayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const { user, isGuest, continueAsGuest } = useAuth();
@@ -22,16 +23,16 @@ export default function Layout({ children, title }: LayoutProps) {
   // Show welcome screen for unauthenticated users
   const showWelcomeScreen = !user && !isGuest;
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center transition-colors">
-      {showWelcomeScreen ? (
+  if (showWelcomeScreen) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center transition-colors">
         <div className="max-w-md w-full space-y-8 p-8">
           <div className="text-center">
             <div className="mx-auto h-12 w-12 rounded-xl bg-indigo-600 flex items-center justify-center mb-6">
               <span className="text-white font-bold text-xl">K</span>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Welcome to Knitter.app
+              Welcome to knitter.app
             </h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
               Start your intelligent AI conversation journey
@@ -55,47 +56,53 @@ export default function Layout({ children, title }: LayoutProps) {
             Guest mode has limited features. Sign up for full access.
           </p>
         </div>
-      ) : (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors w-full">
-          {/* Mobile sidebar */}
-          <div className={`fixed inset-0 flex z-40 md:hidden ${sidebarCollapsed ? 'pointer-events-none' : ''}`}>
-            <div className={`fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'}`} onClick={() => setSidebarCollapsed(true)} />
-            <div className={`relative flex-1 flex flex-col max-w-xs w-full bg-gradient-to-b from-indigo-600 to-purple-700 dark:from-indigo-800 dark:to-purple-900 transform transition-transform ${sidebarCollapsed ? '-translate-x-full' : 'translate-x-0'}`}>
-              <div className="absolute top-0 right-0 -mr-12 pt-2">
-                <button
-                  onClick={() => setSidebarCollapsed(true)}
-                  className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-                >
-                  <X className="h-6 w-6 text-white" />
-                </button>
-              </div>
-              <Sidebar 
-                onImportClick={() => setImportModalOpen(true)} 
-                collapsed={false}
-              />
-            </div>
-          </div>
+        <AuthModal 
+          isOpen={authModalOpen} 
+          onClose={() => setAuthModalOpen(false)} 
+        />
+      </div>
+    );
+  }
 
-          {/* Desktop sidebar */}
-          <div className="hidden md:flex md:flex-col md:fixed md:inset-y-0 transition-all duration-300 md:w-auto">
-            <Sidebar 
-              onImportClick={() => setImportModalOpen(true)} 
-              collapsed={sidebarCollapsed}
-            />
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+      {/* Mobile sidebar */}
+      <div className={`fixed inset-0 flex z-40 md:hidden ${sidebarOpen ? '' : 'pointer-events-none'}`}>
+        <div className={`fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setSidebarOpen(false)} />
+        <div className={`relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-gray-800 transform transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className="absolute top-0 right-0 -mr-12 pt-2">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+            >
+              <X className="h-6 w-6 text-white" />
+            </button>
           </div>
-
-          {/* Main content */}
-          <div className={`transition-all duration-300 ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'} flex flex-col flex-1`}>
-            <TopBar 
-              onMenuClick={() => setSidebarCollapsed(false)} 
-              title={title}
-            />
-            <main className="flex-1">
-              {children}
-            </main>
-          </div>
+          <Sidebar 
+            onImportClick={() => setImportModalOpen(true)} 
+            collapsed={false}
+          />
         </div>
-      )}
+      </div>
+
+      {/* Desktop sidebar */}
+      <div className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 transition-all duration-300 ${sidebarCollapsed ? 'md:w-16' : 'md:w-64'}`}>
+        <Sidebar 
+          onImportClick={() => setImportModalOpen(true)} 
+          collapsed={sidebarCollapsed}
+        />
+      </div>
+
+      {/* Main content */}
+      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'} flex flex-col flex-1`}>
+        <TopBar 
+          onMenuClick={() => setSidebarOpen(true)} 
+          title={title}
+        />
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
 
       {/* Modals - Always rendered to maintain consistent hook order */}
       <ImportModal 

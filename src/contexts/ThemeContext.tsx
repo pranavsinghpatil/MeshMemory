@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import React, { createContext, useContext, useEffect } from 'react';
 import { useAppStore } from '../store/useStore';
+=======
+import React, { createContext, useContext, useEffect, useState } from 'react';
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -12,6 +16,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+<<<<<<< HEAD
   const { darkMode, setDarkMode, uiHasHydrated } = useAppStore();
   const [isDark, setIsDark] = React.useState(false);
 
@@ -34,14 +39,30 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     
+=======
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem('theme') as Theme;
+    return stored || 'system';
+  });
+
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
     const root = window.document.documentElement;
     
     const updateTheme = () => {
       let shouldBeDark = false;
       
+<<<<<<< HEAD
       if (darkMode === true) {
         shouldBeDark = true;
       } else if (darkMode === false) {
+=======
+      if (theme === 'dark') {
+        shouldBeDark = true;
+      } else if (theme === 'light') {
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
         shouldBeDark = false;
       } else {
         // system preference
@@ -62,14 +83,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Listen for system theme changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
+<<<<<<< HEAD
       if (darkMode === null) {
+=======
+      if (theme === 'system') {
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
         updateTheme();
       }
     };
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
+<<<<<<< HEAD
   }, [darkMode, uiHasHydrated]);
+=======
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, isDark }}>

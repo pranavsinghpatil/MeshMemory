@@ -18,7 +18,10 @@ import {
 import Layout from '../components/Layout';
 import MicroThreadModal from '../components/MicroThreadModal';
 import ConversationChunk from '../components/ConversationChunk';
+<<<<<<< HEAD
 import ThreadSummary from '../components/ThreadSummary';
+=======
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
 import { conversationsAPI, microThreadsAPI } from '../lib/api';
 
 export default function ConversationView() {
@@ -32,7 +35,10 @@ export default function ConversationView() {
   const [summary, setSummary] = useState<string | null>(null);
   const [expandedMicroThreads, setExpandedMicroThreads] = useState<Record<string, boolean>>({});
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
+<<<<<<< HEAD
   const [threadId, setThreadId] = useState<string | null>(null);
+=======
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
 
   const fetchConversationData = useCallback(async () => {
     if (!sourceId) return;
@@ -70,6 +76,7 @@ export default function ConversationView() {
       
       setMicroThreads(allMicroThreads);
       
+<<<<<<< HEAD
       // Check if chunks belong to a thread
       const firstChunkWithThread = processedChunks.find((chunk: any) => chunk.thread_id);
       if (firstChunkWithThread) {
@@ -85,6 +92,17 @@ export default function ConversationView() {
         setSummary(null);
       }
       
+=======
+      // Try to get a summary
+      try {
+        const summaryResponse = await conversationsAPI.getConversationSummary(sourceId);
+        setSummary(summaryResponse.summary);
+      } catch (error) {
+        console.error('Error fetching summary:', error);
+        setSummary(null);
+      }
+      
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
     } catch (error) {
       console.error('Error fetching conversation data:', error);
     } finally {
@@ -234,6 +252,7 @@ export default function ConversationView() {
             </div>
           </div>
 
+<<<<<<< HEAD
           {/* Thread Summary */}
           {threadId && (
             <div className="mb-6">
@@ -253,6 +272,16 @@ export default function ConversationView() {
             </div>
           )}
 
+=======
+          {/* Summary (if available) */}
+          {summary && (
+            <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Summary</h3>
+              <p className="text-sm text-blue-700 dark:text-blue-200">{summary}</p>
+            </div>
+          )}
+
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
           {/* Conversation Thread */}
           <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg transition-colors">
             <div className="px-4 py-5 sm:p-6">

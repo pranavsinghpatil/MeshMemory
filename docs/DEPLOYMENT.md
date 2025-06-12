@@ -1,10 +1,10 @@
-# KnitChat Deployment Guide
+# knitter.app Deployment Guide
 
-This guide covers deploying KnitChat to production environments with best practices for security, performance, and scalability.
+This guide covers deploying knitter.app to production environments with best practices for security, performance, and scalability.
 
 ## Overview
 
-KnitChat consists of:
+knitter.app consists of:
 - **Frontend**: React application (static files)
 - **Backend**: FastAPI application (Python)
 - **Database**: PostgreSQL with pgvector extension
@@ -245,14 +245,14 @@ docker-compose -f docker-compose.prod.yml ps
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: knitchat
+  name: knitter
 ---
 # k8s/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: knitchat-config
-  namespace: knitchat
+  name: knitter-config
+  namespace: knitter
 data:
   ENVIRONMENT: "production"
   REDIS_URL: "redis://redis-service:6379"
@@ -261,8 +261,8 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: knitchat-secrets
-  namespace: knitchat
+  name: knitter-secrets
+  namespace: knitter
 type: Opaque
 stringData:
   SUPABASE_URL: "your-supabase-url"
@@ -276,28 +276,28 @@ stringData:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: knitchat-backend
-  namespace: knitchat
+  name: knitter-backend
+  namespace: knitter
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: knitchat-backend
+      app: knitter-backend
   template:
     metadata:
       labels:
-        app: knitchat-backend
+        app: knitter-backend
     spec:
       containers:
       - name: backend
-        image: knitchat/backend:latest
+        image: knitter/backend:latest
         ports:
         - containerPort: 8000
         envFrom:
         - configMapRef:
-            name: knitchat-config
+            name: knitter-config
         - secretRef:
-            name: knitchat-secrets
+            name: knitter-secrets
         livenessProbe:
           httpGet:
             path: /health
@@ -322,21 +322,21 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: knitchat-frontend
-  namespace: knitchat
+  name: knitter-frontend
+  namespace: knitter
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: knitchat-frontend
+      app: knitter-frontend
   template:
     metadata:
       labels:
-        app: knitchat-frontend
+        app: knitter-frontend
     spec:
       containers:
       - name: frontend
-        image: knitchat/frontend:latest
+        image: knitter/frontend:latest
         ports:
         - containerPort: 80
         resources:
@@ -355,8 +355,8 @@ spec:
 kubectl apply -f k8s/
 
 # Check deployment status
-kubectl get pods -n knitchat
-kubectl get services -n knitchat
+kubectl get pods -n knitter
+kubectl get services -n knitter
 ```
 
 ### Option 3: Cloud Platform Deployment
@@ -672,7 +672,7 @@ certbot --nginx -d your-domain.com
 #!/bin/bash
 # backup.sh
 DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="knitchat_backup_$DATE.sql"
+BACKUP_FILE="knitter_backup_$DATE.sql"
 
 pg_dump $DATABASE_URL > $BACKUP_FILE
 gzip $BACKUP_FILE
@@ -681,7 +681,7 @@ gzip $BACKUP_FILE
 aws s3 cp $BACKUP_FILE.gz s3://your-backup-bucket/database/
 
 # Keep only last 30 days
-find . -name "knitchat_backup_*.sql.gz" -mtime +30 -delete
+find . -name "knitter_backup_*.sql.gz" -mtime +30 -delete
 ```
 
 2. **Backup verification**
@@ -689,7 +689,7 @@ find . -name "knitchat_backup_*.sql.gz" -mtime +30 -delete
 ```bash
 #!/bin/bash
 # verify_backup.sh
-LATEST_BACKUP=$(ls -t knitchat_backup_*.sql.gz | head -1)
+LATEST_BACKUP=$(ls -t knitter_backup_*.sql.gz | head -1)
 gunzip -c $LATEST_BACKUP | head -100
 ```
 
@@ -768,12 +768,12 @@ resources:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: knitchat-backend-hpa
+  name: knitter-backend-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: knitchat-backend
+    name: knitter-backend
   minReplicas: 2
   maxReplicas: 10
   metrics:
@@ -794,7 +794,7 @@ spec:
 ```bash
 # Check memory usage
 docker stats
-kubectl top pods -n knitchat
+kubectl top pods -n knitter
 
 # Analyze memory leaks
 docker exec -it backend python -m memory_profiler app.py
@@ -832,7 +832,7 @@ curl -f http://localhost:8000/health
 
 # Monitor logs
 docker-compose logs -f backend
-kubectl logs -f deployment/knitchat-backend -n knitchat
+kubectl logs -f deployment/knitter-backend -n knitter
 
 # Check resource usage
 docker system df
@@ -874,8 +874,8 @@ REINDEX INDEX CONCURRENTLY idx_chunks_embedding;
 
 ```bash
 # Configure logrotate
-cat > /etc/logrotate.d/knitchat << EOF
-/var/log/knitchat/*.log {
+cat > /etc/logrotate.d/knitter << EOF
+/var/log/knitter/*.log {
     daily
     missingok
     rotate 30
@@ -890,4 +890,4 @@ cat > /etc/logrotate.d/knitchat << EOF
 EOF
 ```
 
-This deployment guide provides a comprehensive approach to deploying KnitChat in production environments with proper security, monitoring, and scaling considerations.
+This deployment guide provides a comprehensive approach to deploying knitter.app in production environments with proper security, monitoring, and scaling considerations.

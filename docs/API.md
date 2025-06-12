@@ -1,8 +1,8 @@
-# KnitChat API Documentation
+# knitter.app API Documentation
 
 ## Overview
 
-The KnitChat API provides comprehensive endpoints for managing AI conversations, performing semantic search, and generating insights. All endpoints return JSON responses and use standard HTTP status codes.
+The knitter.app API provides comprehensive endpoints for managing AI conversations, performing semantic search, and generating insights. All endpoints return JSON responses and use standard HTTP status codes.
 
 ## Base URL
 
@@ -495,7 +495,7 @@ X-RateLimit-Reset: 1640995200
 
 ## Webhooks
 
-KnitChat supports webhooks for real-time notifications:
+knitter.app supports webhooks for real-time notifications:
 
 ### Import Completion
 Triggered when an import operation completes.
@@ -530,13 +530,13 @@ Triggered when auto-thread generation completes.
 
 ### JavaScript/TypeScript
 ```bash
-npm install @knitchat/sdk
+npm install @knitter/sdk
 ```
 
 ```javascript
-import { KnitChatClient } from '@knitchat/sdk';
+import { KnitterClient } from '@knitter/sdk';
 
-const client = new KnitChatClient({
+const client = new KnitterClient({
   apiKey: 'your-api-key',
   baseUrl: 'http://localhost:8000/api'
 });
@@ -553,13 +553,13 @@ const importResult = await client.import({
 
 ### Python
 ```bash
-pip install knitchat-sdk
+pip install knitter-sdk
 ```
 
 ```python
-from knitchat import KnitChatClient
+from knitter import KnitterClient
 
-client = KnitChatClient(
+client = KnitterClient(
     api_key='your-api-key',
     base_url='http://localhost:8000/api'
 )
@@ -651,6 +651,6 @@ trendData.daily_activity.forEach(day => {
 ## Support
 
 For API support and questions:
-- **Documentation**: [docs.knitchat.app/api](https://docs.knitchat.app/api)
-- **GitHub Issues**: [github.com/knitchat/knitchat/issues](https://github.com/knitchat/knitchat/issues)
-- **Email**: api-support@knitchat.app
+- **Documentation**: [docs.knitter.app/api](https://docs.knitter.app/api)
+- **GitHub Issues**: [github.com/knitter/knitter/issues](https://github.com/knitter/knitter/issues)
+- **Email**: api-support@knitter.app

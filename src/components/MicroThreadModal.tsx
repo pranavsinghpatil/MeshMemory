@@ -70,7 +70,7 @@ export default function MicroThreadModal({
     
     if (navigator.share) {
       navigator.share({
-        title: 'KnitChat Follow-up',
+        title: 'knitter.app Follow-up',
         text: text
       }).catch(err => {
         console.error('Error sharing:', err);
@@ -93,7 +93,6 @@ export default function MicroThreadModal({
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">Follow-up Question</h3>
                 <Tooltip 
                   content="Ask a follow-up question about this specific part of the conversation. The AI will answer based on this context."
-                  position="top"
                 >
                   <Info className="h-4 w-4 ml-2 text-gray-400 dark:text-gray-500 cursor-help" />
                 </Tooltip>
@@ -102,62 +101,52 @@ export default function MicroThreadModal({
                 onClick={onClose}
                 className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5" />
               </button>
             </div>
-
-            {/* Original Chunk */}
-            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border-l-4 border-indigo-500 dark:border-indigo-400">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Original Context:</h4>
-              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{chunk.text_chunk}</p>
-              {chunk.participant_label && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">— {chunk.participant_label}</p>
-              )}
+            
+            <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-md mb-4">
+              <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{chunk.content}</p>
             </div>
-
-            {/* Question Form */}
-            <form onSubmit={handleSubmit} className="mb-6">
-              <div className="flex space-x-3">
-                <div className="flex-1">
-                  <textarea
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="Ask a follow-up question about this content..."
-                    rows={3}
-                    className="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 resize-none"
-                    disabled={loading}
-                  />
-                </div>
-                <Tooltip content="Send question">
-                  <button
-                    type="submit"
-                    disabled={loading || !question.trim()}
-                    className="flex-shrink-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {loading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </button>
-                </Tooltip>
+            
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3 mb-4">
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
               </div>
-              
-              {error && (
-                <div className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {error}
-                </div>
-              )}
+            )}
+            
+            <form onSubmit={handleSubmit} className="mb-4">
+              <div className="relative">
+                <textarea
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  placeholder="Ask a follow-up question..."
+                  className="w-full p-3 pr-12 bg-white dark:bg-gray-900 rounded-md border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-white resize-none h-24"
+                  disabled={loading}
+                />
+                <button
+                  type="submit"
+                  disabled={!question.trim() || loading}
+                  className="absolute right-2 bottom-2 p-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-md transition-colors"
+                >
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Tooltip content="Send question">
+                      <Send className="h-4 w-4" />
+                    </Tooltip>
+                  )}
+                </button>
+              </div>
             </form>
-
-            {/* Response */}
+            
             {response && (
-              <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border-l-4 border-green-500 dark:border-green-400">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-4 mt-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center">
                     <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
-                    <h4 className="text-sm font-medium text-green-800 dark:text-green-300">
-                      AI Response ({modelUsed})
+                    <h4 className="text-sm font-medium text-green-900 dark:text-green-100">
+                      Response {modelUsed ? `(${modelUsed})` : ''}
                     </h4>
                   </div>
                   <div className="flex space-x-2">

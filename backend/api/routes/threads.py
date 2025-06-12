@@ -42,6 +42,7 @@ async def get_thread(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+<<<<<<< HEAD
 @router.get("/threads/{thread_id}/summary")
 async def get_thread_summary(
     thread_id: str = Path(..., description="Thread ID"),
@@ -88,6 +89,8 @@ async def regenerate_thread_summary(thread_id: str = Path(..., description="Thre
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+=======
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
 @router.post("/threads/auto-generate")
 async def auto_generate_threads():
     """

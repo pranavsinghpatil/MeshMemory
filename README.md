@@ -1,6 +1,6 @@
-# KnitChat - AI Conversation Manager
+# knitter.app - AI Conversation Manager
 
-KnitChat is a comprehensive web application that helps you manage, search, and extract insights from your AI conversations across multiple platforms like ChatGPT, Claude, Gemini, and YouTube.
+knitter.app is a comprehensive web application that helps you manage, search, and extract insights from your AI conversations across multiple platforms like ChatGPT, Claude, Gemini, and YouTube.
 
 ## 🚀 Features
 
@@ -9,6 +9,7 @@ KnitChat is a comprehensive web application that helps you manage, search, and e
 - **Semantic Search**: AI-powered search across all your conversations with hybrid text and vector search
 - **Micro-Threads**: Create follow-up conversations from specific chunks
 - **Thread Management**: Automatic and manual thread creation, merging, and splitting
+- **Thread Explorer**: Discover patterns and topics across your conversations
 - **Persistent Summaries**: AI-generated summaries for threads with caching and regeneration
 - **Enhanced Analytics**: Comprehensive insights into your conversation patterns and AI usage
 
@@ -80,16 +81,38 @@ KnitChat is a comprehensive web application that helps you manage, search, and e
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/knitchat.git
-   cd knitchat
+   git clone https://github.com/yourusername/knitter.git
+   cd knitter
    ```
 
 2. **Set up environment variables**
    ```bash
+
+## Tech Stack
+
+- **Frontend**: React with TypeScript, Tailwind CSS
+- **Backend**: FastAPI (Python)
+- **Database**: Supabase (PostgreSQL with pgvector)
+- **AI**: OpenAI API, Google Gemini API
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 16+
+- Python 3.9+
+- Docker and Docker Compose (optional)
+
+### Environment Setup
+
+1. Copy the example environment files:
+   ```
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
    cp .env.example .env
    cp backend/.env.example backend/.env
    ```
 
+<<<<<<< HEAD
 3. **Configure your environment files**
    ```env
    # .env (Frontend)
@@ -129,18 +152,37 @@ This will start:
 ### Running Locally
 
 #### Frontend
+=======
+2. Fill in your API keys and configuration in both `.env` files
+
+### Running with Docker
+
+```bash
+docker-compose up
+```
+
+### Running Locally
+
+#### Frontend
+
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
 ```bash
 npm install
 npm run dev
 ```
 
 #### Backend
+<<<<<<< HEAD
+=======
+
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
 ```bash
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
+<<<<<<< HEAD
 #### Redis (Optional)
 ```bash
 # Using Docker
@@ -400,11 +442,68 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Documentation**: [docs.knitchat.app](https://docs.knitchat.app)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/knitchat/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/knitchat/discussions)
-- **Email**: support@knitchat.app
+- **Documentation**: [docs.knitter.app](https://docs.knitter.app)
+- **Issues**: [GitHub Issues](https://github.com/yourusername/knitter/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/knitter/discussions)
+- **Email**: support@knitter.app
 
 ---
 
-**KnitChat** - Transform your AI conversations into searchable knowledge. Built with ❤️ for the AI community.
+**knitter.app** - Transform your AI conversations into searchable knowledge. Built with ❤️ for the AI community.
+=======
+## API Endpoints
+
+### Import API
+
+- `POST /api/import` - Import a conversation source
+- `GET /api/import/status/{source_id}` - Get import status
+
+### Conversations API
+
+- `GET /api/conversations/{source_id}` - Get conversation data
+- `GET /api/conversations/{source_id}/chunks` - Get conversation chunks
+- `GET /api/conversations/{source_id}/metadata` - Get conversation metadata
+
+### Search API
+
+- `GET /api/search?q={query}` - Search across conversations
+- `GET /api/search/suggestions?q={partial_query}` - Get search suggestions
+
+### Threads API
+
+- `GET /api/threads` - Get all threads
+- `GET /api/threads/{thread_id}` - Get a specific thread
+- `POST /api/threads/auto-generate` - Auto-generate threads
+- `GET /api/threads/stats` - Get thread statistics
+
+### Micro-Threads API
+
+- `POST /api/thread` - Create a micro-thread
+- `GET /api/thread/{chunk_id}/micro-threads` - Get micro-threads for a chunk
+
+## Project Structure
+
+```
+knitter/
+├── backend/               # FastAPI backend
+│   ├── api/
+│   │   ├── models/        # Data models
+│   │   ├── routes/        # API routes
+│   │   └── services/      # Business logic
+│   ├── main.py            # Entry point
+│   └── requirements.txt   # Python dependencies
+├── src/                   # React frontend
+│   ├── components/        # Reusable UI components
+│   ├── contexts/          # React context providers
+│   ├── lib/               # Utilities and API clients
+│   ├── pages/             # Page components
+│   └── utils/             # Helper functions
+├── public/                # Static assets
+├── docker-compose.yml     # Docker configuration
+└── package.json           # Node dependencies
+```
+
+## License
+
+MIT
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396

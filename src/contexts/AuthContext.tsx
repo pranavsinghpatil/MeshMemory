@@ -16,6 +16,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+<<<<<<< HEAD
   const [loading, setLoading] = React.useState(true);
   const [isGuest, setIsGuest] = React.useState(false);
   
@@ -30,6 +31,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+=======
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
+
+  useEffect(() => {
+>>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
     // Check for guest mode
     const guestMode = localStorage.getItem('guestMode');
     if (guestMode === 'true') {

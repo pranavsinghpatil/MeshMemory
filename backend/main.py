@@ -46,7 +46,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="KnitChat API",
+    title="knitter.app API",
     description="AI Conversation Management Backend with Error Monitoring",
     version="1.0.0"
 )
@@ -109,7 +109,7 @@ app.include_router(pagination.router, prefix="/api", tags=["pagination"])
 
 @app.get("/")
 async def root():
-    return {"message": "KnitChat API is running", "version": "1.0.0"}
+    return {"message": "knitter.app API is running", "version": "1.0.0"}
 
 @app.get("/api/health")
 async def health_check():
