@@ -17,8 +17,8 @@ interface NavItem {
 
 interface SidebarNavItemProps {
   item: NavItem;
-  isActive: boolean;
-  isExpanded: boolean;
+  active: boolean;
+  expanded?: boolean;
   isGroupExpanded?: boolean;
   isDisabled?: boolean;
   isGuest: boolean;
@@ -31,9 +31,8 @@ interface SidebarNavItemProps {
 
 export default function SidebarNavItem({
   item,
-  isActive,
-  isExpanded,
-  isGroupExpanded = false,
+  active,
+  expanded: isGroupExpanded = false,
   isDisabled = false,
   isGuest,
   currentPathname,
@@ -63,14 +62,14 @@ export default function SidebarNavItem({
           }}
           disabled={isDisabled}
           className={`w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors sidebar-item ${
-            isActive
-              ? 'bg-indigo-500/30 text-white active'
+            active
+              ? 'active text-knitter-light-darker dark:text-knitter-dark-lighter'
               : isDisabled
-              ? 'text-indigo-300/50 dark:text-indigo-300/50 cursor-not-allowed'
-              : 'text-white hover:bg-indigo-500/30 hover:text-white'
+              ? 'text-knitter-light-dark/50 dark:text-knitter-dark-light/50 cursor-not-allowed'
+              : 'text-knitter-light-darker dark:text-knitter-dark-lighter'
           } ${!sidebarExpanded ? 'justify-center' : ''} ${indentClass}`}
         >
-          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${isActive ? 'text-white' : 'text-indigo-200'}`} />
+          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${active ? 'text-knitter-light-darker dark:text-knitter-dark-lighter' : 'text-knitter-light-dark dark:text-knitter-dark-light'}`} />
           {sidebarExpanded && (
             <span className="flex-1">{item.name}</span>
           )}
@@ -93,16 +92,16 @@ export default function SidebarNavItem({
           <button
             onClick={() => toggleGroup && item.groupId && toggleGroup(item.groupId)}
             className={`w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors sidebar-item
-              text-white hover:bg-indigo-500/30 hover:text-white
+              text-knitter-light-darker dark:text-knitter-dark-lighter
               ${!sidebarExpanded ? 'justify-center' : ''} ${indentClass}`}
           >
-            <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 text-indigo-200`} />
+            <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 text-knitter-light-dark dark:text-knitter-dark-light`} />
             {sidebarExpanded && (
               <>
                 <span className="flex-1">{item.name}</span>
                 {hasChildren && (
                   <ChevronDown 
-                    className={`h-4 w-4 text-indigo-200 transition-transform duration-200 ${
+                    className={`h-4 w-4 text-knitter-light-dark dark:text-knitter-dark-light transition-transform duration-200 ${
                       isGroupExpanded ? '' : 'transform -rotate-90'
                     }`} 
                   />
@@ -113,14 +112,14 @@ export default function SidebarNavItem({
         </Tooltip>
         
         {sidebarExpanded && hasChildren && (
-          <div className={`nav-group ${isGroupExpanded ? 'nav-group-expanded' : 'nav-group-collapsed'}`}>
-            <div className="ml-2 pl-3 border-l border-indigo-500/30 space-y-1 py-1">
+          <div className={`nav-group ${isGroupExpanded ? 'expanded' : 'nav-group-collapsed'}`}>
+            <div className="ml-2 pl-3 border-l border-knitter-light-accent/30 dark:border-knitter-dark-accent/30 space-y-1 py-1">
               {item.children && item.children.map((child, index) => (
                 <SidebarNavItem
                   key={`${child.name}-${index}`}
                   item={child}
-                  isActive={isActive && child.href ? currentPathname === child.href : false}
-                  isExpanded={isExpanded}
+                  active={child.href ? currentPathname === child.href : false}
+                  expanded={isGroupExpanded}
                   isGuest={isGuest}
                   currentPathname={currentPathname}
                   depth={depth + 1}
@@ -153,20 +152,20 @@ export default function SidebarNavItem({
             }
           }}
           className={`w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors sidebar-item ${
-            isActive
-              ? 'bg-indigo-500/30 text-white active'
+            active
+              ? 'active text-knitter-light-darker dark:text-knitter-dark-lighter'
               : isDisabled
-              ? 'text-indigo-300/50 dark:text-indigo-300/50 cursor-not-allowed'
-              : 'text-white hover:bg-indigo-500/30 hover:text-white'
+              ? 'text-knitter-light-dark/50 dark:text-knitter-dark-light/50 cursor-not-allowed'
+              : 'text-knitter-light-darker dark:text-knitter-dark-lighter'
           } ${!sidebarExpanded ? 'justify-center' : ''} ${indentClass}`}
           disabled={isDisabled}
         >
-          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${isActive ? 'text-white' : 'text-indigo-200'}`} />
+          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${active ? 'text-knitter-light-darker dark:text-knitter-dark-lighter' : 'text-knitter-light-dark dark:text-knitter-dark-light'}`} />
           {sidebarExpanded && (
             <span className="flex-1">{item.name}</span>
           )}
           {sidebarExpanded && item.badge && (
-            <span className="ml-auto px-2 py-0.5 text-xs bg-green-500/30 text-green-100 rounded-full">
+            <span className="ml-auto px-2 py-0.5 text-xs bg-knitter-light-accent/30 dark:bg-knitter-dark-accent/40 text-knitter-light-darker dark:text-knitter-dark-lighter rounded-full">
               {item.badge}
             </span>
           )}

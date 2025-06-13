@@ -3,11 +3,10 @@ import { Search, Loader2, MessageSquare, Clock, AlertCircle } from 'lucide-react
 import Layout from '../components/Layout';
 import MicroThreadModal from '../components/MicroThreadModal';
 import SearchResultCard from '../components/SearchResultCard';
-<<<<<<< HEAD
+
 import SkeletonLoader from '../components/SkeletonLoader';
 import ErrorMessage from '../components/ErrorMessage';
-=======
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
+
 import { searchAPI } from '../lib/api';
 
 export default function SearchPage() {
@@ -68,11 +67,11 @@ export default function SearchPage() {
       
     } catch (error) {
       console.error('Search error:', error);
-<<<<<<< HEAD
+
       setError('Failed to fetch search results—try again');
-=======
+
       setError('An error occurred while searching. Please try again.');
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
+ 
     } finally {
       setLoading(false);
     }
@@ -93,7 +92,7 @@ export default function SearchPage() {
     // Trigger search immediately
     const formEvent = { preventDefault: () => {} } as React.FormEvent;
     handleSearch(formEvent);
-<<<<<<< HEAD
+
   };
 
   const retrySearch = () => {
@@ -101,8 +100,8 @@ export default function SearchPage() {
       const formEvent = { preventDefault: () => {} } as React.FormEvent;
       handleSearch(formEvent);
     }
-=======
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
+
+ 
   };
 
   return (
@@ -163,7 +162,6 @@ export default function SearchPage() {
 
           {/* Error Message */}
           {error && (
-<<<<<<< HEAD
             <ErrorMessage
               title="Search Error"
               message={error}
@@ -179,27 +177,6 @@ export default function SearchPage() {
 
           {/* AI Response */}
           {aiResponse && !loading && (
-=======
-            <div className="mb-8 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <AlertCircle className="h-5 w-5 text-red-400" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
-                    Search Error
-                  </h3>
-                  <p className="mt-2 text-sm text-red-700 dark:text-red-400">
-                    {error}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* AI Response */}
-          {aiResponse && (
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
             <div className="mb-8 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-6">
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0">
@@ -261,11 +238,7 @@ export default function SearchPage() {
           )}
 
           {/* Empty State */}
-<<<<<<< HEAD
           {!searchPerformed && !loading && (
-=======
-          {!searchPerformed && (
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
             <div className="text-center py-12 bg-white dark:bg-gray-800 shadow-md rounded-lg transition-colors">
               <Search className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
               <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">Start searching</h3>

@@ -25,7 +25,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
     { id: 'group-2', title: 'Machine Learning Fundamentals' },
     { id: 'group-3', title: 'Database Design Patterns' }
   ]);
-  
+
   const navigate = useNavigate();
 
   const tabs = [
@@ -42,18 +42,18 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
     const data = new FormData(e.currentTarget as HTMLFormElement);
     data.append('type', activeTab);
     setFormData(data);
-    
+
     // In a real implementation, we would send the data to the server for preview
     // For now, we'll simulate a preview
     setLoading(true);
     setProgress('Processing your import for preview...');
-    
+
     setTimeout(() => {
       // Generate mock preview data based on the import type
       let preview;
       const url = data.get('url') as string;
       const file = data.get('file') as File;
-      
+
       if (activeTab === 'chatgpt') {
         preview = {
           title: 'ChatGPT Conversation',
@@ -100,7 +100,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
           ]
         };
       }
-      
+
       setPreviewData(preview);
       setMetadata(prev => ({
         ...prev,
@@ -111,19 +111,18 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
     }, 1500);
   };
 
-  const handleStepTwoSubmit = (e: React.FormEvent) => {
+  const handleStepTwoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStep(3);
   };
 
-  const handleStepThreeSubmit = (e: React.FormEvent) => {
+  const handleStepThreeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // In a real implementation, we would send the final data to the server
     setLoading(true);
     setProgress('Processing your import...');
-<<<<<<< HEAD
-    
+
     setTimeout(() => {
       setProgress('Generating embeddings...');
       setTimeout(() => {
@@ -143,21 +142,21 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
         }, 500);
       }, 1000);
     }, 1000);
-=======
 
     try {
       setProgress('Uploading and processing content...');
+      if (!formData) throw new Error('Form data is missing.');
       const result = await importAPI.importSource(formData);
-      
+
       setProgress('Generating embeddings...');
       // Simulate progress
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       setProgress('Finalizing import...');
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       setProgress('Complete!');
-      
+
       setTimeout(() => {
         onClose();
         navigate(`/conversations/${result.sourceId}`);
@@ -171,7 +170,6 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
         setProgress('');
       }, 2000);
     }
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
   };
 
   const renderStepOne = () => (
@@ -303,7 +301,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
   const renderStepTwo = () => (
     <>
       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Preview & Metadata</h3>
-      
+
       <form onSubmit={handleStepTwoSubmit}>
         <div className="space-y-6">
           {/* Preview */}
@@ -325,7 +323,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
               {previewData?.chunkCount} chunks detected • {previewData?.participants.join(', ')}
             </div>
           </div>
-          
+
           {/* Metadata */}
           <div className="space-y-4">
             <div>
@@ -341,7 +339,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Date
@@ -355,7 +353,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
             </div>
           </div>
         </div>
-        
+
         <div className="mt-6 flex justify-between">
           <button
             type="button"
@@ -379,7 +377,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
   const renderStepThree = () => (
     <>
       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Assign to Thread Group</h3>
-      
+
       <form onSubmit={handleStepThreeSubmit}>
         <div className="space-y-6">
           <div>
@@ -400,7 +398,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
               You can assign this conversation to an existing thread group or leave it ungrouped
             </p>
           </div>
-          
+
           <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-lg p-4">
             <h4 className="text-sm font-medium text-indigo-800 dark:text-indigo-300 mb-2">Import Summary</h4>
             <ul className="space-y-2 text-sm text-indigo-700 dark:text-indigo-200">
@@ -412,7 +410,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
             </ul>
           </div>
         </div>
-        
+
         <div className="mt-6 flex justify-between">
           <button
             type="button"
@@ -436,17 +434,15 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose} />
-        
+
         <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
           <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6">
             <div className="flex items-center justify-between mb-6">
-<<<<<<< HEAD
+
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                 Import Source {step > 1 && `- Step ${step} of 3`}
               </h3>
-=======
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Import Source</h3>
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
+
               <button
                 onClick={onClose}
                 className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
@@ -463,11 +459,11 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
               </div>
             ) : (
               <>
-<<<<<<< HEAD
+
                 {step === 1 && renderStepOne()}
                 {step === 2 && renderStepTwo()}
                 {step === 3 && renderStepThree()}
-=======
+
                 {/* Tabs */}
                 <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
                   <nav className="-mb-px flex space-x-8">
@@ -491,12 +487,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                 </div>
 
                 {/* Content */}
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  formData.append('type', activeTab);
-                  handleSubmit(formData);
-                }}>
+                
                   {activeTab === 'chatgpt' && (
                     <div className="space-y-4">
                       <div>
@@ -592,10 +583,9 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                       Import
                     </button>
                   </div>
-                </form>
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
-              </>
-            )}
+                </>
+              )}
+            
           </div>
         </div>
       </div>

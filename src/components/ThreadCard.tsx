@@ -10,21 +10,18 @@ interface ThreadCardProps {
 export default function ThreadCard({ thread, viewMode }: ThreadCardProps) {
   const getTopicColor = (index: number) => {
     const colors = [
-<<<<<<< HEAD
       'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
       'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
       'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
       'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
       'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
       'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-=======
       'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
       'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
       'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
       'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
       'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
     ];
     return colors[index % colors.length];
   };
@@ -40,7 +37,6 @@ export default function ThreadCard({ thread, viewMode }: ThreadCardProps) {
                   <Layers className="h-6 w-6 text-white" />
                 </div>
               </div>
-              
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                   {thread.title}
@@ -57,7 +53,6 @@ export default function ThreadCard({ thread, viewMode }: ThreadCardProps) {
                 </div>
               </div>
             </div>
-
             <div className="flex items-center space-x-4">
               {/* Topics */}
               <div className="flex flex-wrap gap-1 max-w-xs">
@@ -71,7 +66,6 @@ export default function ThreadCard({ thread, viewMode }: ThreadCardProps) {
                   </span>
                 ))}
               </div>
-
               <Link
                 to={`/threads/${thread.id}`}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
@@ -104,7 +98,6 @@ export default function ThreadCard({ thread, viewMode }: ThreadCardProps) {
             </p>
           </div>
         </div>
-        
         {/* Topics/Tags */}
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
@@ -119,7 +112,6 @@ export default function ThreadCard({ thread, viewMode }: ThreadCardProps) {
             ))}
           </div>
         </div>
-
         {/* Metadata */}
         <div className="space-y-2 mb-4">
           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
@@ -133,7 +125,6 @@ export default function ThreadCard({ thread, viewMode }: ThreadCardProps) {
             </div>
           )}
         </div>
-
         {/* Action Button */}
         <Link
           to={`/threads/${thread.id}`}

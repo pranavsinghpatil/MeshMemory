@@ -19,11 +19,7 @@ export default function ThemeToggle() {
           onClick={() => setTheme(value)}
           className={`p-2 rounded-md transition-colors ${
             theme === value
-<<<<<<< HEAD
               ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
-=======
-              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
           }`}
           title={label}
