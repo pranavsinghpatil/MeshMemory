@@ -8,25 +8,8 @@ import os
 from datetime import datetime
 import uuid
 import logging
-import sentry_sdk
-from sentry_sdk.integrations.fastapi import FastApiIntegration
-from sentry_sdk.integrations.logging import LoggingIntegration
-
-# Initialize Sentry for error monitoring
-sentry_logging = LoggingIntegration(
-    level=logging.INFO,        # Capture info and above as breadcrumbs
-    event_level=logging.ERROR  # Send errors as events
-)
-
-sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN"),  # Set this in your environment
-    integrations=[
-        FastApiIntegration(auto_enabling_integrations=False),
-        sentry_logging,
-    ],
-    traces_sample_rate=0.1,  # Adjust based on your needs
-    environment=os.getenv("ENVIRONMENT", "development"),
-)
+from dotenv import load_dotenv
+load_dotenv()
 
 # Import route modules
 from api.routes import import_routes, conversations, threads, search, micro_threads, user_settings
@@ -85,13 +68,7 @@ async def log_requests(request, call_next):
         duration = (datetime.now() - start_time).total_seconds()
         logger.error(f"Request failed: {request.method} {request.url} - Duration: {duration:.3f}s - Error: {str(e)}")
         
-        # Capture additional context for Sentry
-        with sentry_sdk.configure_scope() as scope:
-            scope.set_tag("endpoint", str(request.url))
-            scope.set_tag("method", request.method)
-            scope.set_extra("duration", duration)
-            scope.set_extra("user_agent", request.headers.get("user-agent"))
-            
+
         # Re-raise the exception to be handled by FastAPI
         raise e
 
@@ -151,10 +128,7 @@ async def health_check():
             "error": str(e)
         }
 
-@app.get("/sentry-debug")
-async def trigger_error():
-    """Endpoint to test Sentry error reporting"""
-    division_by_zero = 1 / 0
+
 
 if __name__ == "__main__":
     uvicorn.run(

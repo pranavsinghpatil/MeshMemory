@@ -101,7 +101,6 @@ class ThreadService:
         
         # Generate or retrieve summary if requested
         if include_summary:
-<<<<<<< HEAD
             summary = await self.get_or_generate_summary(thread_id)
             if summary:
                 result["summary"] = summary["summary"]
@@ -135,7 +134,7 @@ class ThreadService:
             finally:
                 await self.db_service.release_connection(conn)
         
-        return None
+        raise Exception("Database connection failed")
 
     async def regenerate_summary(self, thread_id: str) -> Dict[str, Any]:
         """Force regenerate thread summary"""
@@ -240,13 +239,6 @@ class ThreadService:
         
         raise Exception("Database connection failed")
 
-=======
-            summary = await self._get_thread_summary(thread_id)
-            result["summary"] = summary
-        
-        return result
-
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
     async def create_thread(self, title: str, chunk_ids: List[str]) -> Dict[str, Any]:
         """Create a new thread from existing chunks"""
         # Validate chunks exist
@@ -538,8 +530,6 @@ class ThreadService:
         import random
         return random.sample(all_topics, random.randint(2, 4))
 
-<<<<<<< HEAD
-=======
     async def _get_thread_summary(self, thread_id: str) -> Optional[str]:
         """Get or generate a summary for a thread"""
         # In production, this would be stored in the thread metadata
@@ -564,7 +554,6 @@ class ThreadService:
             print(f"Error generating thread summary: {e}")
             return None
 
->>>>>>> 25a3726cc0a1e32f9e3e64bd3ef01ce4a1d1f396
     def _determine_role(self, participant_label: str) -> str:
         """Determine if participant is user or assistant"""
         if not participant_label:

@@ -14,6 +14,7 @@ class UserService:
         # Set up encryption for API keys
         # In production, this key would be stored securely, not hardcoded
         self.encryption_key = os.getenv("ENCRYPTION_KEY", "YourFallbackEncryptionKeyHere1234567890123=")
+        print(f"ENCRYPTION_KEY: '{self.encryption_key}'")
         self.cipher = Fernet(self.encryption_key.encode())
         
         # For demo/fallback, use in-memory storage

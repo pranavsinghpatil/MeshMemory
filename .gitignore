@@ -71,6 +71,9 @@ var/
 # Supabase
 .supabase/
 
+# Virtual environment
+venv/
+
 # Misc
 .DS_Store
 .env.local
