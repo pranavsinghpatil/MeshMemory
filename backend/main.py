@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import route modules
-from api.routes import import_routes, conversations, threads, search, micro_threads, user_settings
+from api.routes import auth, import_routes, conversations, threads, search, micro_threads, user_settings
 from api.routes import analytics, enhanced_search, data_management, pagination
 from api.middleware.auth import get_current_user, get_optional_user
 
@@ -73,6 +73,7 @@ async def log_requests(request, call_next):
         raise e
 
 # Include routers with authentication
+app.include_router(auth.router, prefix="/api", tags=["auth"])
 app.include_router(import_routes.router, prefix="/api", tags=["import"])
 app.include_router(conversations.router, prefix="/api", tags=["conversations"])
 app.include_router(threads.router, prefix="/api", tags=["threads"])

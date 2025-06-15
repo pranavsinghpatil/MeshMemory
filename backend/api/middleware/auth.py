@@ -15,6 +15,25 @@ supabase: Client = create_client(supabase_url, supabase_key)
 
 security = HTTPBearer(auto_error=False)
 
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Require valid Supabase auth token and return user"""
+    if not credentials or not credentials.credentials:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    res = supabase.auth.get_user(credentials.credentials)
+    user = getattr(res, 'user', None)
+    if not user:
+        error = getattr(res, 'error', None)
+        detail = error.message if hasattr(error, 'message') else "Invalid token"
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+    return user
+
+async def get_optional_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Return user if token present, else None"""
+    if not credentials or not credentials.credentials:
+        return None
+    res = supabase.auth.get_user(credentials.credentials)
+    return getattr(res, 'user', None)
+
 async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)):
     """Get current authenticated user from JWT token"""
     if not credentials:
