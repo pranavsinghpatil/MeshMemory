@@ -24,34 +24,36 @@ async def import_source(
     file: Optional[UploadFile] = File(None)
 ):
     """
-    Import a conversation source from various platforms
+    Import a conversation source from various platforms.
+    Only accepts high-level source types ('chatgpt', 'claude', 'gemini', 'grok', 'mistral', 'deepseek', 'other').
+    Specific import method details are stored in metadata.
     """
     try:
-        # Validate input
-        if type not in ["chatgpt", "claude", "gemini", "youtube"]:
-            raise HTTPException(status_code=400, detail="Invalid source type")
-        
-        if type in ["chatgpt", "youtube"] and not url:
+        allowed_types = ["chatgpt", "claude", "gemini", "grok", "mistral", "deepseek", "other"]
+        if type not in allowed_types:
+            raise HTTPException(status_code=400, detail=f"Invalid source type. Allowed: {', '.join(allowed_types)}")
+
+        # Validate required fields for each type
+        if type in ["chatgpt", "grok", "mistral", "deepseek"] and not url:
             raise HTTPException(status_code=400, detail="URL required for this source type")
-        
         if type in ["claude", "gemini"] and not file:
             raise HTTPException(status_code=400, detail="File required for this source type")
-        
-        # Process the import
+
+        # Process the import (import_service will normalize and store import_method in metadata)
         result = await import_service.process_import(
             source_type=type,
             url=url,
             title=title,
             file=file
         )
-        
+
         return ImportResponse(
             sourceId=result["source_id"],
             status="success",
             message=f"Successfully imported {type} source",
             chunksProcessed=result.get("chunks_processed", 0)
         )
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

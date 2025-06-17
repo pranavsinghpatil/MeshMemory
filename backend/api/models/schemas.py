@@ -75,17 +75,52 @@ class MergeThreadRequest(BaseModel):
 class SplitThreadRequest(BaseModel):
     chunkId: str
 
+# Chat Schemas
+class ChatListResponse(BaseModel):
+    id: str
+    title: str
+    sourceType: str
+    importDate: Union[datetime, str]
+    chunkCount: int
+    metadata: Optional[Dict[str, Any]] = None
+
+class NewChatRequest(BaseModel):
+    title: str = "New Chat"
+    source_type: str = "manual"
+    chat_id: Optional[str] = None  # Optional custom chat_id
+    metadata: Optional[Dict[str, Any]] = None
+
+class NewChatResponse(BaseModel):
+    id: str
+    title: str
+    sourceType: str
+    createdAt: Union[datetime, str]
+    updatedAt: Union[datetime, str]
+    metadata: Optional[Dict[str, Any]] = None
+
+class MergeChatRequest(BaseModel):
+    chatIds: List[str]
+    title: str
+
 # Micro-thread Schemas
 class MicroThreadRequest(BaseModel):
-    chunkId: str
-    question: str
-    context: Optional[str] = None
+    parentThreadId: str
+    selectedText: str
+    query: str
+    contextBefore: Optional[str] = None
+    contextAfter: Optional[str] = None
+    responseChunkId: str  # ID of the chunk containing the selected text
+    title: Optional[str] = None
 
 class MicroThreadResponse(BaseModel):
-    threadId: str
-    answer: str
-    modelUsed: str
-    timestamp: Union[datetime, str]
+    id: str
+    parentThreadId: str
+    title: str
+    query: str
+    selectedText: str
+    answer: Optional[str] = None
+    createdAt: Union[datetime, str]
+    modelUsed: Optional[str] = None
 
 # User Settings Schemas
 class ApiKeyData(BaseModel):

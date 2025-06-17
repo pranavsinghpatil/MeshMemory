@@ -17,6 +17,48 @@ class ImportService:
         self.embedding_service = EmbeddingService()
         self.db_service = DatabaseService()
 
+    # Allowed high-level source types
+    ALLOWED_SOURCE_TYPES = [
+        "chatgpt", "claude", "gemini", "grok", "mistral", "deepseek", "other"
+    ]
+
+    def normalize_source_type(self, source_type: str) -> str:
+        """
+        Normalize and validate the source_type to a high-level category.
+        """
+        st = (source_type or "other").lower()
+        if st in self.ALLOWED_SOURCE_TYPES:
+            return st
+        # Map common subtypes or aliases
+        mapping = {
+            "chatgpt-link": "chatgpt",
+            "chatgpt_screenshot": "chatgpt",
+            "chatgpt_copy": "chatgpt",
+            "claude_screenshot": "claude",
+            "gemini_pdf": "gemini",
+            "youtube": "other",
+            # Add more mappings as needed
+        }
+        return mapping.get(st, "other")
+
+    def extract_import_method(self, raw_type: str, file: Optional[UploadFile] = None, url: Optional[str] = None) -> str:
+        """
+        Determine import method for metadata based on user input and context.
+        """
+        if raw_type.endswith("screenshot"):
+            return "screenshot"
+        if raw_type.endswith("link") or (url and "http" in url):
+            return "link"
+        if file is not None:
+            ext = (file.filename or "").lower()
+            if ext.endswith(".pdf"):
+                return "pdf"
+            if ext.endswith(('.png', '.jpg', '.jpeg')):
+                return "screenshot"
+        if raw_type.endswith("copy"):
+            return "copy_paste"
+        return "manual"
+
     async def process_import(
         self,
         source_type: str,
@@ -25,40 +67,43 @@ class ImportService:
         file: Optional[UploadFile] = None
     ) -> Dict[str, Any]:
         """
-        Process import from various sources
+        Process import from various sources. Standardize source_type and store import method in metadata.
         """
+        normalized_type = self.normalize_source_type(source_type)
+        import_method = self.extract_import_method(source_type, file, url)
         source_id = str(uuid.uuid4())
-        
+
         # Create source record
         source_data = {
             "id": source_id,
-            "type": self._map_source_type(source_type),
+            "type": normalized_type,
             "url": url,
-            "title": title or f"{source_type.title()} Import",
+            "title": title or f"{normalized_type.title()} Import",
             "created_at": datetime.now(),
-            "metadata": {}
+            "metadata": {
+                "import_method": import_method
+            }
         }
-        
+
         await self.db_service.create_source(source_data)
-        
-        # Extract content based on source type
-        if source_type == "chatgpt":
+
+        # Extract content based on high-level type
+        if normalized_type == "chatgpt":
             chunks = await self._process_chatgpt_link(url)
-        elif source_type == "youtube":
-            chunks = await self._process_youtube_link(url)
-        elif source_type == "claude":
+        elif normalized_type == "claude":
             chunks = await self._process_claude_screenshot(file)
-        elif source_type == "gemini":
+        elif normalized_type == "gemini":
             chunks = await self._process_gemini_pdf(file)
         else:
-            raise ValueError(f"Unsupported source type: {source_type}")
-        
+            # fallback for other types (could be future LLMs or generic)
+            chunks = []
+
         # Process chunks and generate embeddings
         processed_chunks = []
         for chunk_data in chunks:
-            # Generate embedding
             embedding = await self.embedding_service.generate_embedding(chunk_data["text"])
-            
+            chunk_metadata = chunk_data.get("metadata", {})
+            chunk_metadata["import_method"] = import_method
             chunk = {
                 "id": str(uuid.uuid4()),
                 "source_id": source_id,
@@ -67,12 +112,11 @@ class ImportService:
                 "timestamp": chunk_data.get("timestamp", datetime.now()),
                 "participant_label": chunk_data.get("participant", "Unknown"),
                 "model_name": chunk_data.get("model"),
-                "metadata": chunk_data.get("metadata", {})
+                "metadata": chunk_metadata
             }
-            
             await self.db_service.create_chunk(chunk)
             processed_chunks.append(chunk)
-        
+
         return {
             "source_id": source_id,
             "chunks_processed": len(processed_chunks)
