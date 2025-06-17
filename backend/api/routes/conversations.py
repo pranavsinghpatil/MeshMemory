@@ -14,8 +14,8 @@ from ..models.schemas import (
 
 # Import services
 from ..services.conversation_service import ConversationService
-from ..services.micro_thread_service import MicroThreadService
-from ..services.thread_service import ThreadService
+# Removed obsolete micro-thread service import
+# Removed obsolete thread service import
 from ..services.hybrid_service import HybridChatService
 from ..services.database_service import DatabaseService
 
@@ -25,8 +25,8 @@ from ..middleware.auth import get_current_user
 router = APIRouter()
 logger = logging.getLogger(__name__)
 conversation_service = ConversationService()
-micro_thread_service = MicroThreadService()
-thread_service = ThreadService()
+# Removed obsolete micro-thread service instantiation
+# Removed obsolete thread service instantiation
 hybrid_service = HybridChatService()
 
 @router.get("/conversations/{source_id}", response_model=ConversationResponse)
@@ -44,10 +44,7 @@ async def get_conversation(
             raise HTTPException(status_code=404, detail="Conversation not found")
         
         # Optionally include micro-threads
-        if include_micro_threads:
-            for chunk in conversation["chunks"]:
-                micro_threads = await micro_thread_service.get_micro_threads_by_chunk(chunk["id"])
-                chunk["microThreads"] = micro_threads
+        
         
         return conversation
         
