@@ -19,7 +19,7 @@ class HybridChatResponse(BaseModel):
     sourceChats: List[str] = Field(..., description="List of source chat IDs that were merged")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "message": "Chats merged successfully into hybrid chat",
                 "hybridChatId": "hy_1234567890abcdef",
@@ -36,7 +36,7 @@ class HybridChatDetailResponse(HybridChatResponse):
     createdAt: str = Field(..., description="ISO 8601 timestamp when the hybrid chat was created")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "message": "Chats merged successfully into hybrid chat",
                 "hybridChatId": "hy_1234567890abcdef",

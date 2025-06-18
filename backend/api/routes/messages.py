@@ -14,7 +14,7 @@ class MessageCreate(BaseModel):
     source_id: str = Field(..., description="ID of the conversation source")
     participant_label: Optional[str] = Field(None, description="Label of the message sender")
     content: str = Field(..., min_length=1, description="Message content")
-    model_name: Optional[str] = Field(None, description="Model that generated the message")
+    model: Optional[str] = Field(None, description="Model that generated the message", alias="model_name")
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
 
     @validator('source_id')
@@ -30,7 +30,7 @@ class MessageResponse(BaseModel):
     source_id: str
     participant_label: Optional[str]
     content: str
-    model_name: Optional[str]
+    model: Optional[str] = Field(None, alias="model_name")
     metadata: Dict[str, Any]
     timestamp: datetime
 
