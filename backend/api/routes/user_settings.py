@@ -6,6 +6,8 @@ import json
 from ..services.user_service import UserService
 from ..services.llm_service import LLMService
 
+from ..middleware.auth import get_current_user
+
 router = APIRouter()
 user_service = UserService()
 llm_service = LLMService()
@@ -17,61 +19,61 @@ class ApiKeyTest(BaseModel):
     provider: str
     key: str
 
-@router.get("/user/settings")
-async def get_user_settings(user_id: str = None):
+@router.get("/settings", summary="Get user settings")
+async def get_user_settings(current_user: dict = Depends(get_current_user)):
     """
     Get user settings
     """
     try:
-        settings = await user_service.get_user_settings(user_id)
+        settings = await user_service.get_user_settings(current_user["id"]) 
         return settings
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/user/settings")
+@router.put("/settings", summary="Update user settings")
 async def update_user_settings(
     settings: Dict[str, Any] = Body(...),
-    user_id: str = None
-):
+    current_user: dict = Depends(get_current_user)
+) :
     """
     Update user settings
     """
     try:
-        updated_settings = await user_service.update_user_settings(user_id, settings)
+        updated_settings = await user_service.update_user_settings(current_user["id"], settings) 
         return updated_settings
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/user/settings/api-keys")
-async def get_api_keys(user_id: str = None):
+@router.get("/settings/api-keys", summary="Get user API keys")
+async def get_api_keys(current_user: dict = Depends(get_current_user)):
     """
     Get user's API keys
     """
     try:
-        api_keys = await user_service.get_api_keys(user_id)
+        api_keys = await user_service.get_api_keys(current_user["id"]) 
         return api_keys
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/user/settings/api-keys")
+@router.post("/settings/api-keys", summary="Save user API keys")
 async def save_api_keys(
     api_keys: ApiKeys,
-    user_id: str = None
-):
+    current_user: dict = Depends(get_current_user)
+) :
     """
     Save user's API keys
     """
     try:
-        result = await user_service.save_api_keys(user_id, api_keys.keys)
+        result = await user_service.save_api_keys(current_user["id"], api_keys.keys) 
         return {"success": True, "message": "API keys saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/user/settings/test-api-key")
+@router.post("/settings/test-api-key", summary="Test user API key")
 async def test_api_key(
     test_data: ApiKeyTest,
-    user_id: str = None
-):
+    current_user: dict = Depends(get_current_user)
+) :
     """
     Test if an API key is valid
     """

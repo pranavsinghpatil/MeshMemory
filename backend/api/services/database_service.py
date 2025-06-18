@@ -446,3 +446,55 @@ class DatabaseService:
         except Exception as e:
             print(f"Error getting chunk count for source {source_id}: {e}")
             return 0
+
+    # Message operations
+    async def list_messages(self, limit: int = 50, offset: int = 0) -> List[Dict[str, Any]]:
+        """List all main chat messages"""
+        try:
+            result = (self.supabase.table('messages')
+                      .select('*')
+                      .order('timestamp', desc=True)
+                      .range(offset, offset + limit - 1)
+                      .execute())
+            return result.data or []
+        except Exception as e:
+            print(f"Error listing messages: {e}")
+            return []
+
+    async def get_message(self, message_id: str) -> Optional[Dict[str, Any]]:
+        """Get a single message by ID"""
+        try:
+            result = (self.supabase.table('messages')
+                      .select('*')
+                      .eq('id', message_id)
+                      .single()
+                      .execute())
+            return result.data
+        except Exception as e:
+            print(f"Error getting message {message_id}: {e}")
+            return None
+
+    async def create_message(self, message_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a new main chat message"""
+        # Convert datetime to ISO string if present
+        data = message_data.copy()
+        for k, v in data.items():
+            if isinstance(v, datetime):
+                data[k] = v.isoformat()
+        try:
+            result = self.supabase.table('messages').insert(data).execute()
+            return result.data[0]
+        except Exception as e:
+            print(f"Error creating message: {e}")
+            raise
+
+        """Helper method to get chunk count for a source"""
+        try:
+            result = (self.supabase.table('chunks')
+                    .select('id', count='exact')
+                    .eq('source_id', source_id)
+                    .execute())
+            return result.count if hasattr(result, 'count') else 0
+        except Exception as e:
+            print(f"Error getting chunk count for source {source_id}: {e}")
+            return 0

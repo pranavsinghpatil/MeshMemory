@@ -1,65 +1,66 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query, Body, status
 from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
-from ..services.database_service import DatabaseService
 from ..services.analytics_service import AnalyticsService
+from ..middleware.auth import get_current_user
 
 router = APIRouter()
-db_service = DatabaseService()
 analytics_service = AnalyticsService()
 
-@router.get("/analytics/dashboard")
-async def get_dashboard_analytics(user_id: str = None):
+@router.get("/analytics/dashboard", summary="Get dashboard analytics")
+async def get_dashboard_analytics(current_user: dict = Depends(get_current_user)):
     """
-    Get comprehensive dashboard analytics for a user
+    Get comprehensive dashboard analytics for the authenticated user
     """
     try:
-        analytics = await analytics_service.get_dashboard_analytics(user_id)
+        analytics = await analytics_service.get_dashboard_analytics(current_user["id"])
         return analytics
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/analytics/conversation-trends")
+@router.get("/analytics/trends", summary="Get conversation trends over time")
 async def get_conversation_trends(
-    user_id: str = None,
-    days: int = 30
+    days: int = Query(30, ge=1, description="Days to include"),
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Get conversation trends over time
     """
     try:
-        trends = await analytics_service.get_conversation_trends(user_id, days)
+        trends = await analytics_service.get_conversation_trends(current_user["id"], days)
         return trends
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/analytics/search-insights")
-async def get_search_insights(user_id: str = None):
+@router.get("/analytics/insights", summary="Get search insights")
+async def get_search_insights(current_user: dict = Depends(get_current_user)):
     """
     Get insights from user search patterns
     """
     try:
-        insights = await analytics_service.get_search_insights(user_id)
+        insights = await analytics_service.get_search_insights(current_user["id"])
         return insights
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/analytics/model-usage")
+@router.get("/analytics/model-usage", summary="Get model usage stats")
 async def get_model_usage_stats(
-    user_id: str = None,
-    days: int = 30
+    days: int = Query(30, ge=1, description="Days to include"),
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Get AI model usage statistics
     """
     try:
-        stats = await analytics_service.get_model_usage_stats(user_id, days)
+        stats = await analytics_service.get_model_usage_stats(current_user["id"], days)
         return stats
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/analytics/thread-insights/{thread_id}")
-async def get_thread_insights(thread_id: str):
+@router.get("/analytics/threads/{thread_id}", summary="Get thread insights")
+async def get_thread_insights(
+    thread_id: str,
+    current_user: dict = Depends(get_current_user)
+):
     """
     Get detailed insights for a specific thread
     """
@@ -69,18 +70,18 @@ async def get_thread_insights(thread_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/analytics/export")
+@router.post("/analytics/export", summary="Export analytics data")
 async def export_analytics(
-    export_type: str,
-    user_id: str = None,
-    date_range: Optional[Dict[str, str]] = None
+    export_type: str = Body(..., description="Type of export"),
+    date_range: Optional[Dict[str, str]] = Body(None, description="Date range"),
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Export analytics data in various formats
     """
     try:
         job_id = await analytics_service.create_export_job(
-            user_id=user_id,
+            user_id=current_user["id"],
             export_type=export_type,
             date_range=date_range
         )
@@ -88,8 +89,11 @@ async def export_analytics(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/analytics/export/{job_id}")
-async def get_export_status(job_id: str):
+@router.get("/analytics/export/{job_id}", summary="Get export job status")
+async def get_export_status(
+    job_id: str,
+    current_user: dict = Depends(get_current_user)
+):
     """
     Get status of an export job
     """

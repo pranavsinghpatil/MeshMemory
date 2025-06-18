@@ -16,6 +16,8 @@ from api.routes import (
     auth, import_routes, conversations, search, user_settings,
     analytics, enhanced_search, data_management, pagination, microchats
 )
+from api.routes.conversations import router as conversations
+from api.routes.messages import router as messages_router
 from api.routes.hybrid_chats import router as chat_merge_router
 from api.middleware.auth import get_current_user, get_optional_user
 
@@ -78,7 +80,7 @@ async def log_requests(request, call_next):
 # Include routers with authentication
 app.include_router(auth.router, prefix="/api", tags=["auth"])
 app.include_router(import_routes.router, prefix="/api", tags=["import"])
-app.include_router(conversations.router, prefix="/api", tags=["conversations"])
+app.include_router(conversations, prefix="/api", tags=["conversations"])
 app.include_router(chat_merge_router, prefix="/api", tags=["Chat Merge"])
 app.include_router(search.router, prefix="/api", tags=["search"])
 app.include_router(enhanced_search.router, prefix="/api", tags=["enhanced-search"])
@@ -87,6 +89,7 @@ app.include_router(microchats.router, prefix="/api", tags=["microchats"])
 app.include_router(analytics.router, prefix="/api", tags=["analytics"])
 app.include_router(data_management.router, prefix="/api", tags=["data-management"])
 app.include_router(pagination.router, prefix="/api", tags=["pagination"])
+app.include_router(messages_router, prefix="/api", tags=["messages"])
 
 @app.get("/")
 async def root():
