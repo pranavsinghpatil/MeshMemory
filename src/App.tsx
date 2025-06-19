@@ -1,12 +1,12 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import ConversationView from './pages/ConversationView';
 import SearchPage from './pages/SearchPage';
 import EnhancedSearchPage from './pages/EnhancedSearchPage';
-import ThreadsPage from './pages/ThreadsPage';
-import ThreadGroupsPage from './pages/ThreadGroupsPage';
-import ThreadGroupDetailPage from './pages/ThreadGroupDetailPage';
+import ChatsPage from './pages/ChatsPage';
+import ChatGroupsPage from './pages/ChatGroupsPage';
+import ChatGroupDetailPage from './pages/ChatGroupDetailPage';
 import SettingsPage from './pages/SettingsPage';
 import HelpPage from './pages/HelpPage';
 import AnalyticsPage from './pages/AnalyticsPage';
@@ -32,10 +32,19 @@ function App() {
                 <Route path="/conversations/:sourceId" element={<ConversationView />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/search/enhanced" element={<EnhancedSearchPage />} />
-                <Route path="/threads" element={<ThreadsPage />} />
-                <Route path="/threads/:threadId" element={<ThreadsPage />} />
-                <Route path="/threadgroups" element={<ThreadGroupsPage />} />
-                <Route path="/threadgroups/:groupId" element={<ThreadGroupDetailPage />} />
+                <Route path="/chats" element={<ChatsPage />} />
+                <Route path="/chats/:chatId" element={<ChatsPage />} />
+                <Route path="/chat-groups" element={<ChatGroupsPage />} />
+                <Route path="/chat-groups/:groupId" element={<ChatGroupDetailPage />} />
+                {/* Redirect old thread URLs to new chat URLs */}
+                <Route path="/threads" element={<Navigate to="/chats" replace />} />
+                <Route path="/threads/:threadId" element={({ match }) => (
+                  <Navigate to={`/chats/${match.params.threadId}`} replace />
+                )} />
+                <Route path="/threadgroups" element={<Navigate to="/chat-groups" replace />} />
+                <Route path="/threadgroups/:groupId" element={({ match }) => (
+                  <Navigate to={`/chat-groups/${match.params.groupId}`} replace />
+                )} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/help" element={<HelpPage />} />
                 <Route path="/analytics" element={<AnalyticsPage />} />

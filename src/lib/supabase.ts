@@ -45,27 +45,27 @@ export async function getUnassignedChunks() {
   return data;
 }
 
-export async function getThreadCentroids() {
+export async function getChatCentroids() {
   const { data, error } = await supabase
-    .from('threads')
+    .from('chats')
     .select('id, centroid_embedding');
 
   if (error) throw error;
   return data;
 }
 
-export async function upsertThread(params: {
-  threadId?: string;
+export async function upsertChat(params: {
+  chatId?: string;
   title: string;
   chunkIds: string[];
   centroidEmbedding: number[];
 }) {
-  const { threadId, title, chunkIds, centroidEmbedding } = params;
+  const { chatId, title, chunkIds, centroidEmbedding } = params;
 
-  const { data: thread, error: threadError } = await supabase
-    .from('threads')
+  const { data: chat, error: chatError } = await supabase
+    .from('chats')
     .upsert({
-      id: threadId,
+      id: chatId,
       title,
       centroid_embedding: centroidEmbedding,
       updated_at: new Date().toISOString(),
@@ -73,17 +73,17 @@ export async function upsertThread(params: {
     .select()
     .single();
 
-  if (threadError) throw threadError;
+  if (chatError) throw chatError;
 
   // Update chunks with thread_id
   const { error: chunksError } = await supabase
     .from('chunks')
-    .update({ thread_id: thread.id })
+    .update({ chat_id: chat.id })
     .in('id', chunkIds);
 
   if (chunksError) throw chunksError;
 
-  return thread;
+  return chat;
 }
 
 export async function saveMicroThread(params: {

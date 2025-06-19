@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Clock, TrendingUp, Users, Beaker } from 'lucide-react';
+import { MessageSquare, Clock, TrendingUp, Users, Beaker, MessageCircle } from 'lucide-react';
 import Layout from '../components/Layout';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,14 +9,29 @@ import ErrorMessage from '../components/ErrorMessage';
 import FeatureFlag from '../components/FeatureFlag';
 import Tooltip from '../components/Tooltip';
 
+interface Chat {
+  id: string;
+  title: string;
+  updated_at: string;
+  last_message?: string;
+  unread_count?: number;
+}
+
+interface ActivityItem {
+  id: string;
+  title: string;
+  type: string;
+  created_at: string;
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState({
     totalSources: 0,
-    totalThreads: 0,
+    totalChats: 0,
     totalConversations: 0,
   });
-  const [recentActivity, setRecentActivity] = useState([]);
-  const [recentThreads, setRecentThreads] = useState([]);
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
+  const [recentChats, setRecentChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { isGuest } = useAuth();
@@ -29,14 +44,14 @@ export default function Dashboard() {
       setTimeout(() => {
         setStats({
           totalSources: 3,
-          totalThreads: 2,
+          totalChats: 2,
           totalConversations: 8,
         });
         setRecentActivity([
           { id: '1', title: 'React Best Practices', type: 'chatgpt-link', created_at: new Date().toISOString() },
           { id: '2', title: 'AI Career Guide', type: 'pdf', created_at: new Date().toISOString() },
         ]);
-        setRecentThreads([
+        setRecentChats([
           { id: '1', title: 'Frontend Development', updated_at: new Date().toISOString() },
           { id: '2', title: 'Machine Learning', updated_at: new Date().toISOString() },
         ]);
@@ -51,40 +66,43 @@ export default function Dashboard() {
       setError(null);
       
       // Fetch stats
-      const [sourcesResult, threadsResult, conversationsResult] = await Promise.all([
+      const [sourcesResult, chatsResult, conversationsResult] = await Promise.all([
         supabase.from('sources').select('id', { count: 'exact' }),
-        supabase.from('threads').select('id', { count: 'exact' }),
-        supabase.from('micro_threads').select('id', { count: 'exact' }),
+        supabase.from('chats').select('id', { count: 'exact' }),
+        supabase.from('conversations').select('id', { count: 'exact' }),
       ]);
 
       setStats({
         totalSources: sourcesResult.count || 0,
-        totalThreads: threadsResult.count || 0,
+        totalChats: chatsResult.count || 0,
         totalConversations: conversationsResult.count || 0,
       });
 
-      // Fetch recent threads
-      const { data: threads, error: threadsError } = await supabase
-        .from('threads')
+      // Fetch recent chats
+      const { data: chats, error: chatsError } = await supabase
+        .from('chats')
         .select('*')
         .order('updated_at', { ascending: false })
         .limit(5);
 
-      if (threadsError) throw threadsError;
-      setRecentThreads(threads || []);
+      if (chatsError) throw chatsError;
+      setRecentChats(chats || []);
 
-      // Fetch recent activity (sources)
-      const { data: sources, error: sourcesError } = await supabase
-        .from('sources')
+      // Fetch recent activity
+      const { data: activity, error: activityError } = await supabase
+        .from('activities')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (sourcesError) throw sourcesError;
-      setRecentActivity(sources || []);
+      if (activityError) throw activityError;
+      setRecentActivity(activity || []);
+
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      setError('Failed to load dashboard data. Please try again.');
+      setError('Failed to load dashboard data');
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -160,11 +178,11 @@ export default function Dashboard() {
                       <div className="ml-5 w-0 flex-1">
                         <dl>
                           <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                            Active Threads
+                            Active Chats
                           </dt>
                           <dd className="flex items-baseline">
                             <div className="text-2xl font-semibold text-gray-900 dark:text-white">
-                              {stats.totalThreads}
+                              {stats.totalChats}
                             </div>
                           </dd>
                         </dl>
@@ -209,12 +227,36 @@ export default function Dashboard() {
                   Recent Activity
                 </h3>
 
+    setLoading(false);
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    setError('Failed to load dashboard data');
+    setLoading(false);
+  } finally {
+    setLoading(false);
+  }
+}
+
+return (
+  <Layout>
+    <div className="py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
+            Start your intelligent AI conversation journey with knitter.app
+          </p>
+          {isGuest && (
+            <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                You're in guest mode with limited features. Sign up for full access to import sources and create threads.
                 {loading ? (
                   <SkeletonLoader type="list" />
                 ) : (
                   <div className="space-y-4">
                     {recentActivity.length > 0 ? (
-                      recentActivity.map((activity: any) => (
+                      recentActivity.map((activity) => (
                         <div key={activity.id} className="flex items-center space-x-3">
                           <div className="flex-shrink-0">
                             <div className="h-10 w-10 rounded-md bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
@@ -239,41 +281,40 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Recent Threads */}
-            <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl transition-colors">
-              <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
-                  Recent Threads
-                </h3>
-
+            {/* Recent Chats */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Recent Chats</h2>
+                <Link to="/chats" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+                  View all
+                </Link>
+              </div>
+              <div className="space-y-4">
                 {loading ? (
                   <SkeletonLoader type="list" />
-                ) : (
-                  <div className="space-y-4">
-                    {recentThreads.length > 0 ? (
-                      recentThreads.map((thread: any) => (
-                        <Link key={thread.id} to={`/threads/${thread.id}`} className="block">
-                          <div className="flex items-center space-x-3">
-                            <div className="flex-shrink-0">
-                              <div className="h-10 w-10 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                <Clock className="h-5 w-5 text-green-600 dark:text-green-400" />
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                {thread.title}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {new Date(thread.updated_at).toLocaleDateString()}
-                              </p>
-                            </div>
+                ) : recentChats.length > 0 ? (
+                  recentChats.map((chat) => (
+                    <Link key={chat.id} to={`/chats/${chat.id}`} className="block">
+                      <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+                            <MessageCircle className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                           </div>
-                        </Link>
-                      ))
-                    ) : (
-                      <p className="text-sm text-gray-500 dark:text-gray-400">No threads yet</p>
-                    )}
-                  </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">{chat.title}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {new Date(chat.updated_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No recent chats</p>
                 )}
               </div>
             </div>

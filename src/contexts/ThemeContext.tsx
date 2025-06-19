@@ -1,14 +1,21 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAppStore } from '../store/useStore';
 
-
 type Theme = 'light' | 'dark' | 'system';
+
+export interface ThemeColors {
+  primary: string;
+  secondary: string;
+  accent: string;
+  text: string;
+}
 
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   isDark: boolean;
+  toggleTheme: () => void;
+  colors: ThemeColors;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -17,8 +24,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { darkMode, setDarkMode, uiHasHydrated } = useAppStore();
   const [isDark, setIsDark] = React.useState(false);
 
+  // Define knitter.app color palettes
+  const darkColors: ThemeColors = {
+    primary: '#333446',
+    secondary: '#7F8CAA',
+    accent: '#B8CFCE',
+    text: '#EAEFEF'
+  };
+
+  const lightColors: ThemeColors = {
+    primary: '#E7EFC7',
+    secondary: '#AEC8A4',
+    accent: '#8A784E',
+    text: '#3B3B1A'
+  };
+
   // Derive theme from darkMode
   const theme: Theme = darkMode === true ? 'dark' : darkMode === false ? 'light' : 'system';
+
+  // Get current color palette based on isDark
+  const colors = isDark ? darkColors : lightColors;
 
   const setTheme = (newTheme: Theme) => {
     if (newTheme === 'dark') {
@@ -28,6 +53,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       setDarkMode(null);
     }
+  };
+
+  const toggleTheme = () => {
+    setTheme(isDark ? 'light' : 'dark');
   };
 
   useEffect(() => {
@@ -69,7 +98,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, isDark }}>
+    <ThemeContext.Provider value={{ theme, setTheme, isDark, toggleTheme, colors }}>
       {children}
     </ThemeContext.Provider>
   );

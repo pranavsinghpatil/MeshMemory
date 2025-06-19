@@ -24,6 +24,9 @@ class ChunkResponse(BaseModel):
     modelName: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
     microThreads: Optional[List[Any]] = None
+    artefactId: Optional[str] = None  # For grouped import: which artefact/file this message came from
+    artefactOrder: Optional[int] = None  # Order of artefact in import batch
+
 
 class ConversationResponse(BaseModel):
     sourceId: str
@@ -49,31 +52,31 @@ class SearchResponse(BaseModel):
     totalResults: int
     metadata: Optional[Dict[str, Any]] = None
 
-# Thread Schemas
-class ThreadSummary(BaseModel):
-    id: str
-    title: str
-    created_at: Union[datetime, str]
-    updated_at: Union[datetime, str]
-    chunkCount: int
-    topics: List[str]
-    metadata: Optional[Dict[str, Any]] = None
+# # Thread Schemas  [Not used]
+# class ThreadSummary(BaseModel):
+#     id: str
+#     title: str
+#     created_at: Union[datetime, str]
+#     updated_at: Union[datetime, str]
+#     chunkCount: int
+#     topics: List[str]
+#     metadata: Optional[Dict[str, Any]] = None
 
-class ThreadResponse(BaseModel):
-    id: str
-    title: str
-    chunks: List[ChunkResponse]
-    centroidEmbedding: Optional[List[float]] = None
-    created_at: Union[datetime, str]
-    updated_at: Union[datetime, str]
-    metadata: Optional[Dict[str, Any]] = None
-    summary: Optional[str] = None
+# class ThreadResponse(BaseModel): 
+#     id: str
+#     title: str
+#     chunks: List[ChunkResponse]
+#     centroidEmbedding: Optional[List[float]] = None
+#     created_at: Union[datetime, str]
+#     updated_at: Union[datetime, str]
+#     metadata: Optional[Dict[str, Any]] = None
+#     summary: Optional[str] = None
 
-class MergeThreadRequest(BaseModel):
-    targetThreadId: str
+# class MergeThreadRequest(BaseModel):
+#     targetThreadId: str
 
-class SplitThreadRequest(BaseModel):
-    chunkId: str
+# class SplitThreadRequest(BaseModel):
+#     chunkId: str
 
 # Chat Schemas
 class ChatListResponse(BaseModel):
@@ -97,20 +100,22 @@ class NewChatResponse(BaseModel):
     createdAt: Union[datetime, str]
     updatedAt: Union[datetime, str]
     metadata: Optional[Dict[str, Any]] = None
+    isHybrid: bool = False  # True if this chat is a hybrid/merged chat
+
 
 class MergeChatRequest(BaseModel):
     chatIds: List[str]
     title: str
 
-# Micro-thread Schemas
-class MicroThreadRequest(BaseModel):
-    parentThreadId: str
-    selectedText: str
-    query: str
-    contextBefore: Optional[str] = None
-    contextAfter: Optional[str] = None
-    responseChunkId: str  # ID of the chunk containing the selected text
-    title: Optional[str] = None
+# Micro-thread Schemas  [Not used]
+# class MicroThreadRequest(BaseModel):
+#     parentThreadId: str
+#     selectedText: str
+#     query: str
+#     contextBefore: Optional[str] = None
+#     contextAfter: Optional[str] = None
+#     responseChunkId: str  # ID of the chunk containing the selected text
+#     title: Optional[str] = None
 
 class MicroThreadResponse(BaseModel):
     id: str
@@ -155,11 +160,11 @@ class UsageLog(BaseModel):
     errorMessage: Optional[str] = None
     timestamp: Union[datetime, str]
 
-# Thread Changelog Schema
-class ThreadChangelogEntry(BaseModel):
-    id: str
-    threadId: str
-    changeType: str  # "merge", "split", "create", "update", "delete"
-    description: str
-    metadata: Optional[Dict[str, Any]] = None
-    timestamp: Union[datetime, str]
+# Thread Changelog Schema  [Not used]
+# class ThreadChangelogEntry(BaseModel):
+#     id: str
+#     threadId: str
+#     changeType: str  # "merge", "split", "create", "update", "delete"
+#     description: str
+#     metadata: Optional[Dict[str, Any]] = None
+#     timestamp: Union[datetime, str]

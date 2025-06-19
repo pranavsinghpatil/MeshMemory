@@ -138,13 +138,14 @@ export const searchAPI = {
   },
 };
 
-// Threads API
-export const threadsAPI = {
-  getAllThreads: async () => {
+// Chats API
+export const chatsAPI = {
+  getAllChats: async () => {
     try {
-      const response = await api.get('/threads');
+      const response = await api.get('/chats');
       return response.data;
     } catch (error) {
+      console.error('Error fetching chats:', error);
       console.error('Error fetching threads:', error);
       // Return mock data for demo purposes
       return [
@@ -194,7 +195,7 @@ export const threadsAPI = {
     }
   },
   
-  getRelatedThreads: async (threadId: string) => {
+  getRelatedChats: async (threadId: string) => {
     try {
       const response = await api.get(`/threads/${threadId}/related`);
       return response.data;
@@ -209,31 +210,31 @@ export const threadsAPI = {
     }
   },
   
-  autoGenerateThreads: async () => {
+  autoGenerateChats: async () => {
     const response = await api.post('/threads/auto-generate');
     return response.data;
   },
   
-  getThreadStats: async () => {
+  getChatStats: async () => {
     const response = await api.get('/threads/stats');
     return response.data;
   },
   
-  mergeThreads: async (threadId: string, targetThreadId: string) => {
+  mergeChats: async (threadId: string, targetThreadId: string) => {
     const response = await api.post(`/threads/${threadId}/merge`, {
       targetThreadId
     });
     return response.data;
   },
   
-  splitThread: async (threadId: string, chunkId: string) => {
+  splitChat: async (threadId: string, chunkId: string) => {
     const response = await api.post(`/threads/${threadId}/split`, {
       chunkId
     });
     return response.data;
   },
   
-  regenerateSummary: async (threadId: string) => {
+  regenerateChatSummary: async (threadId: string) => {
     try {
       const response = await api.post(`/threads/${threadId}/summary/regenerate`);
       return response.data;
@@ -251,7 +252,7 @@ export const threadsAPI = {
   },
   
   // Thread Groups API
-  getAllThreadGroups: async () => {
+  getAllChatGroups: async () => {
     try {
       const response = await api.get('/threadgroups');
       return response.data;
@@ -298,7 +299,7 @@ export const threadsAPI = {
     }
   },
   
-  getThreadGroupMembers: async (groupId: string) => {
+  getChatGroupMembers: async (groupId: string) => {
     try {
       const response = await api.get(`/threadgroups/${groupId}/members`);
       return response.data;
@@ -328,7 +329,7 @@ export const threadsAPI = {
     }
   },
   
-  getFusedConversation: async (groupId: string) => {
+  getFusedChat: async (groupId: string) => {
     try {
       const response = await api.get(`/threadgroups/${groupId}/fused`);
       return response.data;
@@ -354,7 +355,7 @@ export const threadsAPI = {
     }
   },
   
-  getRelatedGroups: async (groupId: string) => {
+  getRelatedChatGroups: async (groupId: string) => {
     try {
       const response = await api.get(`/threadgroups/${groupId}/related`);
       return response.data;
@@ -380,7 +381,7 @@ export const threadsAPI = {
     }
   },
   
-  updateThreadGroup: async (groupId: string, data: any) => {
+  updateChatGroup: async (groupId: string, data: any) => {
     try {
       const response = await api.put(`/threadgroups/${groupId}`, data);
       return response.data;
@@ -391,7 +392,7 @@ export const threadsAPI = {
     }
   },
   
-  sendMessageToGroup: async (groupId: string, message: string) => {
+  sendMessageToChatGroup: async (groupId: string, message: string) => {
     try {
       const response = await api.post(`/threadgroups/${groupId}/message`, { message });
       return response.data;

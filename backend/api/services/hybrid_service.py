@@ -22,20 +22,21 @@ class HybridChatService:
             Dictionary containing the new hybrid chat's metadata
         """
         hybrid_chat_id = str(uuid.uuid4())
-        now = datetime.now().isoformat()
+        now = datetime.now()
+        now_iso = now.isoformat()
         
-        # Create hybrid chat record with a valid type and proper metadata
+        # Create hybrid chat record with proper is_hybrid flag
         hybrid_chat = {
             "id": hybrid_chat_id,
             "title": title,
             "type": "chatgpt-link",  # Using a valid type that exists in the database
             "created_at": now,
             "updated_at": now,
+            "is_hybrid": True,  # Use the dedicated column
             "metadata": {
                 "import_method": "hybrid-merge",  # Custom identifier for merged chats
                 "merged_from": source_ids,       # Track original source chats
-                "source_type": "hybrid",         # For backward compatibility
-                "is_hybrid": True                # Easy filtering
+                "source_type": "hybrid"         # For backward compatibility
             }
         }
         
@@ -54,15 +55,17 @@ class HybridChatService:
                 "id": str(uuid.uuid4()),
                 "source_id": hybrid_chat_id,
                 "text_chunk": chunk["text_chunk"],
+                "embedding": chunk.get("embedding"),  # Copy the embedding
                 "participant_label": chunk.get("participant_label"),
                 "model_name": chunk.get("model_name"),
                 "timestamp": chunk.get("timestamp") or now,
-                "order_index": i,  # Maintain order in the hybrid chat
+                "artefact_id": hybrid_chat_id,  # Use hybrid chat ID as artefact ID
+                "artefact_order": i,  # Maintain order in the hybrid chat
                 "metadata": {
                     **chunk.get("metadata", {}),
                     "original_chunk_id": chunk["id"],
                     "original_source_id": chunk["source_id"],
-                    "merged_at": now
+                    "merged_at": now_iso
                 }
             }
             await self.db_service.create_chunk(chunk_data)
@@ -70,13 +73,28 @@ class HybridChatService:
         # Store the hybrid chat record
         await self.db_service.create_source(hybrid_chat)
         
+        # Create entry in hybrid_chats table
+        hybrid_chat_entry = {
+            "id": hybrid_chat_id,
+            "merged_from": source_ids,
+            "created_at": now,
+            "merged_by": None  # Will be set from the API route
+        }
+        
+        try:
+            # Insert into the hybrid_chats table
+            self.db_service.supabase.table('hybrid_chats').insert(hybrid_chat_entry).execute()
+        except Exception as e:
+            print(f"Error creating hybrid_chats entry: {e}")
+            # Continue anyway as the main chat record is created
+        
         return {
             "message": "Chats merged successfully into hybrid chat",
             "hybridChatId": hybrid_chat_id,
             "title": title,
             "chunkCount": len(all_chunks),
             "sourceChats": source_ids,
-            "createdAt": now
+            "createdAt": now_iso
         }
     
     async def get_hybrid_chat(self, hybrid_chat_id: str) -> Optional[Dict[str, Any]]:

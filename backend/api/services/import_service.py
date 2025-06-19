@@ -64,15 +64,27 @@ class ImportService:
         source_type: str,
         url: Optional[str] = None,
         title: Optional[str] = None,
-        file: Optional[UploadFile] = None
+        file: Optional[UploadFile] = None,
+        group_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Process import from various sources. Standardize source_type and store import method in metadata.
+        Supports grouped imports with artefact tracking.
+        
+        Args:
+            source_type: Type of source being imported
+            url: Optional URL for web-based imports
+            title: Optional title for the import
+            file: Optional file for file-based imports
+            group_id: Optional group ID for grouped imports (artefact_id)
         """
         normalized_type = self.normalize_source_type(source_type)
         import_method = self.extract_import_method(source_type, file, url)
         source_id = str(uuid.uuid4())
-
+        
+        # Generate artefact_id if this is a new group, or use provided group_id
+        artefact_id = group_id or str(uuid.uuid4())
+        
         # Create source record
         source_data = {
             "id": source_id,
@@ -81,7 +93,9 @@ class ImportService:
             "title": title or f"{normalized_type.title()} Import",
             "created_at": datetime.now(),
             "metadata": {
-                "import_method": import_method
+                "import_method": import_method,
+                "artefact_id": artefact_id,
+                "is_grouped": bool(group_id)  # Flag if this is part of a group
             }
         }
 
@@ -98,12 +112,20 @@ class ImportService:
             # fallback for other types (could be future LLMs or generic)
             chunks = []
 
+        # Get the next artefact_order if this is part of a group
+        next_order = 1
+        if group_id:
+            existing_chunks = await self.db_service.get_chunks_by_artefact(artefact_id)
+            next_order = len(existing_chunks) + 1
+
         # Process chunks and generate embeddings
         processed_chunks = []
-        for chunk_data in chunks:
+        for i, chunk_data in enumerate(chunks, next_order):
             embedding = await self.embedding_service.generate_embedding(chunk_data["text"])
             chunk_metadata = chunk_data.get("metadata", {})
             chunk_metadata["import_method"] = import_method
+            chunk_metadata["artefact_source"] = normalized_type
+            
             chunk = {
                 "id": str(uuid.uuid4()),
                 "source_id": source_id,
@@ -112,6 +134,8 @@ class ImportService:
                 "timestamp": chunk_data.get("timestamp", datetime.now()),
                 "participant_label": chunk_data.get("participant", "Unknown"),
                 "model_name": chunk_data.get("model"),
+                "artefact_id": artefact_id,
+                "artefact_order": i,
                 "metadata": chunk_metadata
             }
             await self.db_service.create_chunk(chunk)
@@ -119,8 +143,30 @@ class ImportService:
 
         return {
             "source_id": source_id,
-            "chunks_processed": len(processed_chunks)
+            "artefact_id": artefact_id,
+            "chunks_processed": len(processed_chunks),
+            "is_grouped": bool(group_id)
         }
+
+    async def process_grouped_import(
+        self,
+        artefact_id: str,
+        source_type: str,
+        url: Optional[str] = None,
+        title: Optional[str] = None,
+        file: Optional[UploadFile] = None
+    ) -> Dict[str, Any]:
+        """
+        Process a grouped import with artefact tracking.
+        
+        Args:
+            artefact_id: ID of the artefact being imported
+            source_type: Type of source being imported
+            url: Optional URL for web-based imports
+            title: Optional title for the import
+            file: Optional file for file-based imports
+        """
+        return await self.process_import(source_type, url, title, file, artefact_id)
 
     def _map_source_type(self, source_type: str) -> str:
         """Map frontend source types to database types"""

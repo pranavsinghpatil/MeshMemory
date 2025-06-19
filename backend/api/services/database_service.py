@@ -100,6 +100,15 @@ class DatabaseService:
             for k, v in data.items():
                 if isinstance(v, datetime):
                     data[k] = v.isoformat()
+                    
+            # Ensure artefact_id and artefact_order are included if provided
+            # These are used for grouped imports where multiple chunks come from different files
+            if "artefact_id" in chunk_data and chunk_data["artefact_id"] is not None:
+                data["artefact_id"] = chunk_data["artefact_id"]
+            
+            if "artefact_order" in chunk_data and chunk_data["artefact_order"] is not None:
+                data["artefact_order"] = chunk_data["artefact_order"]
+                
             result = self.supabase.table('chunks').insert(data).execute()
             if hasattr(result, 'error') and result.error:
                 print(f"Database error creating chunk: {result.error}")
@@ -132,12 +141,31 @@ class DatabaseService:
         """Count chunks for a source (Supabase only)"""
         try:
             result = self.supabase.table('chunks').select('id', count='exact').eq('source_id', source_id).execute()
-            return result.count if hasattr(result, 'count') and result.count is not None else 0
+            return result.count if hasattr(result, 'count') else 0
         except Exception as e:
             print(f"Database error counting chunks: {e}")
-            return 0
-        # Fallback to in-memory
-        return len([chunk for chunk in self.chunks.values() if chunk["source_id"] == source_id])
+            # Fallback to in-memory
+            return len([c for c in self.chunks.values() if c.get('source_id') == source_id])
+
+    async def get_chunks_by_artefact(self, artefact_id: str) -> List[Dict[str, Any]]:
+        """Get all chunks for a specific artefact ID (grouped import)"""
+        try:
+            result = self.supabase.table('chunks').select('*').eq('artefact_id', artefact_id).order('artefact_order').execute()
+            return result.data
+        except Exception as e:
+            print(f"Database error getting chunks by artefact: {e}")
+            # Fallback to in-memory
+            return [c for c in self.chunks.values() if c.get('artefact_id') == artefact_id]
+
+    async def count_chunks_by_artefact(self, artefact_id: str) -> int:
+        """Count chunks for an artefact (Supabase only)"""
+        try:
+            result = self.supabase.table('chunks').select('id', count='exact').eq('artefact_id', artefact_id).execute()
+            return result.count if hasattr(result, 'count') else 0
+        except Exception as e:
+            print(f"Database error counting chunks by artefact: {e}")
+            # Fallback to in-memory
+            return len([c for c in self.chunks.values() if c.get('artefact_id') == artefact_id])
 
     async def search_chunks_by_embedding(
         self, 
@@ -185,69 +213,101 @@ class DatabaseService:
         
         return sorted(results, key=lambda x: x["similarity"], reverse=True)
 
+    async def create_chat(self, chat_data: Dict[str, Any]) -> str:
+        """Create a new chat (formerly thread)"""
+        try:
+            data = chat_data.copy()
+            chat_id = data["id"]
+            
+            # Handle is_hybrid flag
+            if "is_hybrid" in data and data["is_hybrid"] is not None:
+                is_hybrid = data["is_hybrid"]
+            else:
+                is_hybrid = False
+                
+            # Convert metadata to JSON if it's a string
+            if isinstance(data.get("metadata"), str):
+                try:
+                    data["metadata"] = json.loads(data["metadata"])
+                except Exception:
+                    data["metadata"] = {}
+            
+            # Ensure metadata is a dictionary
+            if not data.get("metadata"):
+                data["metadata"] = {}
+                
+            # Add is_hybrid to metadata as well for backward compatibility
+            data["metadata"]["is_hybrid"] = is_hybrid
+            
+            # Convert all datetime objects to isoformat strings for Supabase
+            for k, v in data.items():
+                if isinstance(v, datetime):
+                    data[k] = v.isoformat()
+                    
+            result = self.supabase.table('chats').insert(data).execute()
+            if hasattr(result, 'error') and result.error:
+                print(f"Database error creating chat: {result.error}")
+        except Exception as e:
+            print(f"Database error creating chat: {e}")
+            # Fallback to in-memory
+            self.threads[chat_id] = chat_data
+        
+        return chat_id
+        
+    # Alias for backward compatibility
     async def create_thread(self, thread_data: Dict[str, Any]) -> str:
-        """Create a new thread"""
+        """Legacy alias for create_chat"""
+        return await self.create_chat(thread_data)
+        
+    async def get_chat(self, chat_id: str) -> Optional[Dict[str, Any]]:
+        """Get chat by ID"""
         conn = await self.get_connection()
-        thread_id = thread_data["id"]
         
         if conn:
             try:
-                await conn.execute('''
-                    INSERT INTO threads (id, user_id, title, centroid_embedding, 
-                                        created_at, updated_at, metadata)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7)
-                ''', thread_id, thread_data.get("user_id"), thread_data["title"],
-                thread_data.get("centroid_embedding"), thread_data["created_at"],
-                thread_data["updated_at"], json.dumps(thread_data.get("metadata", {})))
+                row = await conn.fetchrow('''
+                    SELECT * FROM chats WHERE id = $1
+                ''', chat_id)
+                
+                if row:
+                    return dict(row)
+                return None
             except Exception as e:
-                print(f"Database error creating thread: {e}")
+                print(f"Database error getting chat: {e}")
             finally:
                 await self.release_connection(conn)
-        else:
-            # Fallback to in-memory
-            self.threads[thread_id] = thread_data
         
-        return thread_id
+        # Fallback to in-memory
+        return self.threads.get(chat_id)
 
-    async def get_all_threads(self) -> List[Dict[str, Any]]:
-        """Get all threads"""
+    # Alias for backward compatibility
+    async def get_thread(self, thread_id: str) -> Optional[Dict[str, Any]]:
+        """Legacy alias for get_chat"""
+        return await self.get_chat(thread_id)
+
+    async def get_all_chats(self) -> List[Dict[str, Any]]:
+        """Get all chats"""
         conn = await self.get_connection()
         
         if conn:
             try:
                 rows = await conn.fetch('''
-                    SELECT * FROM threads ORDER BY updated_at DESC
+                    SELECT * FROM chats ORDER BY updated_at DESC
                 ''')
                 
                 return [dict(row) for row in rows]
             except Exception as e:
-                print(f"Database error getting threads: {e}")
+                print(f"Database error getting chats: {e}")
             finally:
                 await self.release_connection(conn)
         
         # Fallback to in-memory
         return list(self.threads.values())
 
-    async def get_thread(self, thread_id: str) -> Optional[Dict[str, Any]]:
-        """Get thread by ID"""
-        conn = await self.get_connection()
-        
-        if conn:
-            try:
-                row = await conn.fetchrow('''
-                    SELECT * FROM threads WHERE id = $1
-                ''', thread_id)
-                
-                if row:
-                    return dict(row)
-                return None
-            except Exception as e:
-                print(f"Database error getting thread: {e}")
-            finally:
-                await self.release_connection(conn)
-        
-        # Fallback to in-memory
-        return self.threads.get(thread_id)
+    # Alias for backward compatibility
+    async def get_all_threads(self) -> List[Dict[str, Any]]:
+        """Legacy alias for get_all_chats"""
+        return await self.get_all_chats()
 
     async def create_micro_thread(self, micro_thread_data: Dict[str, Any]) -> str:
         """Create a new micro-thread"""
