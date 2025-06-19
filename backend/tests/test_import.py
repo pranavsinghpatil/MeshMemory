@@ -211,5 +211,32 @@ class TestImportRoutes:
             assert data["sourceId"] == "test-source-id"
             assert data["chunksProcessed"] == 3
 
+    def test_import_grouped_success(self):
+        """Test grouped import via API"""
+        with patch('api.routes.import_routes.import_service.process_grouped_import') as mock_group:
+            mock_group.return_value = {
+                "import_batch_id": "batch-id",
+                "chunks_processed": 2,
+                "artefact_count": 2,
+                "status": "success"
+            }
+            test_file1 = io.BytesIO(b"test1")
+            test_file2 = io.BytesIO(b"test2")
+            response = client.post(
+                "/import/grouped",
+                data={
+                    "types": ["copy_paste", "copy_paste"],
+                    "titles": ["f1", "f2"]
+                },
+                files=[
+                    ("files", ("f1.txt", test_file1, "text/plain")),
+                    ("files", ("f2.txt", test_file2, "text/plain"))
+                ]
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["importBatchId"] == "batch-id"
+
 if __name__ == "__main__":
+
     pytest.main([__file__])

@@ -43,9 +43,23 @@ export const importAPI = {
     const response = await api.get(`/import/status/${sourceId}`);
     return response.data;
   },
+  importGrouped: async (formData: FormData) => {
+    const response = await api.post('/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+  createHybrid: async (payload: { chatIds: string[]; title: string; metadata?: any; sortMethod?: string; }) => {
+    const response = await api.post('/hybrid/create', payload);
+    return response.data;
+  },
 };
 
 // Conversations API
+
+// Convenience exports
+export const { importSource, importGrouped, createHybrid } = importAPI;
+
 export const conversationsAPI = {
   getConversation: async (sourceId: string, includeMicroThreads = true) => {
     try {

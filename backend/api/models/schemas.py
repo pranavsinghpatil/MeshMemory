@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
+from fastapi import UploadFile
 
 # Import/Export Schemas
 class ImportRequest(BaseModel):
@@ -8,14 +9,49 @@ class ImportRequest(BaseModel):
     url: Optional[str] = None
     title: Optional[str] = None
 
+class ImportGroupedRequest(BaseModel):
+    userId: str
+    artefacts: List[ImportRequest]
+    importBatchTitle: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+
+class ImportGroupedResponse(BaseModel):
+    importBatchId: str
+    chunksProcessed: int
+    artefactCount: int
+    status: str
+
+class ImportRequest(BaseModel):
+    type: str
+    url: Optional[str] = None
+    title: Optional[str] = None
+
+class HybridChatRequest(BaseModel):
+    chatIds: List[str]  # List of chat IDs to merge
+    title: str
+    metadata: Optional[Dict[str, Any]] = None
+    sortMethod: str = "timestamp"  # How to sort messages: timestamp, artefact_order, or custom
+
+class ImportBatch(BaseModel):
+    id: str
+    user_id: Optional[str] = None
+    created_at: datetime
+    title: Optional[str] = None
+    artefact_count: int = 0
+    metadata: Optional[Dict[str, Any]] = None
+
 class ImportResponse(BaseModel):
     sourceId: str
+    chatId: str  # Chat created for this import
     status: str
     message: str
     chunksProcessed: int = 0
+    isHybridCandidate: bool = False  # Can this be part of a hybrid chat?
+    hybridCompatibleWith: Optional[List[str]] = None  # List of compatible chat IDs
 
 # Conversation Schemas
 class ChunkResponse(BaseModel):
+    import_batch_id: Optional[str] = None  # For grouped import: batch/group UUID
     id: str
     role: str  # "user" or "assistant"
     text: str
@@ -29,6 +65,7 @@ class ChunkResponse(BaseModel):
 
 
 class ConversationResponse(BaseModel):
+    import_batch_id: Optional[str] = None  # For grouped import
     sourceId: str
     title: str
     sourceType: str

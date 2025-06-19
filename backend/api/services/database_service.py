@@ -13,6 +13,9 @@ class DatabaseService:
     _instance = None
     _initialized = False
     
+    def __init__(self):
+        self.import_batches = {}  # fallback in-memory storage
+    
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(DatabaseService, cls).__new__(cls)
@@ -46,6 +49,21 @@ class DatabaseService:
         # No-op since we're using Supabase client
         if self.pool and conn:
             await self.pool.release(conn)
+
+    async def create_import_batch(self, batch_data: Dict[str, Any]) -> str:
+        batch_id = batch_data["id"]
+        try:
+            data = batch_data.copy()
+            for k, v in data.items():
+                if hasattr(v, 'isoformat'):
+                    data[k] = v.isoformat()
+            result = self.supabase.table('import_batches').insert(data).execute()
+            if hasattr(result, 'error') and result.error:
+                print(f"Database error creating import_batch: {result.error}")
+        except Exception as e:
+            print(f"Database error creating import_batch: {e}")
+            self.import_batches[batch_id] = batch_data
+        return batch_id
 
     async def create_source(self, source_data: Dict[str, Any]) -> str:
         """Create a new source using Supabase client. Expects standardized high-level type and metadata.import_method."""
@@ -117,6 +135,26 @@ class DatabaseService:
             # Fallback to in-memory
             self.chunks[chunk_id] = chunk_data
         return chunk_id
+
+    async def create_chunks(self, chunks_data: List[Dict[str, Any]]) -> None:
+        """Batch insert multiple chunks; fallback to individual inserts on error"""
+        try:
+            data_list = []
+            for chunk_data in chunks_data:
+                d = chunk_data.copy()
+                for k, v in d.items():
+                    if hasattr(v, 'isoformat'):
+                        d[k] = v.isoformat()
+                data_list.append(d)
+            # Supabase batch insert
+            res = self.supabase.table('chunks').insert(data_list).execute()
+            if hasattr(res, 'error') and res.error:
+                print(f"Database error batch creating chunks: {res.error}")
+                raise Exception(res.error)
+        except Exception as e:
+            print(f"Batch insert failed, falling back to single insert: {e}")
+            for chunk_data in chunks_data:
+                await self.create_chunk(chunk_data)
 
     async def get_chunk(self, chunk_id: str) -> Optional[Dict[str, Any]]:
         """Get chunk by ID (Supabase only)"""
