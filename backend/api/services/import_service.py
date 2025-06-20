@@ -312,24 +312,58 @@ class ImportService:
         return mapping.get(source_type, "text")
 
     async def _process_chatgpt_link(self, url: str) -> list:
-        """Process ChatGPT share link"""
-        # For demo purposes, return mock data
-        # In production, you'd scrape the ChatGPT share link
-        return [
-            {
-                "text": "Hello! I'm working on a React project and need help with state management.",
-                "participant": "User",
-                "timestamp": datetime.now(),
-                "metadata": {"source": "chatgpt"}
-            },
-            {
-                "text": "I'd be happy to help with React state management! For simple local state, useState is perfect. For more complex scenarios, consider useReducer or external libraries like Redux or Zustand.",
-                "participant": "Assistant",
-                "model": "gpt-4",
-                "timestamp": datetime.now(),
-                "metadata": {"source": "chatgpt"}
-            }
-        ]
+        """Fetch and parse a ChatGPT share link into message dicts.
+        The share link is of form https://chat.openai.com/share/<uuid>
+        The HTML contains a <script id="__NEXT_DATA__"> whose JSON includes messages.
+        """
+        import aiohttp, json, re
+        from bs4 import BeautifulSoup
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                if resp.status != 200:
+                    raise ValueError(f"Failed to fetch ChatGPT share link: HTTP {resp.status}")
+                html = await resp.text()
+
+        soup = BeautifulSoup(html, "html.parser")
+        script_tag = soup.find("script", id="__NEXT_DATA__")
+        if not script_tag:
+            raise ValueError("Could not locate message payload in share link HTML")
+
+        try:
+            data = json.loads(script_tag.string)
+            # Navigate to props.pageProps.sharedConversationData
+            messages = (
+                data["props"]["pageProps"]["sharedConversationData"]["conversationData"]["mapping"].values()
+            )
+        except Exception as exc:
+            raise ValueError(f"Unexpected share link schema: {exc}")
+
+        parsed_msgs = []
+        for m in messages:
+            content = m.get("message")
+            if not content:
+                continue
+            role = content.get("author", {}).get("role", "user")
+            # message parts may live in content.parts list
+            parts = content.get("content", {}).get("parts", [])
+            text = "\n\n".join(parts).strip()
+            if not text:
+                continue
+            parsed_msgs.append(
+                {
+                    "text": text,
+                    "participant": "Assistant" if role == "assistant" else "User",
+                    "timestamp": datetime.fromtimestamp(content.get("create_time", datetime.now().timestamp())),
+                    "metadata": {
+                        "source": "chatgpt_link",
+                        "share_url": url,
+                    },
+                }
+            )
+        if not parsed_msgs:
+            raise ValueError("No messages parsed from share link")
+        return parsed_msgs
 
     async def _process_youtube_link(self, url: str) -> list:
         """Process YouTube video transcript"""
