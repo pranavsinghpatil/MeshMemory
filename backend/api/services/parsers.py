@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional
 from fastapi import UploadFile
 from datetime import datetime
 import uuid
-import PyPDF2
+import pdfplumber
 import io
 import pytesseract
 from PIL import Image
@@ -86,39 +86,42 @@ class TextParser(ParserInterface):
 
 class PDFParser(ParserInterface):
     async def parse(self, source_id: str, file: Optional[UploadFile] = None, url: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Parse PDF content, extracting text by pages and sections"""
+        """Parse PDF content using pdfplumber and return list of text chunks"""
+        import asyncio
         if not file:
             raise ValueError("PDFParser requires a file")
 
-        content = await file.read()
-        pdf_file = io.BytesIO(content)
+        # Read the entire file into memory (UploadFile.read() is async)
+        content_bytes = await file.read()
 
-        try:
-            reader = PyPDF2.PdfReader(pdf_file)
-            chunks = []
+        def _extract_from_pdf(data: bytes) -> List[str]:
+            """Blocking call to pdfplumber to extract text per page"""
+            text_blocks: List[str] = []
+            with pdfplumber.open(io.BytesIO(data)) as pdf:
+                for page in pdf.pages:
+                    page_text = page.extract_text() or ""
+                    # Split by double newline or keep as single block if small
+                    paragraphs = [p.strip() for p in page_text.split("\n\n") if p.strip()]
+                    if paragraphs:
+                        text_blocks.extend(paragraphs)
+            return text_blocks
 
-            for page_num in range(len(reader.pages)):
-                page = reader.pages[page_num]
-                text = page.extract_text()
+        loop = asyncio.get_event_loop()
+        paragraphs: List[str] = await loop.run_in_executor(None, _extract_from_pdf, content_bytes)
 
-                # Split page into paragraphs
-                paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
-
-                for para in paragraphs:
-                    chunks.append({
-                        "content": para,
-                        "role": "user",
-                        "timestamp": datetime.now(),
-                        "metadata": {
-                            "format": "application/pdf",
-                            "page": page_num + 1,
-                            "total_pages": len(reader.pages)
-                        }
-                    })
-
-            return chunks
-        except Exception as e:
-            raise ValueError(f"Error parsing PDF: {str(e)}")
+        chunks: List[Dict[str, Any]] = []
+        for para in paragraphs:
+            chunks.append({
+                "content": para,
+                "text": para,  # keep compatibility for ImportService expecting 'text'
+                "role": "user",
+                "timestamp": datetime.now(),
+                "metadata": {
+                    "format": "application/pdf",
+                    "source_id": source_id
+                }
+            })
+        return chunks
 
 class HTMLParser(ParserInterface):
     async def parse(self, source_id: str, file: Optional[UploadFile] = None, url: Optional[str] = None) -> List[Dict[str, Any]]:

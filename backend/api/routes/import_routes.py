@@ -37,14 +37,14 @@ async def import_source(
     Specific import method details are stored in metadata.
     """
     try:
-        allowed_types = ["chatgpt", "claude", "gemini", "grok", "mistral", "deepseek", "other"]
+        allowed_types = ["chatgpt", "claude", "gemini", "pdf", "grok", "mistral", "deepseek", "other"]
         if type not in allowed_types:
             raise HTTPException(status_code=400, detail=f"Invalid source type. Allowed: {', '.join(allowed_types)}")
 
         # Validate required fields for each type
         if type in ["chatgpt", "grok", "mistral", "deepseek"] and not url:
             raise HTTPException(status_code=400, detail="URL required for this source type")
-        if type in ["claude", "gemini"] and not file:
+        if type in ["claude", "gemini", "pdf"] and not file:
             raise HTTPException(status_code=400, detail="File required for this source type")
 
         # Security: validate file size and type
