@@ -254,31 +254,35 @@ class OcrParser(ParserInterface):
             raise ValueError("OcrParser requires a file")
 
         content = await file.read()
-        image = Image.open(io.BytesIO(content))
 
+        # Offload OCR to Celery
+        from api.tasks import ocr_image
+        async_result = ocr_image.apply_async(args=[content])
+
+        # Wait (non-blocking) for a bounded time – 10 s default
+        import asyncio, functools
         try:
-            # Extract text using Tesseract
-            text = pytesseract.image_to_string(image)
-
-            # Split into meaningful blocks
-            blocks = [block.strip() for block in text.split('\n\n') if block.strip()]
-
-            chunks = []
-            for block in blocks:
-                chunks.append({
-                    "content": block,
-                    "role": "user",
-                    "timestamp": datetime.now(),
-                    "metadata": {
-                        "format": "image/ocr",
-                        "image_size": image.size,
-                        "confidence": pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)['conf']
-                    }
-                })
-
-            return chunks
+            loop = asyncio.get_event_loop()
+            text: str = await loop.run_in_executor(None, functools.partial(async_result.get, timeout=10))
         except Exception as e:
-            raise ValueError(f"OCR processing failed: {str(e)}")
+            raise ValueError(f"OCR task failed: {e}")
+
+        # Split into paragraphs
+        blocks = [blk.strip() for blk in text.split("\n\n") if blk.strip()]
+        chunks = [
+            {
+                "content": blk,
+                "text": blk,
+                "role": "user",
+                "timestamp": datetime.now(),
+                "metadata": {
+                    "format": "image/ocr",
+                    "source_id": source_id
+                }
+            }
+            for blk in blocks
+        ]
+        return chunks
 
 class LinkParser(ParserInterface):
     async def parse(self, source_id: str, file: Optional[UploadFile] = None, url: Optional[str] = None) -> List[Dict[str, Any]]:
