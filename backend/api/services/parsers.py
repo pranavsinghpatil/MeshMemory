@@ -147,10 +147,12 @@ class HTMLParser(ParserInterface):
 
             from bs4 import BeautifulSoup
             soup = BeautifulSoup(content, 'html.parser')
+            # Remove script and style elements
             for script in soup(["script", "style"]):
                 script.decompose()
 
             chunks: List[Dict[str, Any]] = []
+            # Extract text from meaningful blocks
             for element in soup.find_all(['p','h1','h2','h3','h4','h5','h6','li']):
                 text = element.get_text().strip()
                 if text:
@@ -164,7 +166,6 @@ class HTMLParser(ParserInterface):
                             "classes": element.get('class', [])
                         }
                     })
-
             return chunks
         except ParserError:
             raise

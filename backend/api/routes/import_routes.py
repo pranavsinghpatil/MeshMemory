@@ -27,7 +27,9 @@ async def import_source(
     type: str = Form(...),
     url: Optional[str] = Form(None),
     title: Optional[str] = Form(None),
-    file: Optional[UploadFile] = File(None)
+    file: Optional[UploadFile] = File(None),
+    text: Optional[str] = Form(None),
+    html: Optional[str] = Form(None)
 ):
     """
     Import a conversation source from various platforms.
@@ -60,42 +62,56 @@ async def import_source(
             hostname = urllib.parse.urlparse(url).hostname or ""
             if hostname not in ALLOWED_URL_DOMAINS:
                 raise HTTPException(status_code=400, detail=f"URL host '{hostname}' not allowed")
-async def import_source(
-    type: str = Form(...),
-    url: Optional[str] = Form(None),
-    title: Optional[str] = Form(None),
-    file: Optional[UploadFile] = File(None)
-):
-    """
-    Import a conversation source from various platforms.
-    Only accepts high-level source types ('chatgpt', 'claude', 'gemini', 'grok', 'mistral', 'deepseek', 'other').
-    Specific import method details are stored in metadata.
-    """
-    try:
-        allowed_types = ["chatgpt", "claude", "gemini", "grok", "mistral", "deepseek", "other"]
-        if type not in allowed_types:
-            raise HTTPException(status_code=400, detail=f"Invalid source type. Allowed: {', '.join(allowed_types)}")
 
-        # Validate required fields for each type
-        if type in ["chatgpt", "grok", "mistral", "deepseek"] and not url:
-            raise HTTPException(status_code=400, detail="URL required for this source type")
-        if type in ["claude", "gemini"] and not file:
-            raise HTTPException(status_code=400, detail="File required for this source type")
-
-        # Process the import (import_service will normalize and store import_method in metadata)
-                # Process the import (import_service will normalize and store import_method in metadata)
-        result = await import_service.process_import(
-            source_type=type,
-            url=url,
-            title=title,
-            file=file
-        )
+        # Determine input type and route to correct parser
+        if text:
+            # Handle pasted plain text
+            from ..services.parsers import TextParser
+            parser = TextParser()
+            import_method = "copy_paste"
+            file_obj = None
+            if file:
+                file_obj = file
+            else:
+                # Create a pseudo UploadFile from text
+                import io
+                from fastapi import UploadFile
+                file_obj = UploadFile(filename="pasted.txt", file=io.BytesIO(text.encode("utf-8")), content_type="text/plain")
+            result = await import_service.process_import(
+                source_type="copy_paste",
+                title=title,
+                file=file_obj
+            )
+        elif html:
+            # Handle pasted HTML
+            from ..services.parsers import HTMLParser
+            parser = HTMLParser()
+            import_method = "html"
+            import io
+            from fastapi import UploadFile
+            file_obj = UploadFile(filename="pasted.html", file=io.BytesIO(html.encode("utf-8")), content_type="text/html")
+            result = await import_service.process_import(
+                source_type="html",
+                title=title,
+                file=file_obj
+            )
+        else:
+            # Fallback to file or URL import
+            result = await import_service.process_import(
+                source_type=type,
+                url=url,
+                title=title,
+                file=file
+            )
 
         return ImportResponse(
-            sourceId=result["source_id"],
-            status="success",
-            message=f"Successfully imported {type} source",
-            chunksProcessed=result.get("chunks_processed", 0)
+            sourceId=result["sourceId"],
+            chatId=result["chatId"],
+            status=result["status"],
+            message=result["message"],
+            chunksProcessed=result.get("chunksProcessed", 0),
+            isHybridCandidate=result.get("isHybridCandidate", False),
+            hybridCompatibleWith=result.get("hybridCompatibleWith")
         )
 
     except Exception as e:

@@ -6,7 +6,7 @@ from fastapi import UploadFile
 import io
 
 from api.routes.import_routes import router
-from api.services.import_service import ImportService
+# from api.services.import_service import ImportService
 
 # Create test client
 from fastapi import FastAPI
@@ -134,7 +134,91 @@ class TestImportService:
 
 class TestImportRoutes:
     """Test cases for import API routes"""
-    
+
+    def test_import_text_paste(self):
+        """Test import with pasted plain text"""
+        with patch('api.routes.import_routes.import_service.process_import') as mock_process:
+            mock_process.return_value = {
+                "sourceId": "text-id",
+                "chatId": "chat-id",
+                "status": "success",
+                "message": "Successfully imported copy_paste source",
+                "chunksProcessed": 2
+            }
+            response = client.post(
+                "/import",
+                data={
+                    "type": "copy_paste",
+                    "text": "Hello\n\nHow are you?",
+                    "title": "Test Text Paste"
+                }
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["sourceId"] == "text-id"
+            assert data["status"] == "success"
+            assert data["chunksProcessed"] == 2
+
+    def test_import_html_paste(self):
+        """Test import with pasted HTML"""
+        with patch('api.routes.import_routes.import_service.process_import') as mock_process:
+            mock_process.return_value = {
+                "sourceId": "html-id",
+                "chatId": "chat-id",
+                "status": "success",
+                "message": "Successfully imported html source",
+                "chunksProcessed": 3
+            }
+            response = client.post(
+                "/import",
+                data={
+                    "type": "html",
+                    "html": "<h1>Header</h1><p>Paragraph</p>",
+                    "title": "Test HTML Paste"
+                }
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["sourceId"] == "html-id"
+            assert data["status"] == "success"
+            assert data["chunksProcessed"] == 3
+
+    def test_import_empty_input(self):
+        """Test import with no file, text, html, or url (malformed input)"""
+        response = client.post(
+            "/import",
+            data={
+                "type": "copy_paste",
+                "title": "Empty Import"
+            }
+        )
+        # Should fallback to error or empty import
+        assert response.status_code in (400, 500)
+        assert ("requires" in response.text.lower()) or ("error" in response.text.lower())
+
+    def test_import_html_invalid(self):
+        """Test import with invalid HTML (should not crash)"""
+        with patch('api.routes.import_routes.import_service.process_import') as mock_process:
+            mock_process.return_value = {
+                "sourceId": "html-id",
+                "chatId": "chat-id",
+                "status": "success",
+                "message": "Successfully imported html source",
+                "chunksProcessed": 1
+            }
+            response = client.post(
+                "/import",
+                data={
+                    "type": "html",
+                    "html": "<html><body><h1>Header",
+                    "title": "Broken HTML"
+                }
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["sourceId"] == "html-id"
+            assert data["chunksProcessed"] == 1
+
     def test_import_chatgpt_success(self):
         """Test successful ChatGPT import via API"""
         with patch('api.routes.import_routes.import_service.process_import') as mock_process:
