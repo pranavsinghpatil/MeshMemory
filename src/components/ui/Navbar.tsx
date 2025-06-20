@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Layout, Button, Typography, Space, Avatar, Dropdown, Menu } from 'antd';
 import { 
   UserOutlined, 
@@ -11,12 +11,14 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import HybridChatMerge from '../chat/HybridChatMerge';
+import MultiImportDialog from '../MultiImportDialog';
 
 const { Header } = Layout;
 const { Title } = Typography;
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const location = useLocation();
   const { theme } = useTheme();
   
@@ -30,7 +32,7 @@ const Navbar: React.FC = () => {
   };
 
   const handleImportClick = () => {
-    navigate('/import');
+    setShowImportDialog(true);
   };
 
   const userMenu = (
@@ -110,7 +112,7 @@ const Navbar: React.FC = () => {
         
         <Button
           icon={<ImportOutlined />}
-          style={isActive('/import') ? activeButtonStyle : buttonStyle}
+          style={buttonStyle}
           onClick={handleImportClick}
         >
           Import
@@ -128,6 +130,9 @@ const Navbar: React.FC = () => {
           </Button>
         </Dropdown>
       </Space>
+      {showImportDialog && (
+        <MultiImportDialog isOpen={showImportDialog} onClose={() => setShowImportDialog(false)} />
+      )}
     </Header>
   );
 };

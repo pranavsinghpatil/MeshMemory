@@ -58,7 +58,7 @@ export const importAPI = {
 // Conversations API
 
 // Convenience exports
-export const { importSource, importGrouped, createHybrid } = importAPI;
+export const { importSource, importGrouped: importGroupedAPI, createHybrid } = importAPI;
 
 export const conversationsAPI = {
   getConversation: async (sourceId: string, includeMicroThreads = true) => {
