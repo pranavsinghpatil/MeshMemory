@@ -12,6 +12,9 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import GroupedImportButton from './GroupedImportButton';
+import ChatMergeDialog from '../ChatMergeDialog';
+import { Checkbox } from 'antd';
+import { MergeOutlined } from '@ant-design/icons';
 
 const { Sider } = Layout;
 const { Title, Text } = Typography;
@@ -23,6 +26,8 @@ const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [chats, setChats] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedChats, setSelectedChats] = useState<Set<string>>(new Set());
+  const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
 
   // Color palette based on theme
   const colors = theme === 'dark'
@@ -106,7 +111,16 @@ const Sidebar: React.FC = () => {
     boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
   };
 
-  return (
+  // Merge dialog
+      <ChatMergeDialog
+        isOpen={isMergeModalOpen}
+        onClose={() => setIsMergeModalOpen(false)}
+        chats={chats
+          .filter(chat => selectedChats.has(chat.id))
+          .map(chat => ({ id: chat.id, title: chat.title, createdAt: chat.importDate, messageCount: chat.chunkCount }))}
+        onMergeComplete={(newChatId: string) => { setSelectedChats(new Set()); setIsMergeModalOpen(false); navigate(`/chat/${newChatId}`); }}
+      />
+      <Sider
     <Sider
       width={250}
       collapsible
@@ -142,6 +156,14 @@ const Sidebar: React.FC = () => {
         </Button>
 
         <GroupedImportButton />
+        <Button
+          icon={<MergeOutlined />}
+          onClick={() => setIsMergeModalOpen(true)}
+          disabled={selectedChats.size < 2}
+          style={buttonStyle}
+        >
+          {!collapsed && `Merge Chats (${selectedChats.size})`}
+        </Button>
 
         <Divider style={{ margin: '12px 0', borderColor: theme === 'dark' ? '#444' : '#eee' }} />
 
@@ -161,7 +183,35 @@ const Sidebar: React.FC = () => {
               color: colors.text
             }}
           >
-            {chats.map(chat => (
+            {chats.map(chat => (  
+                <Menu.Item
+                  key={chat.id}
+                  onClick={() => handleChatClick(chat.id)}
+                  style={{
+                    color: colors.text,
+                    backgroundColor: 'transparent',
+                    margin: '4px 0',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Checkbox
+                      checked={selectedChats.has(chat.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={() => setSelectedChats(prev => {
+                        const newSet = new Set(prev);
+                        if (newSet.has(chat.id)) newSet.delete(chat.id);
+                        else newSet.add(chat.id);
+                        return newSet;
+                      })}
+                    />
+                    <span>
+                      {chat.title.length > 20
+                        ? `${chat.title.substring(0, 20)}...`
+                        : chat.title}
+                    </span>
+                  </div>
+                </Menu.Item>
+            ))}
               <Menu.Item
                 key={chat.id}
                 icon={<FileTextOutlined />}

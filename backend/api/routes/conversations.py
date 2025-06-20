@@ -11,6 +11,7 @@ from ..models.schemas import (
     ConversationResponse, ChunkResponse, ChatListResponse, 
     MergeChatRequest, NewChatRequest, NewChatResponse
 )
+from ..models.hybrid_chat_schemas import HybridChatResponse, HybridChatDetailResponse
 
 # Import services
 from ..services.conversation_service import ConversationService
@@ -132,7 +133,7 @@ async def list_imported_chats(
             detail="An error occurred while retrieving chats"
         )
 
-@router.post("/chats/merge", status_code=status.HTTP_201_CREATED)
+@router.post("/conversations/merge", response_model=HybridChatResponse, status_code=status.HTTP_201_CREATED)
 async def merge_chats(
     request: MergeChatRequest = Body(...)
 ):
@@ -148,7 +149,7 @@ async def merge_chats(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/chats/merge/{hybrid_chat_id}", status_code=200)
+@router.get("/conversations/merge/{hybrid_chat_id}", response_model=HybridChatDetailResponse, status_code=200)
 async def get_hybrid_chat(hybrid_chat_id: str):
     """
     Retrieve a hybrid chat by its ID.
