@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Clock, TrendingUp, Users, Beaker, MessageCircle } from 'lucide-react';
+import { MessageSquare, Clock, TrendingUp, Users, Beaker, MessageCircle, Plus, Search, Zap } from 'lucide-react';
 import Layout from '../components/Layout';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -103,15 +103,14 @@ export default function Dashboard() {
       console.error('Error fetching dashboard data:', error);
       setError('Failed to load dashboard data');
       setLoading(false);
-    } finally {
-      setLoading(false);
     }
   }
 
   return (
     <Layout>
-      <div className="py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+      <div className="min-h-full">
+        <div className="py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
@@ -222,167 +221,153 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             {/* Recent Activity */}
             <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl transition-colors">
-              <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
-                  Recent Activity
-                </h3>
-
-    setLoading(false);
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error);
-    setError('Failed to load dashboard data');
-    setLoading(false);
-  } finally {
-    setLoading(false);
-  }
-}
-
-return (
-  <Layout>
-    <div className="py-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-            Start your intelligent AI conversation journey with knitter.app
-          </p>
-          {isGuest && (
-            <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                You're in guest mode with limited features. Sign up for full access to import sources and create threads.
+              <div className="p-6">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h2>
                 {loading ? (
                   <SkeletonLoader type="list" />
-                ) : (
+                ) : recentActivity.length > 0 ? (
                   <div className="space-y-4">
-                    {recentActivity.length > 0 ? (
-                      recentActivity.map((activity) => (
-                        <div key={activity.id} className="flex items-center space-x-3">
-                          <div className="flex-shrink-0">
-                            <div className="h-10 w-10 rounded-md bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                              <MessageSquare className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                              {activity.title}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {new Date(activity.created_at).toLocaleDateString()}
-                            </p>
+                    {recentActivity.map((activity) => (
+                      <div key={activity.id} className="flex items-center space-x-3">
+                        <div className="flex-shrink-0">
+                          <div className="h-10 w-10 rounded-md bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                            <MessageSquare className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                           </div>
                         </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-gray-500 dark:text-gray-400">No recent activity</p>
-                    )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {activity.title}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {activity.type}
+                          </p>
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(activity.created_at).toLocaleTimeString()}
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No recent activity</p>
                 )}
               </div>
             </div>
 
             {/* Recent Chats */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Recent Chats</h2>
-                <Link to="/chats" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
-                  View all
-                </Link>
-              </div>
-              <div className="space-y-4">
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl transition-colors">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-medium text-gray-900 dark:text-white">Recent Chats</h2>
+                  <Link
+                    to="/chat"
+                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                  >
+                    View all
+                  </Link>
+                </div>
                 {loading ? (
                   <SkeletonLoader type="list" />
                 ) : recentChats.length > 0 ? (
-                  recentChats.map((chat) => (
-                    <Link key={chat.id} to={`/chats/${chat.id}`} className="block">
-                      <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <div className="space-y-4">
+                    {recentChats.map((chat) => (
+                      <Link
+                        key={chat.id}
+                        to={`/chat/${chat.id}`}
+                        className="block p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      >
                         <div className="flex items-center space-x-3">
-                          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
-                            <MessageCircle className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                          <div className="flex-shrink-0">
+                            <div className="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                              <MessageCircle className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">{chat.title}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {new Date(chat.updated_at).toLocaleDateString()}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {chat.title || 'New Chat'}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                              {chat.lastMessage || 'No messages yet'}
                             </p>
                           </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {chat.lastMessageTime ? (
+                              new Date(chat.lastMessageTime).toLocaleTimeString()
+                            ) : (
+                              '--:--'
+                            )}
+                          </div>
                         </div>
-                        <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </Link>
-                  ))
+                      </Link>
+                    ))}
+                  </div>
                 ) : (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">No recent chats</p>
+                  <div className="text-center py-8">
+                    <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No chats yet</h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      Get started by creating a new chat.
+                    </p>
+                    <div className="mt-6">
+                      <Link
+                        to="/chat"
+                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-700 dark:hover:bg-indigo-600"
+                      >
+                        <Plus className="-ml-1 mr-2 h-5 w-5" />
+                        New Chat
+                      </Link>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Experimental Feature Preview */}
-          <FeatureFlag flag="globalMood">
-            <div className="mt-8 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl shadow-lg p-6">
-              <div className="flex items-center mb-4">
-                <Beaker className="h-6 w-6 text-purple-600 dark:text-purple-400 mr-2" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                  Global Mood Analysis (Experimental)
-                </h3>
+          {/* Experimental Features Section */}
+          <FeatureFlag flag="experimental_features">
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Experimental Features</h2>
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-2xl p-6">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <Zap className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Global Mood Analysis</h3>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                      Analyze the overall sentiment and mood across all your conversations.
+                    </p>
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 dark:bg-purple-700 dark:hover:bg-purple-600"
+                        onClick={() => alert('Global Mood Analysis is coming soon!')}
+                      >
+                        Analyze Mood
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              
-              <div className="bg-white dark:bg-gray-800 bg-opacity-50 dark:bg-opacity-50 rounded-lg p-4 mb-4">
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Sentiment</span>
-                  <span className="text-sm font-medium text-purple-700 dark:text-purple-300">Positive</span>
-                </div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: '75%' }}></div>
-                </div>
-                <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  <span>Negative</span>
-                  <span>Neutral</span>
-                  <span>Positive</span>
-                </div>
-              </div>
-              
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                This experimental feature analyzes the emotional tone across all your AI conversations.
-                Disable it in Settings → Experimental Features if you don't need it.
-              </p>
-              
-              <Link to="/settings" className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors">
-                Manage experimental features →
-              </Link>
             </div>
           </FeatureFlag>
 
           {/* Welcome Section */}
-          <div className="mt-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-lg">
-            <div className="px-6 py-8 sm:px-8">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-white mb-4">
-                  Welcome to knitter.app
-                </h2>
-                <p className="text-indigo-100 mb-6 max-w-2xl mx-auto">
-                  Transform your AI conversations into searchable knowledge. Import from ChatGPT, Claude, 
-                  Gemini, or YouTube and discover insights across all your interactions.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link
-                    to="/search"
-                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 transition-colors"
-                  >
-                    Start Searching
-                  </Link>
-                  <Link
-                    to="/future-features"
-                    className="inline-flex items-center px-6 py-3 border border-white text-base font-medium rounded-md text-white hover:bg-white hover:bg-opacity-10 transition-colors"
-                  >
-                    Explore Future Features
-                  </Link>
-                </div>
-              </div>
+          <div className="mt-12 text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome to knitter.app</h2>
+            <p className="mt-3 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-300">
+              Start by searching for information or exploring your existing conversations.
+            </p>
+            <div className="mt-6">
+              <Link
+                to="/search"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-700 dark:hover:bg-indigo-600"
+              >
+                <Search className="-ml-1 mr-3 h-5 w-5" />
+                Search Knowledge Base
+              </Link>
             </div>
+          </div>
           </div>
         </div>
       </div>
