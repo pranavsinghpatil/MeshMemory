@@ -1,8 +1,8 @@
-# knitter.app API Documentation
+# MeshMemory API Documentation
 
 ## Overview
 
-The knitter.app API provides comprehensive endpoints for managing AI conversations, performing semantic search, and generating insights. All endpoints return JSON responses and use standard HTTP status codes.
+The MeshMemory API provides comprehensive endpoints for managing AI conversations, performing semantic search, and generating insights. All endpoints return JSON responses and use standard HTTP status codes.
 
 ## Base URL
 
@@ -495,7 +495,7 @@ X-RateLimit-Reset: 1640995200
 
 ## Webhooks
 
-knitter.app supports webhooks for real-time notifications:
+MeshMemory supports webhooks for real-time notifications:
 
 ### Import Completion
 Triggered when an import operation completes.
@@ -530,13 +530,13 @@ Triggered when auto-thread generation completes.
 
 ### JavaScript/TypeScript
 ```bash
-npm install @knitter/sdk
+npm install @MeshMemory/sdk
 ```
 
 ```javascript
-import { KnitterClient } from '@knitter/sdk';
+import { MeshMemoryClient } from '@MeshMemory/sdk';
 
-const client = new KnitterClient({
+const client = new MeshMemoryClient({
   apiKey: 'your-api-key',
   baseUrl: 'http://localhost:8000/api'
 });
@@ -553,13 +553,13 @@ const importResult = await client.import({
 
 ### Python
 ```bash
-pip install knitter-sdk
+pip install MeshMemory-sdk
 ```
 
 ```python
-from knitter import KnitterClient
+from MeshMemory import MeshMemoryClient
 
-client = KnitterClient(
+client = MeshMemoryClient(
     api_key='your-api-key',
     base_url='http://localhost:8000/api'
 )
@@ -651,6 +651,6 @@ trendData.daily_activity.forEach(day => {
 ## Support
 
 For API support and questions:
-- **Documentation**: [docs.knitter.app/api](https://docs.knitter.app/api)
-- **GitHub Issues**: [github.com/knitter/knitter/issues](https://github.com/knitter/knitter/issues)
-- **Email**: api-support@knitter.app
+- **Documentation**: [docs.MeshMemory/api](https://docs.MeshMemory/api)
+- **GitHub Issues**: [github.com/MeshMemory/MeshMemory/issues](https://github.com/MeshMemory/MeshMemory/issues)
+- **Email**: api-support@MeshMemory

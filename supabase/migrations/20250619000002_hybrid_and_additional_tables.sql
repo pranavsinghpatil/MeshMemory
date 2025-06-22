@@ -1,5 +1,5 @@
 /*
-  # Hybrid and Additional Tables Migration for knitter.app
+  # Hybrid and Additional Tables Migration for MeshMemory
   
   This migration creates:
   - hybrid_chats: Tracks hybrid chat merges

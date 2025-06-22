@@ -35,7 +35,7 @@ export default {
           800: '#5b21b6',
           900: '#4c1d95',
         },
-        knitter: {
+        MeshMemory: {
           dark: {
             base: '#333446',
             accent: '#7F8CAA',

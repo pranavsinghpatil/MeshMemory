@@ -1,5 +1,5 @@
 /*
-  # Indexes and Functions for knitter.app
+  # Indexes and Functions for MeshMemory
   
   This migration creates:
   - Performance indexes for all tables

@@ -131,7 +131,7 @@ const Sidebar: React.FC = () => {
       <div style={logoStyle}>
         {!collapsed ? (
           <Title level={4} style={{ margin: 0, color: colors.accent }}>
-            knitter.app
+            MeshMemory
           </Title>
         ) : (
           <Title level={4} style={{ margin: 0, color: colors.accent }}>

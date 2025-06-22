@@ -80,7 +80,7 @@ export const useUserStore = create<UserState>()(
       setApiKeys: (apiKeys) => set({ apiKeys }),
     }),
     {
-      name: 'knitter-user-storage',
+      name: 'MeshMemory-user-storage',
       getStorage: () => localStorage,
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -111,7 +111,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       setWorkspaces: (workspaces) => set({ workspaces }),
     }),
     {
-      name: 'knitter-workspace-storage',
+      name: 'MeshMemory-workspace-storage',
       getStorage: () => localStorage,
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -159,7 +159,7 @@ export const useUIStore = create<UIState>()(
       toggleContextPanel: () => set((state) => ({ contextPanelOpen: !state.contextPanelOpen })),
     }),
     {
-      name: 'knitter-ui-storage',
+      name: 'MeshMemory-ui-storage',
       getStorage: () => localStorage,
       onRehydrateStorage: () => (state) => {
         if (state) {

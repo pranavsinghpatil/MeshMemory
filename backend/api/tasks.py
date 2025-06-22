@@ -19,7 +19,7 @@ broker_url = os.getenv("CELERY_BROKER_URL", "memory://localhost/")
 backend_url = os.getenv("CELERY_RESULT_BACKEND", "rpc://")
 
 celery_app = Celery(
-    "knitchat_backend",
+    "MeshMemory_backend",
     broker=broker_url,
     backend=backend_url,
 )

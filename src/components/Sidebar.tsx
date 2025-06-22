@@ -179,17 +179,17 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
   return (
     <div 
       ref={sidebarRef}
-      className={`flex flex-col h-full bg-knitter-light-base dark:bg-knitter-dark-base border-r border-knitter-light-accent dark:border-knitter-dark-accent transition-all duration-300 ${isExpanded ? 'w-64' : 'w-16'}`}
+      className={`flex flex-col h-full bg-MeshMemory-light-base dark:bg-MeshMemory-dark-base border-r border-MeshMemory-light-accent dark:border-MeshMemory-dark-accent transition-all duration-300 ${isExpanded ? 'w-64' : 'w-16'}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {/* App Logo/Title */}
-      <div className="flex-shrink-0 h-16 flex items-center justify-center bg-knitter-light-accent dark:bg-knitter-dark-accent px-4">
+      <div className="flex-shrink-0 h-16 flex items-center justify-center bg-MeshMemory-light-accent dark:bg-MeshMemory-dark-accent px-4">
         <div className="flex items-center w-full overflow-hidden">
           {isExpanded ? (
             <div className="w-full">
-              <div className="text-xl font-bold text-knitter-light-darker dark:text-knitter-dark-lighter flex items-center justify-between">
-                knitter.app
+              <div className="text-xl font-bold text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter flex items-center justify-between">
+                MeshMemory
                 {isTeamWorkspace && (
                   <WorkspaceSelector 
                     workspaces={workspaces}
@@ -201,7 +201,7 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
               </div>
             </div>
           ) : (
-            <MessageSquare className="h-8 w-8 text-knitter-light-darker dark:text-knitter-dark-lighter" />
+            <MessageSquare className="h-8 w-8 text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter" />
           )}
         </div>
       </div>
@@ -210,7 +210,7 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
       <div className="mt-1 px-2">
         <button 
           onClick={toggleSidebar}
-          className="w-full flex items-center justify-center p-2 rounded-md text-knitter-light-darker dark:text-knitter-dark-lighter bg-knitter-light-base dark:bg-knitter-dark-base hover:bg-knitter-light-accent dark:hover:bg-knitter-dark-accent transition-colors"
+          className="w-full flex items-center justify-center p-2 rounded-md text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter bg-MeshMemory-light-base dark:bg-MeshMemory-dark-base hover:bg-MeshMemory-light-accent dark:hover:bg-MeshMemory-dark-accent transition-colors"
         >
           {isExpanded ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           {isExpanded && <span className="ml-2 text-sm">Collapse</span>}
@@ -219,12 +219,12 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
         
       {/* Team Workspace Indicator */}
       {isTeamWorkspace && isExpanded && (
-        <div className="mt-2 mx-3 p-2 bg-knitter-light-accent/30 dark:bg-knitter-dark-accent/30 rounded-lg">
+        <div className="mt-2 mx-3 p-2 bg-MeshMemory-light-accent/30 dark:bg-MeshMemory-dark-accent/30 rounded-lg">
           <div className="flex items-center">
-            <Building className="h-4 w-4 mr-1 text-knitter-light-darker dark:text-knitter-dark-lighter" />
-            <span className="text-xs font-medium text-knitter-light-darker dark:text-knitter-dark-lighter">Team Workspace</span>
+            <Building className="h-4 w-4 mr-1 text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter" />
+            <span className="text-xs font-medium text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter">Team Workspace</span>
           </div>
-          <p className="text-xs text-knitter-light-darker dark:text-knitter-dark-lighter mt-1">
+          <p className="text-xs text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter mt-1">
             You're viewing shared team content
           </p>
         </div>
@@ -239,8 +239,8 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
           className={`w-full flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors
             ${isExpanded ? '' : 'justify-center'}
             ${isGuest 
-              ? 'text-knitter-light-accent/50 dark:text-knitter-dark-accent/50 cursor-not-allowed' 
-              : 'text-knitter-light-darker dark:text-knitter-dark-lighter hover:bg-knitter-light-accent dark:hover:bg-knitter-dark-accent'
+              ? 'text-MeshMemory-light-accent/50 dark:text-MeshMemory-dark-accent/50 cursor-not-allowed' 
+              : 'text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter hover:bg-MeshMemory-light-accent dark:hover:bg-MeshMemory-dark-accent'
             }`}
         >
           <Upload className={`${isExpanded ? 'mr-3' : ''} h-5 w-5`} />
@@ -270,30 +270,30 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
       </nav>
       
       {/* User Section */}
-      <div className="flex-shrink-0 flex border-t border-knitter-light-accent dark:border-knitter-dark-accent p-4">
+      <div className="flex-shrink-0 flex border-t border-MeshMemory-light-accent dark:border-MeshMemory-dark-accent p-4">
         <div className={`flex items-center ${!isExpanded ? 'justify-center' : 'w-full'}`}>
           <div className="flex-shrink-0">
-            <div className="h-8 w-8 rounded-full bg-knitter-light-accent dark:bg-knitter-dark-accent flex items-center justify-center">
+            <div className="h-8 w-8 rounded-full bg-MeshMemory-light-accent dark:bg-MeshMemory-dark-accent flex items-center justify-center">
               {isGuest ? (
-                <UserCheck className="h-5 w-5 text-knitter-light-darker dark:text-knitter-dark-lighter" />
+                <UserCheck className="h-5 w-5 text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter" />
               ) : (
-                <User className="h-5 w-5 text-knitter-light-darker dark:text-knitter-dark-lighter" />
+                <User className="h-5 w-5 text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter" />
               )}
             </div>
           </div>
           {isExpanded && (
             <>
               <div className="ml-3 flex-1 min-w-0">
-                <p className="text-sm font-medium text-knitter-light-darker dark:text-knitter-dark-lighter truncate">
+                <p className="text-sm font-medium text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter truncate">
                   {isGuest ? 'Guest User' : user?.email}
                 </p>
                 {isGuest && (
-                  <p className="text-xs text-knitter-light-dark/70 dark:text-knitter-dark-light/70">Limited features</p>
+                  <p className="text-xs text-MeshMemory-light-dark/70 dark:text-MeshMemory-dark-light/70">Limited features</p>
                 )}
               </div>
               <button
                 onClick={handleSignOut}
-                className="ml-3 flex-shrink-0 p-1 text-knitter-light-darker dark:text-knitter-dark-lighter hover:text-knitter-light-dark dark:hover:text-knitter-dark-light transition-colors"
+                className="ml-3 flex-shrink-0 p-1 text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter hover:text-MeshMemory-light-dark dark:hover:text-MeshMemory-dark-light transition-colors"
                 aria-label="Sign out"
               >
                 <LogOut className="h-5 w-5" />

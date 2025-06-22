@@ -1,5 +1,5 @@
 /*
-  # Clean Slate Migration for knitter.app
+  # Clean Slate Migration for MeshMemory
   
   This migration drops all existing tables to start fresh.
   Run this as the first migration to ensure a clean database state.

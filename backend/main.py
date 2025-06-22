@@ -1,4 +1,4 @@
-"""knitter.app main entry – patched for Python 3.12 + pydantic 1.x compatibility."""
+"""MeshMemory main entry – patched for Python 3.12 + pydantic 1.x compatibility."""
 
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
@@ -54,7 +54,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 app = FastAPI(
-    title="knitter.app API",
+    title="MeshMemory API",
     description="AI Conversation Management Backend with Error Monitoring",
     version="1.0.0"
 )
@@ -69,11 +69,11 @@ app.add_middleware(
         # Production deployments 
         "https://*.vercel.app", 
         "https://*.netlify.app",
-        # Domain names for both KnitChat.app and knitter.app
-        "https://knitchat.app",
-        "https://*.knitchat.app",
-        "https://knitter.app",
-        "https://*.knitter.app",
+        # Domain names for both MeshMemory.app and MeshMemory
+        "https://MeshMemory.app",
+        "https://*.MeshMemory.app",
+        "https://meshmemory.xyz",
+        "https://*.meshmemory.xyz",
         # Development with different ports
         "http://localhost:3000",
         "http://127.0.0.1:3000"
@@ -135,7 +135,7 @@ except Exception as e:
 
 @app.get("/")
 async def root():
-    return {"message": "knitter.app API is running", "version": "1.0.0"}
+    return {"message": "MeshMemory API is running", "version": "1.0.0"}
 
 @app.get("/api/health")
 async def health_check():

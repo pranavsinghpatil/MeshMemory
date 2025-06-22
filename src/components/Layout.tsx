@@ -32,7 +32,7 @@ export default function Layout({ children, title }: LayoutProps) {
               <span className="text-white font-bold text-xl">K</span>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Welcome to knitter.app
+              Welcome to MeshMemory
             </h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
               Start your intelligent AI conversation journey

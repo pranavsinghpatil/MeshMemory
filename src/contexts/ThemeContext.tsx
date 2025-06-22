@@ -24,7 +24,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { darkMode, setDarkMode, uiHasHydrated } = useAppStore();
   const [isDark, setIsDark] = React.useState(false);
 
-  // Define knitter.app color palettes
+  // Define MeshMemory color palettes
   const darkColors: ThemeColors = {
     primary: '#333446',
     secondary: '#7F8CAA',

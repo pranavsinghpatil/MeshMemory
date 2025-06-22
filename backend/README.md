@@ -1,6 +1,6 @@
-# KnitChat.app Backend
+# MeshMemory Backend
 
-[![License](https://img.shields.io/badge/License-Proprietary-blue.svg)](https://knittr.app/terms)
+[![License](https://img.shields.io/badge/License-Proprietary-blue.svg)](https://MeshMemory.app/terms)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.68.0-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
 
@@ -31,7 +31,7 @@
 
 ## Overview
 
-KnitChat.app is a powerful chat and knowledge management platform that allows users to organize, search, and merge conversations from various sources. This repository contains the backend API built with FastAPI.
+MeshMemory is a powerful chat and knowledge management platform that allows users to organize, search, and merge conversations from various sources. This repository contains the backend API built with FastAPI.
 
 ## Features
 
@@ -65,8 +65,8 @@ For detailed API reference, see the [OpenAPI specification](./docs/openapi/opena
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/knitchat.app.git
-   cd knitchat.app/backend
+   git clone https://github.com/yourusername/MeshMemory.git
+   cd MeshMemory/backend
    ```
 
 2. Create and activate a virtual environment:
@@ -92,7 +92,7 @@ Edit `.env` with your configuration:
 
 ```env
 # Database
-DATABASE_URL=postgresql://user:password@localhost:5432/knitchat
+DATABASE_URL=postgresql://user:password@localhost:5432/MeshMemory
 
 # JWT
 SECRET_KEY=your-secret-key
@@ -281,8 +281,8 @@ gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app
 Build and run with Docker:
 
 ```bash
-docker build -t knitchat-backend .
-docker run -p 8000:8000 knitchat-backend
+docker build -t MeshMemory-backend .
+docker run -p 8000:8000 MeshMemory-backend
 ```
 
 ## Contributing
@@ -295,4 +295,4 @@ docker run -p 8000:8000 knitchat-backend
 
 ## License
 
-Proprietary - © 2023 KnitChat.app. All rights reserved.
+Proprietary - © 2023 MeshMemory. All rights reserved.

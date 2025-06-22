@@ -1,6 +1,6 @@
-# knitter.app - AI Conversation Manager
+# MeshMemory - AI Conversation Manager
 
-knitter.app is a comprehensive web application that helps you manage, search, and extract insights from your AI conversations across multiple platforms like ChatGPT, Claude, Gemini, and YouTube.
+MeshMemory is a comprehensive web application that helps you manage, search, and extract insights from your AI conversations across multiple platforms like ChatGPT, Claude, Gemini, and YouTube.
 
 ## 🚀 Features
 
@@ -81,8 +81,8 @@ knitter.app is a comprehensive web application that helps you manage, search, an
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/knitter.git
-   cd knitter
+   git clone https://github.com/yourusername/MeshMemory.git
+   cd MeshMemory
    ```
 
 2. **Set up environment variables**
@@ -442,14 +442,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Documentation**: [docs.knitter.app](https://docs.knitter.app)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/knitter/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/knitter/discussions)
-- **Email**: support@knitter.app
+- **Documentation**: [docs.MeshMemory](https://docs.MeshMemory)
+- **Issues**: [GitHub Issues](https://github.com/yourusername/MeshMemory/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/MeshMemory/discussions)
+- **Email**: support@MeshMemory
 
 ---
 
-**knitter.app** - Transform your AI conversations into searchable knowledge. Built with ❤️ for the AI community.
+**MeshMemory** - Transform your AI conversations into searchable knowledge. Built with ❤️ for the AI community.
 =======
 ## API Endpoints
 
@@ -484,7 +484,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Project Structure
 
 ```
-knitter/
+MeshMemory/
 ├── backend/               # FastAPI backend
 │   ├── api/
 │   │   ├── models/        # Data models

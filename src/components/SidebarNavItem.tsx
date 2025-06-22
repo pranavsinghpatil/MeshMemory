@@ -63,13 +63,13 @@ export default function SidebarNavItem({
           disabled={isDisabled}
           className={`w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors sidebar-item ${
             active
-              ? 'active text-knitter-light-darker dark:text-knitter-dark-lighter'
+              ? 'active text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter'
               : isDisabled
-              ? 'text-knitter-light-dark/50 dark:text-knitter-dark-light/50 cursor-not-allowed'
-              : 'text-knitter-light-darker dark:text-knitter-dark-lighter'
+              ? 'text-MeshMemory-light-dark/50 dark:text-MeshMemory-dark-light/50 cursor-not-allowed'
+              : 'text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter'
           } ${!sidebarExpanded ? 'justify-center' : ''} ${indentClass}`}
         >
-          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${active ? 'text-knitter-light-darker dark:text-knitter-dark-lighter' : 'text-knitter-light-dark dark:text-knitter-dark-light'}`} />
+          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${active ? 'text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter' : 'text-MeshMemory-light-dark dark:text-MeshMemory-dark-light'}`} />
           {sidebarExpanded && (
             <span className="flex-1">{item.name}</span>
           )}
@@ -92,16 +92,16 @@ export default function SidebarNavItem({
           <button
             onClick={() => toggleGroup && item.groupId && toggleGroup(item.groupId)}
             className={`w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors sidebar-item
-              text-knitter-light-darker dark:text-knitter-dark-lighter
+              text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter
               ${!sidebarExpanded ? 'justify-center' : ''} ${indentClass}`}
           >
-            <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 text-knitter-light-dark dark:text-knitter-dark-light`} />
+            <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 text-MeshMemory-light-dark dark:text-MeshMemory-dark-light`} />
             {sidebarExpanded && (
               <>
                 <span className="flex-1">{item.name}</span>
                 {hasChildren && (
                   <ChevronDown 
-                    className={`h-4 w-4 text-knitter-light-dark dark:text-knitter-dark-light transition-transform duration-200 ${
+                    className={`h-4 w-4 text-MeshMemory-light-dark dark:text-MeshMemory-dark-light transition-transform duration-200 ${
                       isGroupExpanded ? '' : 'transform -rotate-90'
                     }`} 
                   />
@@ -113,7 +113,7 @@ export default function SidebarNavItem({
         
         {sidebarExpanded && hasChildren && (
           <div className={`nav-group ${isGroupExpanded ? 'expanded' : 'nav-group-collapsed'}`}>
-            <div className="ml-2 pl-3 border-l border-knitter-light-accent/30 dark:border-knitter-dark-accent/30 space-y-1 py-1">
+            <div className="ml-2 pl-3 border-l border-MeshMemory-light-accent/30 dark:border-MeshMemory-dark-accent/30 space-y-1 py-1">
               {item.children && item.children.map((child, index) => (
                 <SidebarNavItem
                   key={`${child.name}-${index}`}
@@ -153,19 +153,19 @@ export default function SidebarNavItem({
           }}
           className={`w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors sidebar-item ${
             active
-              ? 'active text-knitter-light-darker dark:text-knitter-dark-lighter'
+              ? 'active text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter'
               : isDisabled
-              ? 'text-knitter-light-dark/50 dark:text-knitter-dark-light/50 cursor-not-allowed'
-              : 'text-knitter-light-darker dark:text-knitter-dark-lighter'
+              ? 'text-MeshMemory-light-dark/50 dark:text-MeshMemory-dark-light/50 cursor-not-allowed'
+              : 'text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter'
           } ${!sidebarExpanded ? 'justify-center' : ''} ${indentClass}`}
           disabled={isDisabled}
         >
-          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${active ? 'text-knitter-light-darker dark:text-knitter-dark-lighter' : 'text-knitter-light-dark dark:text-knitter-dark-light'}`} />
+          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${active ? 'text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter' : 'text-MeshMemory-light-dark dark:text-MeshMemory-dark-light'}`} />
           {sidebarExpanded && (
             <span className="flex-1">{item.name}</span>
           )}
           {sidebarExpanded && item.badge && (
-            <span className="ml-auto px-2 py-0.5 text-xs bg-knitter-light-accent/30 dark:bg-knitter-dark-accent/40 text-knitter-light-darker dark:text-knitter-dark-lighter rounded-full">
+            <span className="ml-auto px-2 py-0.5 text-xs bg-MeshMemory-light-accent/30 dark:bg-MeshMemory-dark-accent/40 text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter rounded-full">
               {item.badge}
             </span>
           )}

@@ -201,38 +201,38 @@
     transition: max-height 0.3s ease-in-out, opacity 0.1s ease-in-out;
   }
   
-  /* Custom button styling for knitter theme */
-  .knitter-button {
+  /* Custom button styling for MeshMemory theme */
+  .MeshMemory-button {
     transition: all 0.2s ease;
     border-radius: 0.375rem;
     font-weight: 500;
   }
   
-  .knitter-button:hover {
+  .MeshMemory-button:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
-  .knitter-button:active {
+  .MeshMemory-button:active {
     transform: translateY(0);
     box-shadow: none;
   }
   
-  .dark .knitter-button {
+  .dark .MeshMemory-button {
     background-color: var(--dark-accent);
     color: var(--dark-lighter);
   }
   
-  .dark .knitter-button:hover {
+  .dark .MeshMemory-button:hover {
     background-color: var(--dark-light);
   }
   
-  .light .knitter-button {
+  .light .MeshMemory-button {
     background-color: var(--light-dark);
     color: var(--light-base);
   }
   
-  .light .knitter-button:hover {
+  .light .MeshMemory-button:hover {
     background-color: var(--light-darker);
   }
 }
