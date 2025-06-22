@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Layers, Plus, Search, Grid, List, Filter, SlidersHorizontal } from 'lucide-react';
-import Layout from '../components/Layout';
 import ThreadGroupCard from '../components/ThreadGroupCard';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -140,8 +139,7 @@ export default function ThreadGroupsPage() {
   });
 
   return (
-    <Layout>
-      <div className="py-6">
+          <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           {/* Header */}
           <div className="mb-8">
@@ -345,6 +343,5 @@ export default function ThreadGroupsPage() {
           )}
         </div>
       </div>
-    </Layout>
   );
 }

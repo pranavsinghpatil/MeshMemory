@@ -1,7 +1,7 @@
 @echo off
-:: Launch knitter.app backend with fixed environment
+:: Launch MeshMemory backend with fixed environment
 echo =======================================
-echo   LAUNCHING KNITTER.APP BACKEND
+echo   LAUNCHING MeshMemory BACKEND
 echo =======================================
 
 set VENV_PYTHON=%CD%\venv\Scripts\python.exe
@@ -28,7 +28,7 @@ if not exist .env (
     echo.
 )
 
-echo Starting knitter.app backend server...
+echo Starting MeshMemory backend server...
 echo.
 echo Server will be available at http://localhost:8000
 echo Press CTRL+C to stop the server

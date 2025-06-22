@@ -1,10 +1,10 @@
-# knitter.app Deployment Guide
+# MeshMemory Deployment Guide
 
-This guide covers deploying knitter.app to production environments with best practices for security, performance, and scalability.
+This guide covers deploying MeshMemory to production environments with best practices for security, performance, and scalability.
 
 ## Overview
 
-knitter.app consists of:
+MeshMemory consists of:
 - **Frontend**: React application (static files)
 - **Backend**: FastAPI application (Python)
 - **Database**: PostgreSQL with pgvector extension
@@ -245,14 +245,14 @@ docker-compose -f docker-compose.prod.yml ps
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: knitter
+  name: MeshMemory
 ---
 # k8s/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: knitter-config
-  namespace: knitter
+  name: MeshMemory-config
+  namespace: MeshMemory
 data:
   ENVIRONMENT: "production"
   REDIS_URL: "redis://redis-service:6379"
@@ -261,8 +261,8 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: knitter-secrets
-  namespace: knitter
+  name: MeshMemory-secrets
+  namespace: MeshMemory
 type: Opaque
 stringData:
   SUPABASE_URL: "your-supabase-url"
@@ -276,28 +276,28 @@ stringData:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: knitter-backend
-  namespace: knitter
+  name: MeshMemory-backend
+  namespace: MeshMemory
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: knitter-backend
+      app: MeshMemory-backend
   template:
     metadata:
       labels:
-        app: knitter-backend
+        app: MeshMemory-backend
     spec:
       containers:
       - name: backend
-        image: knitter/backend:latest
+        image: MeshMemory/backend:latest
         ports:
         - containerPort: 8000
         envFrom:
         - configMapRef:
-            name: knitter-config
+            name: MeshMemory-config
         - secretRef:
-            name: knitter-secrets
+            name: MeshMemory-secrets
         livenessProbe:
           httpGet:
             path: /health
@@ -322,21 +322,21 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: knitter-frontend
-  namespace: knitter
+  name: MeshMemory-frontend
+  namespace: MeshMemory
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: knitter-frontend
+      app: MeshMemory-frontend
   template:
     metadata:
       labels:
-        app: knitter-frontend
+        app: MeshMemory-frontend
     spec:
       containers:
       - name: frontend
-        image: knitter/frontend:latest
+        image: MeshMemory/frontend:latest
         ports:
         - containerPort: 80
         resources:
@@ -355,8 +355,8 @@ spec:
 kubectl apply -f k8s/
 
 # Check deployment status
-kubectl get pods -n knitter
-kubectl get services -n knitter
+kubectl get pods -n MeshMemory
+kubectl get services -n MeshMemory
 ```
 
 ### Option 3: Cloud Platform Deployment
@@ -672,7 +672,7 @@ certbot --nginx -d your-domain.com
 #!/bin/bash
 # backup.sh
 DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="knitter_backup_$DATE.sql"
+BACKUP_FILE="MeshMemory_backup_$DATE.sql"
 
 pg_dump $DATABASE_URL > $BACKUP_FILE
 gzip $BACKUP_FILE
@@ -681,7 +681,7 @@ gzip $BACKUP_FILE
 aws s3 cp $BACKUP_FILE.gz s3://your-backup-bucket/database/
 
 # Keep only last 30 days
-find . -name "knitter_backup_*.sql.gz" -mtime +30 -delete
+find . -name "MeshMemory_backup_*.sql.gz" -mtime +30 -delete
 ```
 
 2. **Backup verification**
@@ -689,7 +689,7 @@ find . -name "knitter_backup_*.sql.gz" -mtime +30 -delete
 ```bash
 #!/bin/bash
 # verify_backup.sh
-LATEST_BACKUP=$(ls -t knitter_backup_*.sql.gz | head -1)
+LATEST_BACKUP=$(ls -t MeshMemory_backup_*.sql.gz | head -1)
 gunzip -c $LATEST_BACKUP | head -100
 ```
 
@@ -768,12 +768,12 @@ resources:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: knitter-backend-hpa
+  name: MeshMemory-backend-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: knitter-backend
+    name: MeshMemory-backend
   minReplicas: 2
   maxReplicas: 10
   metrics:
@@ -794,7 +794,7 @@ spec:
 ```bash
 # Check memory usage
 docker stats
-kubectl top pods -n knitter
+kubectl top pods -n MeshMemory
 
 # Analyze memory leaks
 docker exec -it backend python -m memory_profiler app.py
@@ -832,7 +832,7 @@ curl -f http://localhost:8000/health
 
 # Monitor logs
 docker-compose logs -f backend
-kubectl logs -f deployment/knitter-backend -n knitter
+kubectl logs -f deployment/MeshMemory-backend -n MeshMemory
 
 # Check resource usage
 docker system df
@@ -874,8 +874,8 @@ REINDEX INDEX CONCURRENTLY idx_chunks_embedding;
 
 ```bash
 # Configure logrotate
-cat > /etc/logrotate.d/knitter << EOF
-/var/log/knitter/*.log {
+cat > /etc/logrotate.d/MeshMemory << EOF
+/var/log/MeshMemory/*.log {
     daily
     missingok
     rotate 30
@@ -890,4 +890,4 @@ cat > /etc/logrotate.d/knitter << EOF
 EOF
 ```
 
-This deployment guide provides a comprehensive approach to deploying knitter.app in production environments with proper security, monitoring, and scaling considerations.
+This deployment guide provides a comprehensive approach to deploying MeshMemory in production environments with proper security, monitoring, and scaling considerations.

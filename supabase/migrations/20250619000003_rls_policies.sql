@@ -1,5 +1,5 @@
 /*
-  # Row Level Security Policies for knitter.app
+  # Row Level Security Policies for MeshMemory
   
   This migration enables RLS on all tables and creates appropriate policies
   to ensure users can only access their own data.

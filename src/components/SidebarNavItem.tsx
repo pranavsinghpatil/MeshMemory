@@ -13,6 +13,7 @@ interface NavItem {
   action?: () => void;
   badge?: string;
   pro?: boolean;
+  endpoint?: string;
 }
 
 interface SidebarNavItemProps {
@@ -63,18 +64,18 @@ export default function SidebarNavItem({
           disabled={isDisabled}
           className={`w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors sidebar-item ${
             active
-              ? 'active text-knitter-light-darker dark:text-knitter-dark-lighter'
+              ? 'active text-[#3B3B1A] dark:text-[#EAEFEF] bg-[#E7EFC7]/50 dark:bg-[#333446]/70'
               : isDisabled
-              ? 'text-knitter-light-dark/50 dark:text-knitter-dark-light/50 cursor-not-allowed'
-              : 'text-knitter-light-darker dark:text-knitter-dark-lighter'
+              ? 'text-[#8A784E]/50 dark:text-[#B8CFCE]/50 cursor-not-allowed'
+              : 'text-[#3B3B1A] dark:text-[#EAEFEF] hover:bg-[#E7EFC7]/30 dark:hover:bg-[#333446]/50'
           } ${!sidebarExpanded ? 'justify-center' : ''} ${indentClass}`}
         >
-          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${active ? 'text-knitter-light-darker dark:text-knitter-dark-lighter' : 'text-knitter-light-dark dark:text-knitter-dark-light'}`} />
+          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${active ? 'text-[#3B3B1A] dark:text-[#EAEFEF]' : 'text-[#8A784E] dark:text-[#B8CFCE]'}`} />
           {sidebarExpanded && (
             <span className="flex-1">{item.name}</span>
           )}
           {sidebarExpanded && isDisabled && (
-            <span className="ml-auto text-xs bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full">
+            <span className="ml-auto text-xs bg-[#AEC8A4]/30 dark:bg-[#333446]/50 text-[#8A784E] dark:text-[#B8CFCE] px-2 py-0.5 rounded-full">
               Pro
             </span>
           )}
@@ -92,16 +93,16 @@ export default function SidebarNavItem({
           <button
             onClick={() => toggleGroup && item.groupId && toggleGroup(item.groupId)}
             className={`w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors sidebar-item
-              text-knitter-light-darker dark:text-knitter-dark-lighter
+              text-[#3B3B1A] dark:text-[#EAEFEF] hover:bg-[#E7EFC7]/30 dark:hover:bg-[#333446]/50
               ${!sidebarExpanded ? 'justify-center' : ''} ${indentClass}`}
           >
-            <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 text-knitter-light-dark dark:text-knitter-dark-light`} />
+            <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 text-[#8A784E] dark:text-[#B8CFCE]`} />
             {sidebarExpanded && (
               <>
                 <span className="flex-1">{item.name}</span>
                 {hasChildren && (
                   <ChevronDown 
-                    className={`h-4 w-4 text-knitter-light-dark dark:text-knitter-dark-light transition-transform duration-200 ${
+                    className={`h-4 w-4 text-[#8A784E] dark:text-[#B8CFCE] transition-transform duration-200 ${
                       isGroupExpanded ? '' : 'transform -rotate-90'
                     }`} 
                   />
@@ -111,21 +112,25 @@ export default function SidebarNavItem({
           </button>
         </Tooltip>
         
-        {sidebarExpanded && hasChildren && (
-          <div className={`nav-group ${isGroupExpanded ? 'expanded' : 'nav-group-collapsed'}`}>
-            <div className="ml-2 pl-3 border-l border-knitter-light-accent/30 dark:border-knitter-dark-accent/30 space-y-1 py-1">
+        {hasChildren && (
+          <div className={`nav-group ${isGroupExpanded ? 'expanded' : 'nav-group-collapsed'} overflow-hidden transition-all duration-200`} 
+               style={{ 
+                 maxHeight: sidebarExpanded && isGroupExpanded ? `${(item.children?.length || 0) * 36}px` : '0px',
+                 opacity: sidebarExpanded && isGroupExpanded ? 1 : 0 
+               }}>
+            <div className="ml-2 pl-3 border-l border-[#AEC8A4]/30 dark:border-[#7F8CAA]/30 space-y-1 py-1">
               {item.children && item.children.map((child, index) => (
                 <SidebarNavItem
                   key={`${child.name}-${index}`}
                   item={child}
-                  active={child.href ? currentPathname === child.href : false}
+                  active={child.href ? currentPathname.startsWith(child.href) : false}
                   expanded={isGroupExpanded}
                   isGuest={isGuest}
                   currentPathname={currentPathname}
                   depth={depth + 1}
                   toggleGroup={toggleGroup}
                   sidebarExpanded={sidebarExpanded}
-                  isDisabled={isDisabled || (isGuest && child.pro)}
+                  isDisabled={isDisabled || (isGuest && !!child.pro)}
                   onNavigate={onNavigate}
                 />
               ))}
@@ -153,24 +158,24 @@ export default function SidebarNavItem({
           }}
           className={`w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors sidebar-item ${
             active
-              ? 'active text-knitter-light-darker dark:text-knitter-dark-lighter'
+              ? 'active text-[#3B3B1A] dark:text-[#EAEFEF] bg-[#E7EFC7]/50 dark:bg-[#333446]/70'
               : isDisabled
-              ? 'text-knitter-light-dark/50 dark:text-knitter-dark-light/50 cursor-not-allowed'
-              : 'text-knitter-light-darker dark:text-knitter-dark-lighter'
+              ? 'text-[#8A784E]/50 dark:text-[#B8CFCE]/50 cursor-not-allowed'
+              : 'text-[#3B3B1A] dark:text-[#EAEFEF] hover:bg-[#E7EFC7]/30 dark:hover:bg-[#333446]/50'
           } ${!sidebarExpanded ? 'justify-center' : ''} ${indentClass}`}
           disabled={isDisabled}
         >
-          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${active ? 'text-knitter-light-darker dark:text-knitter-dark-lighter' : 'text-knitter-light-dark dark:text-knitter-dark-light'}`} />
+          <Icon className={`${!sidebarExpanded ? '' : 'mr-3'} h-5 w-5 ${active ? 'text-[#3B3B1A] dark:text-[#EAEFEF]' : 'text-[#8A784E] dark:text-[#B8CFCE]'}`} />
           {sidebarExpanded && (
             <span className="flex-1">{item.name}</span>
           )}
           {sidebarExpanded && item.badge && (
-            <span className="ml-auto px-2 py-0.5 text-xs bg-knitter-light-accent/30 dark:bg-knitter-dark-accent/40 text-knitter-light-darker dark:text-knitter-dark-lighter rounded-full">
+            <span className="ml-auto px-2 py-0.5 text-xs bg-[#E7EFC7]/30 dark:bg-[#333446]/40 text-[#3B3B1A] dark:text-[#EAEFEF] rounded-full">
               {item.badge}
             </span>
           )}
           {sidebarExpanded && isDisabled && (
-            <span className="ml-auto text-xs bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full">
+            <span className="ml-auto text-xs bg-[#AEC8A4]/30 dark:bg-[#333446]/50 text-[#8A784E] dark:text-[#B8CFCE] px-2 py-0.5 rounded-full">
               Pro
             </span>
           )}

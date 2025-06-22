@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  title: KnitChat.app API
+  title: MeshMemory API
   description: |
-    # KnitChat.app API Documentation
+    # MeshMemory API Documentation
     
-    This is the official API documentation for KnitChat.app, a powerful chat and knowledge management platform.
+    This is the official API documentation for MeshMemory, a powerful chat and knowledge management platform.
     
     ## Authentication
     
@@ -16,7 +16,7 @@ info:
     ## Base URL
     
     ```
-    https://api.knittr.app/v1
+    https://api.meshmemory.xyz/v1
     ```
     
     ## Rate Limiting
@@ -26,13 +26,13 @@ info:
   version: 1.0.0
   contact:
     name: API Support
-    email: support@knittr.app
+    email: support@meshmemory.xyz
   license:
     name: Proprietary
-    url: https://knittr.app/terms
+    url: https://meshmemory.xyz/terms
 
 servers:
-  - url: https://api.knittr.app/v1
+  - url: https://api.meshmemory.xyz/v1
     description: Production server
   - url: http://localhost:8000/v1
     description: Local development server

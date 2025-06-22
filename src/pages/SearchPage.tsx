@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Loader2, MessageSquare, Clock, AlertCircle } from 'lucide-react';
-import Layout from '../components/Layout';
 import MicroThreadModal from '../components/MicroThreadModal';
 import SearchResultCard from '../components/SearchResultCard';
 
@@ -105,8 +104,7 @@ export default function SearchPage() {
   };
 
   return (
-    <Layout>
-      <div className="py-6">
+          <div className="py-6">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
           {/* Header */}
           <div className="mb-8">
@@ -280,6 +278,5 @@ export default function SearchPage() {
           console.log('Micro-thread created from search');
         }}
       />
-    </Layout>
   );
 }

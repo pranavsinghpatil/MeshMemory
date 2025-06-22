@@ -97,7 +97,7 @@ const Navbar: React.FC = () => {
     <Header style={navbarStyle}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <Title level={3} style={logoStyle} onClick={handleHomeClick}>
-          knitter.app
+          MeshMemory
         </Title>
       </div>
       

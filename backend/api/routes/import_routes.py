@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # Security settings
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 ALLOWED_MIME_TYPES = {"text/plain", "application/pdf", "image/png", "image/jpeg"}
-ALLOWED_URL_DOMAINS = {"example.com", "knitter.app"}  # TODO: update with real domains
+ALLOWED_URL_DOMAINS = {"example.com", "MeshMemory"}  # TODO: update with real domains
 
 # Initialize router and services
 router = APIRouter()

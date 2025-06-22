@@ -17,10 +17,10 @@ export default function TopBar({ onMenuClick, title }: TopBarProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-knitter-light-base dark:bg-knitter-dark-base shadow-sm border-b border-knitter-light-accent dark:border-knitter-dark-accent transition-colors">
+    <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-MeshMemory-light-base dark:bg-MeshMemory-dark-base shadow-sm border-b border-MeshMemory-light-accent dark:border-MeshMemory-dark-accent transition-colors">
       <button
         onClick={() => toggleSidebar()}
-        className="px-4 border-r border-knitter-light-accent dark:border-knitter-dark-accent text-knitter-light-darker dark:text-knitter-dark-lighter focus:outline-none focus:ring-2 focus:ring-inset focus:ring-knitter-light-dark dark:focus:ring-knitter-dark-light md:hidden"
+        className="px-4 border-r border-MeshMemory-light-accent dark:border-MeshMemory-dark-accent text-MeshMemory-light-darker dark:text-MeshMemory-dark-lighter focus:outline-none focus:ring-2 focus:ring-inset focus:ring-MeshMemory-light-dark dark:focus:ring-MeshMemory-dark-light md:hidden"
       >
         <Menu className="h-6 w-6" />
       </button>
@@ -44,7 +44,7 @@ export default function TopBar({ onMenuClick, title }: TopBarProps) {
           <Tooltip content="Notifications">
             <button 
               onClick={() => navigate('/notifications')} 
-              className="p-1 rounded-full text-knitter-light-dark dark:text-knitter-dark-light hover:text-knitter-light-darker dark:hover:text-knitter-dark-lighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-knitter-light-dark dark:focus:ring-knitter-dark-light transition-colors"
+              className="p-1 rounded-full text-MeshMemory-light-dark dark:text-MeshMemory-dark-light hover:text-MeshMemory-light-darker dark:hover:text-MeshMemory-dark-lighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-MeshMemory-light-dark dark:focus:ring-MeshMemory-dark-light transition-colors"
             >
               <Bell className="h-6 w-6" />
             </button>
@@ -52,7 +52,7 @@ export default function TopBar({ onMenuClick, title }: TopBarProps) {
           <Tooltip content="Settings">
             <button 
               onClick={() => navigate('/settings')} 
-              className="p-1 rounded-full text-knitter-light-dark dark:text-knitter-dark-light hover:text-knitter-light-darker dark:hover:text-knitter-dark-lighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-knitter-light-dark dark:focus:ring-knitter-dark-light transition-colors"
+              className="p-1 rounded-full text-MeshMemory-light-dark dark:text-MeshMemory-dark-light hover:text-MeshMemory-light-darker dark:hover:text-MeshMemory-dark-lighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-MeshMemory-light-dark dark:focus:ring-MeshMemory-dark-light transition-colors"
             >
               <Settings className="h-6 w-6" />
             </button>
@@ -60,7 +60,7 @@ export default function TopBar({ onMenuClick, title }: TopBarProps) {
           <Tooltip content="New Conversation">
             <button 
               onClick={() => navigate('/conversations/new')} 
-              className="p-1 rounded-full text-knitter-light-dark dark:text-knitter-dark-light hover:text-knitter-light-darker dark:hover:text-knitter-dark-lighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-knitter-light-dark dark:focus:ring-knitter-dark-light transition-colors"
+              className="p-1 rounded-full text-MeshMemory-light-dark dark:text-MeshMemory-dark-light hover:text-MeshMemory-light-darker dark:hover:text-MeshMemory-dark-lighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-MeshMemory-light-dark dark:focus:ring-MeshMemory-dark-light transition-colors"
             >
               <PlusCircle className="h-6 w-6" />
             </button>

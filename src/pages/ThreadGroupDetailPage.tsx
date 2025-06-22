@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import Layout from '../components/Layout';
 import ThreadGroupDetailHeader from '../components/ThreadGroupDetailHeader';
 import ThreadGroupMembersPanel from '../components/ThreadGroupMembersPanel';
 import FusedChatArea from '../components/FusedChatArea';
@@ -200,18 +199,15 @@ export default function ThreadGroupDetailPage() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
+              <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
         </div>
-      </Layout>
     );
   }
 
   if (error) {
     return (
-      <Layout>
-        <div className="py-6">
+              <div className="py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
             <Link
               to="/threadgroups"
@@ -230,26 +226,22 @@ export default function ThreadGroupDetailPage() {
             />
           </div>
         </div>
-      </Layout>
     );
   }
 
   if (!group) {
     return (
-      <Layout>
-        <div className="text-center py-12">
+              <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Thread Group not found</h2>
           <Link to="/threadgroups" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 mt-4 inline-block transition-colors">
             Return to Thread Groups
           </Link>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="py-6">
+          <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           {/* Back Link */}
           <Link
@@ -293,6 +285,5 @@ export default function ThreadGroupDetailPage() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 }

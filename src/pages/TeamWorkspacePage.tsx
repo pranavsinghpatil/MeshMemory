@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Building, Users, MessageSquare, Layers, BarChart3, Loader2 } from 'lucide-react';
-import Layout from '../components/Layout';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 
 export default function TeamWorkspacePage() {
@@ -98,30 +97,25 @@ export default function TeamWorkspacePage() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
+              <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
         </div>
-      </Layout>
     );
   }
 
   if (!teamData) {
     return (
-      <Layout>
-        <div className="text-center py-12">
+              <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Team workspace not found</h2>
           <p className="mt-2 text-gray-600 dark:text-gray-300">
             The team workspace you're looking for doesn't exist or you don't have access to it.
           </p>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="py-6">
+          <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           {/* Header */}
           <div className="mb-8">
@@ -319,6 +313,5 @@ export default function TeamWorkspacePage() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 }

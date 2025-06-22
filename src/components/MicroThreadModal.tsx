@@ -70,7 +70,7 @@ export default function MicroThreadModal({
     
     if (navigator.share) {
       navigator.share({
-        title: 'knitter.app Follow-up',
+        title: 'MeshMemory Follow-up',
         text: text
       }).catch(err => {
         console.error('Error sharing:', err);

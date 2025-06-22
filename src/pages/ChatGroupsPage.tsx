@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layers, Plus, Users, Filter, Search, MessageSquare, Clock, MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import Layout from '../components/Layout';
 import { chatsAPI } from '../lib/api';
 import { Dropdown } from 'flowbite-react'; // Make sure to install flowbite-react if not already installed
 
@@ -69,17 +68,14 @@ export default function ChatGroupsPage() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
+              <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Chat Groups</h1>
@@ -277,6 +273,6 @@ export default function ChatGroupsPage() {
           </div>
         </div>
       )}
-    </Layout>
   );
 }
+

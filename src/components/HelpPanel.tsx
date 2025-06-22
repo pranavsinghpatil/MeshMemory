@@ -127,7 +127,7 @@ export default function HelpPanel() {
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Community & Support</h3>
           <div className="space-y-3">
             <a 
-              href="https://discord.gg/knitter"
+              href="https://discord.gg/MeshMemory"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
@@ -147,7 +147,7 @@ export default function HelpPanel() {
             </a>
             
             <a 
-              href="https://github.com/knitter/knitter/issues"
+              href="https://github.com/MeshMemory/MeshMemory/issues"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
@@ -167,7 +167,7 @@ export default function HelpPanel() {
             </a>
             
             <a 
-              href="mailto:support@knitter.app"
+              href="mailto:support@MeshMemory"
               className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
             >
               <div className="flex items-center">
@@ -179,7 +179,7 @@ export default function HelpPanel() {
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-900 dark:text-white">Email Support</h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">support@knitter.app</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">support@MeshMemory</p>
                 </div>
               </div>
               <ExternalLink className="h-4 w-4 text-gray-400 dark:text-gray-500" />

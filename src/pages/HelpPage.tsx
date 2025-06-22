@@ -1,6 +1,5 @@
 import React from 'react';
 import { HelpCircle } from 'lucide-react';
-import Layout from '../components/Layout';
 import HelpPanel from '../components/HelpPanel';
 
 export default function HelpPage() {
@@ -15,13 +14,12 @@ export default function HelpPage() {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Help & Documentation</h1>
             </div>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              Learn how to get the most out of knitter.app
+              Learn how to get the most out of MeshMemory
             </p>
           </div>
 
           <HelpPanel />
         </div>
       </div>
-    </Layout>
   );
 }

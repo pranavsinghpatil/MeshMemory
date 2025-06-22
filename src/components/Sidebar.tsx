@@ -20,7 +20,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Upload,
-  Building
+  Building,
+  BarChart,
+  FileText,
+  Shield,
+  Book,
+  List
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -34,6 +39,19 @@ interface SidebarProps {
   collapsed?: boolean;
 }
 
+interface Navigation {
+  name: string;
+  href?: string;
+  icon: React.ElementType;
+  isGroup?: boolean;
+  groupId?: string;
+  children?: Navigation[];
+  action?: () => void;
+  badge?: string;
+  pro?: boolean;
+  endpoint?: string;
+}
+
 export default function Sidebar({ onImportClick, collapsed = false }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,42 +60,62 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const sidebarRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
   
   // Use the global state for sidebar collapsed state
-  const sidebarCollapsed = useAppStore(state => state.sidebarCollapsed);
-  const setSidebarCollapsed = useAppStore(state => state.setSidebarCollapsed);
-  const toggleSidebar = useAppStore(state => state.toggleSidebar);
-  const isExpanded = !sidebarCollapsed;
+  const { sidebarCollapsed, setSidebarCollapsed, toggleSidebar } = useAppStore();
+  const isExpanded = !sidebarCollapsed || isHovered;
 
-  const navigation = [
+  // Initialize the navigation items
+
+  
+  // Auto-expand relevant group when navigating to a page
+  useEffect(() => {
+    const currentPath = location.pathname;
+    navigation.forEach(item => {
+      if (item.isGroup && item.children) {
+        const shouldExpand = item.children.some(child => 
+          child.href && currentPath.startsWith(child.href));
+        
+        if (shouldExpand) {
+          setExpandedGroups(prev => ({ ...prev, [item.groupId!]: true }));
+        }
+      }
+    });
+  }, [location.pathname]);
+
+  const navigation: Navigation[] = [
     { 
       name: 'Dashboard', 
       href: '/', 
-      icon: Home 
+      icon: Home,
+      endpoint: '/api/dashboard'
     },
     { 
       name: 'Chats', 
       icon: MessageSquare, 
       isGroup: true,
       groupId: 'chats',
+      endpoint: '/api/messages',
       children: [
-        { name: 'New Chat', href: '/chats/new', icon: PlusCircle, badge: 'New' },
-        { name: 'Quick Chat', href: '/chats/quick', icon: PlusCircle },
-        { name: 'Import Chat', href: '#', icon: FolderPlus, action: onImportClick },
-        { name: 'Active Chats', href: '/chats/active', icon: MessageSquare },
-        { name: 'Parallel Chats', href: '/chats/parallel', icon: GitBranch },
-        { name: 'Archived Chats', href: '/chats/archived', icon: Archive }
+        { name: 'New Chat', href: '/chats/new', icon: PlusCircle, badge: 'New', endpoint: '/api/messages' },
+        { name: 'Quick Chat', href: '/chats/quick', icon: MessageSquare, endpoint: '/api/messages' },
+        { name: 'Import Chat', href: '#', icon: FolderPlus, action: onImportClick, endpoint: '/api/import' },
+        { name: 'Active Chats', href: '/chats/active', icon: List, endpoint: '/api/messages' },
+        { name: 'Parallel Chats', href: '/chats/parallel', icon: GitBranch, endpoint: '/api/messages' },
+        { name: 'Archived Chats', href: '/chats/archived', icon: Archive, endpoint: '/api/messages' }
       ]
     },
     { 
-      name: 'Thread Groups', 
+      name: 'Conversations', 
       icon: Activity, 
       isGroup: true,
-      groupId: 'threadgroups',
+      groupId: 'conversations',
+      endpoint: '/api/conversations',
       children: [
-        { name: 'All Groups', href: '/threadgroups', icon: Users },
-        { name: 'Create Group', href: '/threadgroups/new', icon: PlusCircle },
-        { name: 'Shared Groups', href: '/threadgroups/shared', icon: Users, pro: true }
+        { name: 'All Conversations', href: '/conversations', icon: List, endpoint: '/api/conversations' },
+        { name: 'Create New', href: '/conversations/new', icon: PlusCircle, endpoint: '/api/conversations' },
+        { name: 'Shared', href: '/conversations/shared', icon: Users, pro: true, endpoint: '/api/conversations' }
       ]
     },
     { 
@@ -85,63 +123,76 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
       icon: Search, 
       isGroup: true,
       groupId: 'search',
+      endpoint: '/api/search',
       children: [
-        { name: 'Basic Search', href: '/search', icon: Search },
-        { name: 'Enhanced Search', href: '/search/enhanced', icon: Search, badge: 'New' }
+        { name: 'Basic Search', href: '/search', icon: Search, endpoint: '/api/search' },
+        { name: 'Enhanced Search', href: '/search/enhanced', icon: Search, badge: 'New', endpoint: '/api/enhanced_search' }
       ]
     },
     { 
       name: 'Analytics', 
-      icon: PenSquare, 
+      icon: BarChart, 
       isGroup: true,
       groupId: 'analytics',
+      endpoint: '/api/analytics',
       children: [
-        { name: 'Dashboard', href: '/analytics', icon: PenSquare },
-        { name: 'Weekly Reports', href: '/analytics/weekly', icon: PenSquare, pro: true },
-        { name: 'Topic Clusters', href: '/analytics/topics', icon: PenSquare, pro: true }
+        { name: 'Dashboard', href: '/analytics', icon: BarChart, endpoint: '/api/analytics' },
+        { name: 'Usage Stats', href: '/analytics/usage', icon: BarChart, endpoint: '/api/analytics' },
+        { name: 'Topic Clusters', href: '/analytics/topics', icon: PenSquare, pro: true, endpoint: '/api/analytics/topics' }
       ],
       pro: true
     },
     { 
-      name: 'Exports', 
-      icon: Archive, 
+      name: 'Documents', 
+      icon: FileText, 
       isGroup: true,
-      groupId: 'exports',
+      groupId: 'documents',
+      endpoint: '/api/data_management',
       children: [
-        { name: 'My Exports', href: '/exports', icon: Archive },
-        { name: 'Create Export', href: '/exports/create', icon: Archive },
-        { name: 'Shared Exports', href: '/exports/shared', icon: Archive, pro: true }
-      ],
-      pro: true
+        { name: 'My Documents', href: '/documents', icon: FileText, endpoint: '/api/data_management' },
+        { name: 'Upload', href: '/documents/upload', icon: Upload, endpoint: '/api/data_management' },
+        { name: 'Shared Documents', href: '/documents/shared', icon: Users, pro: true, endpoint: '/api/data_management' }
+      ]
     },
-    { name: 'Settings', href: '/settings', icon: Settings },
-    { name: 'Help', href: '/help', icon: HelpCircle },
+    { name: 'Settings', href: '/settings', icon: Settings, endpoint: '/api/user_settings' },
+    { name: 'Privacy & Security', href: '/privacy', icon: Shield, endpoint: '/api/auth' },
+    { name: 'Help', href: '/help', icon: Book },
   ];
 
   // Sign out handler
   function handleSignOut() {
-    signOut().then(() => {
-      navigate('/');
-    }).catch(error => {
-      console.error('Error signing out:', error);
-    });
+    if (confirm('Are you sure you want to sign out?')) {
+      // Reset active states before signing out
+      const { setActiveChatId, setActiveThreadId } = useAppStore();
+      setActiveChatId(null);
+      setActiveThreadId(null);
+      
+      signOut().then(() => {
+        navigate('/');
+      }).catch(error => {
+        console.error('Error signing out:', error);
+      });
+    }
   }
 
   // Handle mouse enter/leave for dynamic expansion
   function handleMouseEnter() {
-    if (sidebarCollapsed && timeoutRef.current === null) {
-      timeoutRef.current = setTimeout(() => {
-        setSidebarCollapsed(false);
+    if (sidebarCollapsed) {
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
-      }, 300);
+      }
+      setIsHovered(true);
     }
   }
 
   function handleMouseLeave() {
-    if (timeoutRef.current !== null) {
+    if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    setIsHovered(false);
   }
 
   // Toggle group expansion
@@ -177,19 +228,19 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
   }
 
   return (
-    <div 
+    <div
       ref={sidebarRef}
-      className={`flex flex-col h-full bg-knitter-light-base dark:bg-knitter-dark-base border-r border-knitter-light-accent dark:border-knitter-dark-accent transition-all duration-300 ${isExpanded ? 'w-64' : 'w-16'}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      className={`h-full flex flex-col bg-white dark:bg-[#333446] border-r border-[#AEC8A4]/20 dark:border-[#7F8CAA]/20 shadow-sm transition-all duration-300 ${isExpanded ? 'w-64' : 'w-16'}`}
     >
       {/* App Logo/Title */}
-      <div className="flex-shrink-0 h-16 flex items-center justify-center bg-knitter-light-accent dark:bg-knitter-dark-accent px-4">
+      <div className="flex-shrink-0 h-16 flex items-center justify-center bg-[#E7EFC7] dark:bg-[#333446] px-4">
         <div className="flex items-center w-full overflow-hidden">
           {isExpanded ? (
             <div className="w-full">
-              <div className="text-xl font-bold text-knitter-light-darker dark:text-knitter-dark-lighter flex items-center justify-between">
-                knitter.app
+              <div className="text-xl font-bold text-[#3B3B1A] dark:text-[#EAEFEF] flex items-center justify-between">
+                MeshMemory
                 {isTeamWorkspace && (
                   <WorkspaceSelector 
                     workspaces={workspaces}
@@ -201,30 +252,36 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
               </div>
             </div>
           ) : (
-            <MessageSquare className="h-8 w-8 text-knitter-light-darker dark:text-knitter-dark-lighter" />
+            <MessageSquare className="h-8 w-8 text-[#3B3B1A] dark:text-[#EAEFEF]" />
           )}
         </div>
       </div>
       
       {/* Close/Expand Button */}
       <div className="mt-1 px-2">
-        <button 
-          onClick={toggleSidebar}
-          className="w-full flex items-center justify-center p-2 rounded-md text-knitter-light-darker dark:text-knitter-dark-lighter bg-knitter-light-base dark:bg-knitter-dark-base hover:bg-knitter-light-accent dark:hover:bg-knitter-dark-accent transition-colors"
+        <button
+          onClick={() => toggleSidebar()}
+          className={`flex items-center w-full px-2 py-2 text-sm font-medium text-[#3B3B1A] dark:text-[#EAEFEF] hover:bg-[#E7EFC7] dark:hover:bg-[#333446] rounded-md transition-colors
+            ${isExpanded ? '' : 'justify-center'}`}
         >
           {isExpanded ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           {isExpanded && <span className="ml-2 text-sm">Collapse</span>}
         </button>
       </div>
+      
+      {/* Divider */}
+      <div className="mt-2 mb-2">
+        <div className="h-px bg-[#AEC8A4]/20 dark:bg-[#7F8CAA]/20"></div>
+      </div>
         
       {/* Team Workspace Indicator */}
       {isTeamWorkspace && isExpanded && (
-        <div className="mt-2 mx-3 p-2 bg-knitter-light-accent/30 dark:bg-knitter-dark-accent/30 rounded-lg">
+        <div className="mt-2 mx-3 p-2 bg-[#E7EFC7]/30 dark:bg-[#7F8CAA]/30 rounded-lg">
           <div className="flex items-center">
-            <Building className="h-4 w-4 mr-1 text-knitter-light-darker dark:text-knitter-dark-lighter" />
-            <span className="text-xs font-medium text-knitter-light-darker dark:text-knitter-dark-lighter">Team Workspace</span>
+            <Building className="h-4 w-4 mr-1 text-[#8A784E] dark:text-[#B8CFCE]" />
+            <span className="text-xs font-medium text-[#3B3B1A] dark:text-[#EAEFEF]">Team Workspace</span>
           </div>
-          <p className="text-xs text-knitter-light-darker dark:text-knitter-dark-lighter mt-1">
+          <p className="text-xs text-[#8A784E] dark:text-[#B8CFCE] mt-1">
             You're viewing shared team content
           </p>
         </div>
@@ -239,15 +296,15 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
           className={`w-full flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors
             ${isExpanded ? '' : 'justify-center'}
             ${isGuest 
-              ? 'text-knitter-light-accent/50 dark:text-knitter-dark-accent/50 cursor-not-allowed' 
-              : 'text-knitter-light-darker dark:text-knitter-dark-lighter hover:bg-knitter-light-accent dark:hover:bg-knitter-dark-accent'
+              ? 'text-[#AEC8A4]/50 dark:text-[#7F8CAA]/50 cursor-not-allowed' 
+              : 'text-[#3B3B1A] dark:text-[#EAEFEF] hover:bg-[#E7EFC7] dark:hover:bg-[#333446]'
             }`}
         >
           <Upload className={`${isExpanded ? 'mr-3' : ''} h-5 w-5`} />
           {isExpanded && (
             <>
               Import Source
-              {isGuest && <span className="ml-auto text-xs opacity-75">Pro</span>}
+              {isGuest && <span className="ml-auto text-xs text-[#8A784E] dark:text-[#B8CFCE]">Pro</span>}
             </>
           )}
         </button>
@@ -259,7 +316,7 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
             item={item}
             active={item.href ? isRouteActive(item.href) : false}
             expanded={expandedGroups[item.groupId || ''] || false}
-            isDisabled={isGuest && item.pro}
+            isDisabled={isGuest && !!item.pro}
             isGuest={isGuest}
             currentPathname={location.pathname}
             toggleGroup={toggleGroup}
@@ -270,30 +327,30 @@ export default function Sidebar({ onImportClick, collapsed = false }: SidebarPro
       </nav>
       
       {/* User Section */}
-      <div className="flex-shrink-0 flex border-t border-knitter-light-accent dark:border-knitter-dark-accent p-4">
+      <div className="flex-shrink-0 flex border-t border-[#AEC8A4] dark:border-[#7F8CAA] p-4">
         <div className={`flex items-center ${!isExpanded ? 'justify-center' : 'w-full'}`}>
           <div className="flex-shrink-0">
-            <div className="h-8 w-8 rounded-full bg-knitter-light-accent dark:bg-knitter-dark-accent flex items-center justify-center">
+            <div className="h-8 w-8 rounded-full bg-[#AEC8A4] dark:bg-[#7F8CAA] flex items-center justify-center">
               {isGuest ? (
-                <UserCheck className="h-5 w-5 text-knitter-light-darker dark:text-knitter-dark-lighter" />
+                <UserCheck className="h-5 w-5 text-[#3B3B1A] dark:text-[#EAEFEF]" />
               ) : (
-                <User className="h-5 w-5 text-knitter-light-darker dark:text-knitter-dark-lighter" />
+                <User className="h-5 w-5 text-[#3B3B1A] dark:text-[#EAEFEF]" />
               )}
             </div>
           </div>
           {isExpanded && (
             <>
               <div className="ml-3 flex-1 min-w-0">
-                <p className="text-sm font-medium text-knitter-light-darker dark:text-knitter-dark-lighter truncate">
+                <p className="text-sm font-medium text-[#3B3B1A] dark:text-[#EAEFEF] truncate">
                   {isGuest ? 'Guest User' : user?.email}
                 </p>
                 {isGuest && (
-                  <p className="text-xs text-knitter-light-dark/70 dark:text-knitter-dark-light/70">Limited features</p>
+                  <p className="text-xs text-[#8A784E] dark:text-[#B8CFCE]">Limited features</p>
                 )}
               </div>
               <button
                 onClick={handleSignOut}
-                className="ml-3 flex-shrink-0 p-1 text-knitter-light-darker dark:text-knitter-dark-lighter hover:text-knitter-light-dark dark:hover:text-knitter-dark-light transition-colors"
+                className="ml-3 flex-shrink-0 p-1 text-[#8A784E] dark:text-[#B8CFCE] hover:text-[#3B3B1A] dark:hover:text-[#EAEFEF] transition-colors"
                 aria-label="Sign out"
               >
                 <LogOut className="h-5 w-5" />

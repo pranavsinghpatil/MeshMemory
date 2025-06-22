@@ -15,7 +15,6 @@ import {
   Share,
   Download
 } from 'lucide-react';
-import Layout from '../components/Layout';
 import MicroThreadModal from '../components/MicroThreadModal';
 import ConversationChunk from '../components/ConversationChunk';
 
@@ -172,30 +171,25 @@ export default function ConversationView() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
+              <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
         </div>
-      </Layout>
     );
   }
 
   if (!source) {
     return (
-      <Layout>
-        <div className="text-center py-12">
+              <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Source not found</h2>
           <Link to="/" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 mt-4 inline-block transition-colors">
             Return to Dashboard
           </Link>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="py-6">
+          <div className="py-6">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
           {/* Header */}
           <div className="mb-6">
@@ -403,6 +397,5 @@ export default function ConversationView() {
         chunk={selectedChunk}
         onMicroThreadCreated={fetchConversationData}
       />
-    </Layout>
   );
 }

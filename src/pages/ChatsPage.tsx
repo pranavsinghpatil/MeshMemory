@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Layers, Loader2, TrendingUp, MessageSquare } from 'lucide-react';
-import Layout from '../components/Layout';
 import ChatCard from '../components/ChatCard';
 import { chatsAPI } from '../lib/api';
 
@@ -39,17 +38,14 @@ export default function ChatsPage() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
+              <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="py-6">
+          <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Your Chats</h1>
@@ -101,6 +97,6 @@ export default function ChatsPage() {
           )}
         </div>
       </div>
-    </Layout>
   );
 }
+

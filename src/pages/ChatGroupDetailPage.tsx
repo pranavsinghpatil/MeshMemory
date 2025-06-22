@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Search, Users, MessageSquare, Clock, MoreVertical, Edit, Trash2, Share2, Filter } from 'lucide-react';
-import Layout from '../components/Layout';
 import { chatsAPI } from '../lib/api';
 
 export default function ChatGroupDetailPage() {
@@ -57,18 +56,15 @@ export default function ChatGroupDetailPage() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
+              <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
-      </Layout>
     );
   }
 
   if (!group) {
     return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-12">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">Chat group not found</h3>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -85,13 +81,11 @@ export default function ChatGroupDetailPage() {
             </div>
           </div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <button
             onClick={() => navigate(-1)}
@@ -253,6 +247,6 @@ export default function ChatGroupDetailPage() {
           </div>
         )}
       </div>
-    </Layout>
   );
 }
+

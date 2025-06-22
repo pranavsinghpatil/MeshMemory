@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Key, Shield, Bell, User, Database, Settings } from 'lucide-react';
-import Layout from '../components/Layout';
 import SettingsPanel from '../components/SettingsPanel';
 import APIKeyForm from '../components/APIKeyForm';
 
@@ -107,6 +106,5 @@ export default function SettingsPage() {
  
         </div>
       </div>
-    </Layout>
   );
 }

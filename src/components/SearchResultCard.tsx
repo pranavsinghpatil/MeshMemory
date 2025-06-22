@@ -47,7 +47,7 @@ export default function SearchResultCard({
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `knitter.app - ${result.source?.title || 'Search Result'}`,
+        title: `MeshMemory - ${result.source?.title || 'Search Result'}`,
         text: result.text_chunk,
         url: window.location.href
       }).catch(err => {

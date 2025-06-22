@@ -1,5 +1,5 @@
 /*
-  # Core Tables Migration for knitter.app
+  # Core Tables Migration for MeshMemory
   
   This migration creates the core tables for the application:
   - sources: Stores imported content sources

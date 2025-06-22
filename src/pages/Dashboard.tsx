@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Clock, TrendingUp, Users, Beaker, MessageCircle, Plus, Search, Zap } from 'lucide-react';
-import Layout from '../components/Layout';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -107,7 +106,6 @@ export default function Dashboard() {
   }
 
   return (
-    <Layout>
       <div className="min-h-full">
         <div className="py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
@@ -115,7 +113,7 @@ export default function Dashboard() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
             <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-              Start your intelligent AI conversation journey with knitter.app
+              Start your intelligent AI conversation journey with MeshMemory
             </p>
             {isGuest && (
               <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -354,7 +352,7 @@ export default function Dashboard() {
 
           {/* Welcome Section */}
           <div className="mt-12 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome to knitter.app</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome to MeshMemory</h2>
             <p className="mt-3 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-300">
               Start by searching for information or exploring your existing conversations.
             </p>
@@ -371,6 +369,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 }
+
