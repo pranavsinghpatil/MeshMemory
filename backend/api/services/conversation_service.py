@@ -86,31 +86,6 @@ class ConversationService:
             # Log the error for debugging
             print(f"Error listing imported chats: {str(e)}")
             raise
-        
-        # Convert chunks to response format
-        formatted_chunks = []
-        for chunk in chunks:
-            formatted_chunk = {
-                "id": chunk["id"],
-                "role": self._determine_role(chunk["participant_label"]),
-                "text": chunk["text_chunk"],
-                "timestamp": chunk["timestamp"],
-                "participantLabel": chunk["participant_label"],
-                "modelName": chunk.get("model_name"),
-                "metadata": chunk.get("metadata", {})
-            }
-            formatted_chunks.append(formatted_chunk)
-
-        # Sort chunks by timestamp
-        formatted_chunks.sort(key=lambda x: x["timestamp"])
-
-        return {
-            "sourceId": source_id,
-            "title": source["title"],
-            "sourceType": source["type"],
-            "chunks": formatted_chunks,
-            "metadata": source.get("metadata", {})
-        }
 
     async def get_chunks_by_source(self, source_id: str) -> List[Dict[str, Any]]:
         """Get chunks for a source"""

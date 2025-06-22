@@ -1,16 +1,17 @@
 import asyncio
 import uuid
-from datetime import datetime
-from typing import Optional, Dict, Any
-from fastapi import UploadFile
-import aiofiles
+import logging
 import tempfile
 import os
+from datetime import datetime
+from typing import List, Dict, Any, Optional
+
+from fastapi import UploadFile
+import aiofiles
 
 from .llm_service import LLMService
 from .embedding_service import EmbeddingService
 from .database_service import DatabaseService
-import logging
 from .parsers import PARSER_REGISTRY, TextParser
 
 logger = logging.getLogger(__name__)
@@ -20,12 +21,11 @@ class ImportService:
         self.llm_service = LLMService()
         self.embedding_service = EmbeddingService()
         self.db_service = DatabaseService()
-
+    
     # Allowed high-level source types
     ALLOWED_SOURCE_TYPES = [
         "chatgpt", "claude", "gemini", "grok", "mistral", "deepseek", "other"
     ]
-
     def normalize_source_type(self, source_type: str) -> str:
         """
         Normalize and validate the source_type to a high-level category.
@@ -68,7 +68,8 @@ class ImportService:
         source_type: str,
         url: Optional[str] = None,
         title: Optional[str] = None,
-        file: Optional[UploadFile] = None
+        file: Optional[UploadFile] = None,
+        group_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Process import from various sources. Standardize source_type and store import method in metadata.
@@ -79,7 +80,7 @@ class ImportService:
             url: Optional URL for web-based imports
             title: Optional title for the import
             file: Optional file for file-based imports
-            group_id: Optional group ID for grouped imports (artefact_id)
+            group_id: Optional ID for grouping related imports (artefact_id)
         """
         normalized_type = self.normalize_source_type(source_type)
         import_method = self.extract_import_method(source_type, file, url)
@@ -97,7 +98,8 @@ class ImportService:
             "created_at": datetime.now(),
             "metadata": {
                 "import_method": import_method,
-                "can_hybrid": True  # Mark as hybrid-capable by default
+                "can_hybrid": True,  # Mark as hybrid-capable by default
+                "artefact_id": artefact_id
             }
         }
         
@@ -111,7 +113,8 @@ class ImportService:
             "metadata": {
                 "source_id": source_id,
                 "source_type": normalized_type,
-                "import_method": import_method
+                "import_method": import_method,
+                "artefact_id": artefact_id
             }
         }
 
@@ -179,7 +182,6 @@ class ImportService:
             "isHybridCandidate": True,
             "hybridCompatibleWith": compatible_chats
         }
-
     async def _find_hybrid_compatible_chats(self, chat_id: str, source_type: str) -> List[str]:
         """Find chats that could be merged with this one in a hybrid chat."""
         try:
@@ -196,7 +198,6 @@ class ImportService:
         except Exception as e:
             print(f"Error finding hybrid compatible chats: {e}")
             return []
-    
     async def create_hybrid_chat(
         self,
         chat_ids: List[str],
@@ -299,7 +300,6 @@ class ImportService:
             "artefact_count": len(artefacts),
             "status": "success"
         }
-
 
     def _map_source_type(self, source_type: str) -> str:
         """Map frontend source types to database types"""

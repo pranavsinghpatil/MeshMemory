@@ -8,17 +8,14 @@ import io
 import pytesseract
 from PIL import Image
 import aiohttp
-import magic
-
-from typing import List, Dict, Any, Optional
 import logging
 import copy
+from typing import List, Dict, Any, Optional
 from aiolimiter import AsyncLimiter
 
 logger = logging.getLogger(__name__)
 _rate_limiter = AsyncLimiter(max_rate=5, time_period=1)
 _url_cache: Dict[str, List[Dict[str, Any]]] = {}
-
 class ParserError(Exception):
     """Custom exception for parser failures."""
 
@@ -84,6 +81,7 @@ class TextParser(ParserInterface):
 
         return chunks
 
+
 class PDFParser(ParserInterface):
     async def parse(self, source_id: str, file: Optional[UploadFile] = None, url: Optional[str] = None) -> List[Dict[str, Any]]:
         """Parse PDF content using pdfplumber and return list of text chunks"""
@@ -122,6 +120,7 @@ class PDFParser(ParserInterface):
                 }
             })
         return chunks
+
 
 class HTMLParser(ParserInterface):
     async def parse(self, source_id: str, file: Optional[UploadFile] = None, url: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -247,6 +246,7 @@ class HTMLParser(ParserInterface):
                 
         return chunks
 
+
 class OcrParser(ParserInterface):
     async def parse(self, source_id: str, file: Optional[UploadFile] = None, url: Optional[str] = None) -> List[Dict[str, Any]]:
         """Parse images using OCR to extract text"""
@@ -283,6 +283,7 @@ class OcrParser(ParserInterface):
             for blk in blocks
         ]
         return chunks
+
 
 class LinkParser(ParserInterface):
     async def parse(self, source_id: str, file: Optional[UploadFile] = None, url: Optional[str] = None) -> List[Dict[str, Any]]:

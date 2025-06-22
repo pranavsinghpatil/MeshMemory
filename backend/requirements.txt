@@ -1,24 +1,43 @@
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
+# Core FastAPI requirements
+fastapi==0.95.2  # Downgraded to match pydantic 1.10.x
+uvicorn[standard]==0.22.0  # Compatible with FastAPI 0.95.2
 python-multipart==0.0.6
 aiofiles==23.2.1
-pydantic==2.5.0
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-openai>=1.0.0,<2.0.0  # Allow newer versions that support newer httpx
-google-generativeai==0.3.0
+
+# Pydantic and authentication
+pydantic==1.10.15  # Updated to support Python 3.12 and remain compatible with FastAPI <0.100
+cryptography>=38.0.0,<40.0.0  # Range that works with python-jose
+python-jose[cryptography]>=3.3.0,<4.0.0
+passlib[bcrypt]>=1.7.4,<1.8.0
+PyJWT>=2.4.0,<3.0.0
+
+# HTTP and database connections
+httpx<0.24.0,>=0.23.0  # Compatible range
+
+# Modified Supabase - we'll implement our own client
+# supabase - REMOVED due to compatibility issues
+postgrest>=0.10.6  # Correct package name for PostgrestClient
+
+# Testing
+pytest>=6.0.0,<8.0.0  # Compatible with most packages
+pytest-asyncio>=0.21.0,<0.22.0
+
+# Services
+redis>=5.0.0,<6.0.0
+sentry-sdk[fastapi]>=1.38.0,<2.0.0
+
+# API clients
+openai>=0.27.0,<0.29.0  # Compatible version range
+google-generativeai>=0.3.0,<0.4.0
+
+# General utilities
+python-dotenv>=1.0.0,<2.0.0
 numpy
-python-dotenv==1.0.0
-pydantic[email]
-pytest-asyncio
-redis==5.0.0
-sentry-sdk[fastapi]==1.38.0
-pytest==7.4.3
-pytest-asyncio==0.21.1
-httpx>=0.25.2,<1.0.0  # Updated to be compatible with openai
-cryptography==41.0.7
-supabase>=2.0.0,<3.0.0  # Allow newer versions that support newer httpx
-pillow 
-pytesseract 
+email-validator  # For pydantic[email]
+pillow
+pytesseract
 celery
 pdfplumber
+python-magic
+beautifulsoup4
+aiolimiter

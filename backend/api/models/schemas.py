@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 from fastapi import UploadFile
@@ -27,10 +27,27 @@ class ImportRequest(BaseModel):
     title: Optional[str] = None
 
 class HybridChatRequest(BaseModel):
-    chatIds: List[str]  # List of chat IDs to merge
-    title: str
-    metadata: Optional[Dict[str, Any]] = None
-    sortMethod: str = "timestamp"  # How to sort messages: timestamp, artefact_order, or custom
+    """Request model for creating a hybrid chat by merging multiple chats."""
+    chat_ids: List[str] = Field(..., description="List of chat IDs to merge")
+    title: str = Field(..., description="Title for the new hybrid chat")
+    metadata: Optional[Dict[str, Any]] = Field(
+        None, 
+        description="Additional metadata for the hybrid chat"
+    )
+    sort_method: str = Field(
+        "timestamp", 
+        description="How to sort messages: 'timestamp', 'artefact_order', or 'custom'"
+    )
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "chat_ids": ["chat_1", "chat_2", "chat_3"],
+                "title": "Merged Research Chats",
+                "metadata": {"tags": ["research", "ai"]},
+                "sort_method": "timestamp"
+            }
+        }
 
 class ImportBatch(BaseModel):
     id: str
@@ -143,6 +160,25 @@ class NewChatResponse(BaseModel):
 class MergeChatRequest(BaseModel):
     chatIds: List[str]
     title: str
+
+# Auth Schemas
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    expires_in: int
+    token_type: str = "bearer"
+
+class UserResponse(BaseModel):
+    id: str
+    email: EmailStr
 
 # Micro-thread Schemas  [Not used]
 # class MicroThreadRequest(BaseModel):

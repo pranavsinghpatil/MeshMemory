@@ -1,42 +1,52 @@
+import logging
 import os
-from typing import List, Dict, Any, Optional
-from datetime import datetime
+from typing import Dict, List, Any, Optional
 import json
-import numpy as np
-from supabase import create_client, Client
+import traceback
+from datetime import datetime
 from dotenv import load_dotenv
+from pathlib import Path
+from .supabase_client import create_client
 
-# Load environment variables
-load_dotenv()
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Load environment variables from project root
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+env_path = os.path.join(project_root, '.env')
+load_dotenv(env_path)
+
+# Setup logger
+logger = logging.getLogger(__name__)
 
 class DatabaseService:
     _instance = None
-    _initialized = False
     
-    def __init__(self):
+    def __init__(self, use_supabase=True):
+        self.use_supabase = use_supabase
         self.import_batches = {}  # fallback in-memory storage
-    
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(DatabaseService, cls).__new__(cls)
-            cls._instance._initialize()
-        return cls._instance
-    
-    def _initialize(self):
-        if not self._initialized:
-            # Initialize Supabase client
-            supabase_url = os.getenv("SUPABASE_URL")
-            supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
-            
-            if not supabase_url or not supabase_key:
-                raise ValueError("Missing Supabase configuration. Please set SUPABASE_URL and SUPABASE_SERVICE_KEY in .env")
-            self.supabase: Client = create_client(supabase_url, supabase_key)
-            # Always define in-memory fallback stores
-            self.sources = {}
-            self.chunks = {}
-            self.threads = {}
-            self.micro_threads = {}
-            self._initialized = True
+        self.sources = {}         # in-memory fallback stores
+        self.chunks = {}
+        self.threads = {}
+        self.micro_threads = {}
+        
+        if use_supabase:
+            try:
+                supabase_url = os.environ.get("SUPABASE_URL")
+                supabase_key = os.environ.get("SUPABASE_SERVICE_KEY")
+                
+                if not supabase_url or not supabase_key:
+                    logger.warning("Missing Supabase configuration, using in-memory database instead")
+                    self.use_supabase = False
+                else:
+                    self.supabase = create_client(supabase_url, supabase_key)
+                    # logger.info("Using custom Supabase client for database operations")
+            except Exception as e:
+                logger.error(f"Error connecting to Supabase: {str(e)}")
+                logger.error(traceback.format_exc())
+                logger.info("Using in-memory database instead")
+                self.use_supabase = False
     
     async def get_connection(self):
         """Get a database connection from Supabase"""
@@ -583,16 +593,5 @@ class DatabaseService:
             result = self.supabase.table('messages').insert(data).execute()
             return result.data[0]
         except Exception as e:
-            print(f"Error creating message: {e}")
+            logger.error(f"Error creating message: {e}")
             raise
-
-        """Helper method to get chunk count for a source"""
-        try:
-            result = (self.supabase.table('chunks')
-                    .select('id', count='exact')
-                    .eq('source_id', source_id)
-                    .execute())
-            return result.count if hasattr(result, 'count') else 0
-        except Exception as e:
-            print(f"Error getting chunk count for source {source_id}: {e}")
-            return 0
