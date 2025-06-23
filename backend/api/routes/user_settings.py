@@ -44,7 +44,7 @@ async def update_user_settings(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/settings/api-keys", summary="Get user API keys")
+@router.get("/settings-keys", summary="Get user API keys")
 async def get_api_keys(current_user: dict = Depends(get_current_user)):
     """
     Get user's API keys
@@ -55,7 +55,7 @@ async def get_api_keys(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/settings/api-keys", summary="Save user API keys")
+@router.post("/settings-keys", summary="Save user API keys")
 async def save_api_keys(
     api_keys: ApiKeys,
     current_user: dict = Depends(get_current_user)

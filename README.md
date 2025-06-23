@@ -220,43 +220,43 @@ The application uses a comprehensive PostgreSQL schema with the following key ta
 ## 🔧 API Endpoints
 
 ### Import API
-- `POST /api/import` - Import conversation sources
-- `GET /api/import/status/{source_id}` - Get import status
+- `POST /import` - Import conversation sources
+- `GET /import/status/{source_id}` - Get import status
 
 ### Search API
-- `GET /api/search` - Basic semantic search
-- `GET /api/search/enhanced` - Advanced search with filters
-- `GET /api/search/paginated` - Paginated search results
-- `GET /api/search/suggestions` - Search suggestions
+- `GET /search` - Basic semantic search
+- `GET /search/enhanced` - Advanced search with filters
+- `GET /search/paginated` - Paginated search results
+- `GET /search/suggestions` - Search suggestions
 
 ### Conversations API
-- `GET /api/conversations/{source_id}` - Get conversation data
-- `GET /api/conversations/{source_id}/summary` - Get conversation summary
-- `GET /api/sources/{source_id}/chunks` - Get paginated chunks
+- `GET /conversations/{source_id}` - Get conversation data
+- `GET /conversations/{source_id}/summary` - Get conversation summary
+- `GET /sources/{source_id}/chunks` - Get paginated chunks
 
 ### Threads API
-- `GET /api/threads` - Get all threads
-- `GET /api/threads/{thread_id}` - Get specific thread
-- `GET /api/threads/{thread_id}/chunks` - Get paginated thread chunks
-- `GET /api/threads/{thread_id}/summary` - Get thread summary
-- `POST /api/threads/{thread_id}/summary/regenerate` - Regenerate summary
-- `POST /api/threads/{thread_id}/merge` - Merge threads
-- `POST /api/threads/{thread_id}/split` - Split threads
+- `GET /threads` - Get all threads
+- `GET /threads/{thread_id}` - Get specific thread
+- `GET /threads/{thread_id}/chunks` - Get paginated thread chunks
+- `GET /threads/{thread_id}/summary` - Get thread summary
+- `POST /threads/{thread_id}/summary/regenerate` - Regenerate summary
+- `POST /threads/{thread_id}/merge` - Merge threads
+- `POST /threads/{thread_id}/split` - Split threads
 
 ### Data Management API
-- `DELETE /api/sources/{source_id}` - Delete source and related data
-- `DELETE /api/threads/{thread_id}` - Delete thread
-- `DELETE /api/user/data` - Delete all user data (requires confirmation)
-- `GET /api/user/data/export` - Export all user data
+- `DELETE /sources/{source_id}` - Delete source and related data
+- `DELETE /threads/{thread_id}` - Delete thread
+- `DELETE /user/data` - Delete all user data (requires confirmation)
+- `GET /user/data/export` - Export all user data
 
 ### Analytics API
-- `GET /api/analytics/dashboard` - Dashboard analytics
-- `GET /api/analytics/conversation-trends` - Conversation trends
-- `GET /api/analytics/search-insights` - Search insights
-- `GET /api/analytics/model-usage` - Model usage statistics
+- `GET /analytics/dashboard` - Dashboard analytics
+- `GET /analytics/conversation-trends` - Conversation trends
+- `GET /analytics/search-insights` - Search insights
+- `GET /analytics/model-usage` - Model usage statistics
 
 ### Health & Monitoring
-- `GET /api/health` - Health check endpoint
+- `GET /health` - Health check endpoint
 
 ## 🧪 Testing
 
@@ -384,7 +384,7 @@ psql $DATABASE_URL -f supabase/migrations/latest.sql
 ```
 
 ### Monitoring & Health Checks
-- Health check endpoint: `/api/health`
+- Health check endpoint: `/health`
 - Sentry error monitoring
 - Redis connection monitoring
 - Database connection monitoring
@@ -455,31 +455,31 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Import API
 
-- `POST /api/import` - Import a conversation source
-- `GET /api/import/status/{source_id}` - Get import status
+- `POST /import` - Import a conversation source
+- `GET /import/status/{source_id}` - Get import status
 
 ### Conversations API
 
-- `GET /api/conversations/{source_id}` - Get conversation data
-- `GET /api/conversations/{source_id}/chunks` - Get conversation chunks
-- `GET /api/conversations/{source_id}/metadata` - Get conversation metadata
+- `GET /conversations/{source_id}` - Get conversation data
+- `GET /conversations/{source_id}/chunks` - Get conversation chunks
+- `GET /conversations/{source_id}/metadata` - Get conversation metadata
 
 ### Search API
 
-- `GET /api/search?q={query}` - Search across conversations
-- `GET /api/search/suggestions?q={partial_query}` - Get search suggestions
+- `GET /search?q={query}` - Search across conversations
+- `GET /search/suggestions?q={partial_query}` - Get search suggestions
 
 ### Threads API
 
-- `GET /api/threads` - Get all threads
-- `GET /api/threads/{thread_id}` - Get a specific thread
-- `POST /api/threads/auto-generate` - Auto-generate threads
-- `GET /api/threads/stats` - Get thread statistics
+- `GET /threads` - Get all threads
+- `GET /threads/{thread_id}` - Get a specific thread
+- `POST /threads/auto-generate` - Auto-generate threads
+- `GET /threads/stats` - Get thread statistics
 
 ### Micro-Threads API
 
-- `POST /api/thread` - Create a micro-thread
-- `GET /api/thread/{chunk_id}/micro-threads` - Get micro-threads for a chunk
+- `POST /thread` - Create a micro-thread
+- `GET /thread/{chunk_id}/micro-threads` - Get micro-threads for a chunk
 
 ## Project Structure
 

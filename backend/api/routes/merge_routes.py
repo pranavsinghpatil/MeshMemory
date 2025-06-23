@@ -6,7 +6,7 @@ from api.services.merge_service import MergeService
 from api.models import get_db
 from sqlalchemy.orm import Session
 
-router = APIRouter(prefix="/api/conversations", tags=["Merge"])
+router = APIRouter(prefix="/conversations", tags=["Merge"])
 
 class MergeRequest(BaseModel):
     chat_ids: List[str]

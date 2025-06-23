@@ -15,12 +15,12 @@ from api.routes.import_routes import router
 
 # Create test client
 app = FastAPI()
-app.include_router(router, prefix="/api")
+app.include_router(router, prefix="")
 client = TestClient(app)
 
 
 class TestImportEndpointIntegration:
-    """Integration tests for /api/import endpoint with all parser types"""
+    """Integration tests for /import endpoint with all parser types"""
     
     def test_import_text_paste_integration(self):
         """Test complete flow for text paste import"""
@@ -32,7 +32,7 @@ class TestImportEndpointIntegration:
             }
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "copy_paste",
                     "text": "Hello world\n\nThis is a test paragraph",
@@ -64,7 +64,7 @@ class TestImportEndpointIntegration:
             html_content = "<html><body><h1>Title</h1><p>Content</p></body></html>"
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "html",
                     "html": html_content,
@@ -94,7 +94,7 @@ class TestImportEndpointIntegration:
             fake_pdf_content = b"%PDF-1.4 fake pdf content"
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "pdf",
                     "title": "PDF Import Test"
@@ -125,7 +125,7 @@ class TestImportEndpointIntegration:
             fake_image_content = b"fake-image-data"
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "screenshot",
                     "title": "OCR Import Test"
@@ -152,7 +152,7 @@ class TestImportEndpointIntegration:
             }
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "link",
                     "url": "https://example.com/article.html",
@@ -186,7 +186,7 @@ class TestImportEndpointIntegration:
             file3_content = b"Third file content"
             
             response = client.post(
-                "/api/import/grouped",
+                "/import/grouped",
                 data={
                     "types": ["copy_paste", "copy_paste", "copy_paste"],
                     "titles": ["File 1", "File 2", "File 3"]
@@ -217,7 +217,7 @@ class TestImportEndpointErrorHandling:
     def test_import_invalid_type(self):
         """Test import with invalid parser type"""
         response = client.post(
-            "/api/import",
+            "/import",
             data={
                 "type": "invalid_parser",
                 "text": "Some content",
@@ -232,7 +232,7 @@ class TestImportEndpointErrorHandling:
         """Test import with missing required fields"""
         # Missing URL for link import
         response = client.post(
-            "/api/import",
+            "/import",
             data={
                 "type": "link",
                 "title": "Missing URL Test"
@@ -244,7 +244,7 @@ class TestImportEndpointErrorHandling:
         
         # Missing file for PDF import
         response = client.post(
-            "/api/import",
+            "/import",
             data={
                 "type": "pdf",
                 "title": "Missing File Test"
@@ -257,7 +257,7 @@ class TestImportEndpointErrorHandling:
     def test_import_empty_content(self):
         """Test import with empty content"""
         response = client.post(
-            "/api/import",
+            "/import",
             data={
                 "type": "copy_paste",
                 "text": "",
@@ -274,7 +274,7 @@ class TestImportEndpointErrorHandling:
             mock_process.side_effect = Exception("Import processing failed")
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "copy_paste",
                     "text": "Test content",
@@ -293,7 +293,7 @@ class TestImportEndpointErrorHandling:
             malformed_content = b"not-a-valid-pdf"
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "pdf",
                     "title": "Malformed File Test"
@@ -321,7 +321,7 @@ class TestImportEndpointValidation:
             large_content = b"Large file content " * 500000
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "copy_paste",
                     "title": "Large File Test"
@@ -344,7 +344,7 @@ class TestImportEndpointValidation:
             special_title = "Test with émojis 🚀 and spëcial chars: <>&'\""
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "copy_paste",
                     "text": "Content with special title",
@@ -369,7 +369,7 @@ class TestImportEndpointValidation:
             unicode_content = "Content with Unicode: 中文, العربية, हिन्दी, 🌍🚀✨"
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "copy_paste",
                     "text": unicode_content,
@@ -402,7 +402,7 @@ class TestImportEndpointConcurrency:
                 }
                 
                 response = client.post(
-                    "/api/import",
+                    "/import",
                     data={
                         "type": "copy_paste",
                         "text": f"Concurrent import {index}",
@@ -478,7 +478,7 @@ class TestParserIntegrationWithRealContent:
             """
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "html",
                     "html": realistic_html,
@@ -527,7 +527,7 @@ Final thoughts and summary.
             """
             
             response = client.post(
-                "/api/import",
+                "/import",
                 data={
                     "type": "copy_paste",
                     "text": realistic_markdown,

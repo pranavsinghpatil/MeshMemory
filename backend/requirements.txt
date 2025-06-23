@@ -1,43 +1,61 @@
 # Core FastAPI requirements
-fastapi==0.95.2  # Downgraded to match pydantic 1.10.x
-uvicorn[standard]==0.22.0  # Compatible with FastAPI 0.95.2
+fastapi==0.95.2
+uvicorn[standard]==0.22.0
 python-multipart==0.0.6
+python-dotenv==1.0.0
+
+# HTTP client
+httpx==0.25.2  # Pinned version that works with both FastAPI and Supabase
+aiohttp==3.9.3  # Required for async HTTP requests
+
+# Supabase
+supabase==2.3.5  # Latest stable version with good compatibility
+postgrest>=0.10.8,<0.16.0  # Required by Supabase
+realtime>=1.0.0,<2.0.0  # Required by Supabase
+
+# Database
+psycopg2-binary==2.9.9  # PostgreSQL adapter
+asyncpg==0.29.0  # Async PostgreSQL driver
+
+# Authentication
+python-jose[cryptography]==3.3.0
+PyJWT==2.8.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Pydantic
+pydantic==1.10.15
+email-validator==2.1.0.post1
+
+# Utilities
 aiofiles==23.2.1
+python-magic==0.4.27
+beautifulsoup4==4.12.3
+aiolimiter==1.1.0
 
-# Pydantic and authentication
-pydantic==1.10.15  # Updated to support Python 3.12 and remain compatible with FastAPI <0.100
-cryptography>=38.0.0,<40.0.0  # Range that works with python-jose
-python-jose[cryptography]>=3.3.0,<4.0.0
-passlib[bcrypt]>=1.7.4,<1.8.0
-PyJWT>=2.4.0,<3.0.0
+# File processing
+pdfplumber==0.11.0
+pytesseract==0.3.10
+Pillow==10.2.0
 
-# HTTP and database connections
-httpx<0.24.0,>=0.23.0  # Compatible range
+# AI/ML
+numpy==1.26.4
+openai==1.12.0
+google-generativeai==0.3.2
 
-# Modified Supabase - we'll implement our own client
-# supabase - REMOVED due to compatibility issues
-postgrest>=0.10.6  # Correct package name for PostgrestClient
+# Caching
+redis==5.0.1
+
+# Monitoring
+sentry-sdk[fastapi]==1.39.1
 
 # Testing
-pytest>=6.0.0,<8.0.0  # Compatible with most packages
-pytest-asyncio>=0.21.0,<0.22.0
+pytest==7.4.4
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
 
-# Services
-redis>=5.0.0,<6.0.0
-sentry-sdk[fastapi]>=1.38.0,<2.0.0
-
-# API clients
-openai>=0.27.0,<0.29.0  # Compatible version range
-google-generativeai>=0.3.0,<0.4.0
-
-# General utilities
-python-dotenv>=1.0.0,<2.0.0
-numpy
-email-validator  # For pydantic[email]
-pillow
-pytesseract
-celery
-pdfplumber
-python-magic
-beautifulsoup4
-aiolimiter
+# Development
+black==24.3.0
+isort==5.13.2
+mypy==1.8.0
+types-requests==2.31.0.20240311

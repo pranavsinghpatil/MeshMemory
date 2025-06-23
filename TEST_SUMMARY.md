@@ -28,7 +28,7 @@ I have successfully created comprehensive test coverage for all import parsers i
 **Full API endpoint integration tests with 350+ lines of test code**
 
 #### Test Coverage:
-- **API Integration**: Tests all `/api/import` endpoints with different parser types
+- **API Integration**: Tests all `/import` endpoints with different parser types
 - **File Upload Testing**: PDF, image, and text file uploads
 - **Error Handling**: Invalid types, missing fields, service failures
 - **Input Validation**: Large files, special characters, Unicode content

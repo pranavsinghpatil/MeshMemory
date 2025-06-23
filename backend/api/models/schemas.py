@@ -162,9 +162,14 @@ class MergeChatRequest(BaseModel):
     title: str
 
 # Auth Schemas
+from typing import Dict, Any, Optional
+
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
+    full_name: Optional[str] = None
+    is_active: bool = True
+    is_superuser: bool = False
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -172,13 +177,21 @@ class UserLogin(BaseModel):
 
 class TokenResponse(BaseModel):
     access_token: str
-    refresh_token: str
+    refresh_token: str = ""
     expires_in: int
     token_type: str = "bearer"
 
 class UserResponse(BaseModel):
     id: str
     email: EmailStr
+    full_name: Optional[str] = None
+    is_active: Optional[bool] = True
+    is_superuser: Optional[bool] = False
+
+class UserSession(BaseModel):
+    user: Dict[str, Any]
+    session: Dict[str, Any]
+    error: Optional[str] = None
 
 # Micro-thread Schemas  [Not used]
 # class MicroThreadRequest(BaseModel):

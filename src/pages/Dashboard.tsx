@@ -1,376 +1,308 @@
-import React, { useState, useEffect } from 'react';
-import { MessageSquare, Clock, TrendingUp, Users, Beaker, MessageCircle, Plus, Search, Zap } from 'lucide-react';
-import Layout from '../components/Layout';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
-import { Link } from 'react-router-dom';
-import SkeletonLoader from '../components/SkeletonLoader';
-import ErrorMessage from '../components/ErrorMessage';
-import FeatureFlag from '../components/FeatureFlag';
-import Tooltip from '../components/Tooltip';
 
-interface Chat {
-  id: string;
-  title: string;
-  updated_at: string;
-  last_message?: string;
-  unread_count?: number;
-}
+import { motion } from 'framer-motion';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  MessageCircle, 
+  Users, 
+  BarChart3, 
+  Plus,
+  TrendingUp,
+  Clock,
+  Zap,
+  Star,
+  ArrowRight,
+  Sparkles,
+  Target,
+  Rocket
+} from 'lucide-react';
 
-interface ActivityItem {
-  id: string;
-  title: string;
-  type: string;
-  created_at: string;
-}
-
-export default function Dashboard() {
-  const [stats, setStats] = useState({
-    totalSources: 0,
-    totalChats: 0,
-    totalConversations: 0,
-  });
-  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
-  const [recentChats, setRecentChats] = useState<Chat[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { isGuest } = useAuth();
-
-  useEffect(() => {
-    if (!isGuest) {
-      fetchDashboardData();
-    } else {
-      // Mock data for guest users
-      setTimeout(() => {
-        setStats({
-          totalSources: 3,
-          totalChats: 2,
-          totalConversations: 8,
-        });
-        setRecentActivity([
-          { id: '1', title: 'React Best Practices', type: 'chatgpt-link', created_at: new Date().toISOString() },
-          { id: '2', title: 'AI Career Guide', type: 'pdf', created_at: new Date().toISOString() },
-        ]);
-        setRecentChats([
-          { id: '1', title: 'Frontend Development', updated_at: new Date().toISOString() },
-          { id: '2', title: 'Machine Learning', updated_at: new Date().toISOString() },
-        ]);
-        setLoading(false);
-      }, 800); // Simulate loading delay
+const Dashboard = () => {
+  // Mock data
+  const stats = [
+    {
+      title: 'Total Messages',
+      value: '2,847',
+      change: '+12.5%',
+      icon: MessageCircle,
+      color: 'from-blue-500 to-cyan-500'
+    },
+    {
+      title: 'Active Groups',
+      value: '23',
+      change: '+3.2%',
+      icon: Users,
+      color: 'from-green-500 to-emerald-500'
+    },
+    {
+      title: 'Response Time',
+      value: '2.3min',
+      change: '-8.1%',
+      icon: Clock,
+      color: 'from-purple-500 to-pink-500'
+    },
+    {
+      title: 'Team Score',
+      value: '94%',
+      change: '+5.7%',
+      icon: Star,
+      color: 'from-yellow-500 to-orange-500'
     }
-  }, [isGuest]);
+  ];
 
-  async function fetchDashboardData() {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Fetch stats
-      const [sourcesResult, chatsResult, conversationsResult] = await Promise.all([
-        supabase.from('sources').select('id', { count: 'exact' }),
-        supabase.from('chats').select('id', { count: 'exact' }),
-        supabase.from('conversations').select('id', { count: 'exact' }),
-      ]);
-
-      setStats({
-        totalSources: sourcesResult.count || 0,
-        totalChats: chatsResult.count || 0,
-        totalConversations: conversationsResult.count || 0,
-      });
-
-      // Fetch recent chats
-      const { data: chats, error: chatsError } = await supabase
-        .from('chats')
-        .select('*')
-        .order('updated_at', { ascending: false })
-        .limit(5);
-
-      if (chatsError) throw chatsError;
-      setRecentChats(chats || []);
-
-      // Fetch recent activity
-      const { data: activity, error: activityError } = await supabase
-        .from('activities')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (activityError) throw activityError;
-      setRecentActivity(activity || []);
-
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      setError('Failed to load dashboard data');
-      setLoading(false);
+  const quickActions = [
+    {
+      title: 'New Chat',
+      description: 'Start a conversation',
+      icon: MessageCircle,
+      color: 'from-primary to-accent'
+    },
+    {
+      title: 'Create Group',
+      description: 'Set up a team workspace',
+      icon: Users,
+      color: 'from-secondary to-success'
+    },
+    {
+      title: 'View Analytics',
+      description: 'Check team insights',
+      icon: BarChart3,
+      color: 'from-accent to-secondary'
+    },
+    {
+      title: 'Invite Members',
+      description: 'Add team members',
+      icon: Plus,
+      color: 'from-success to-primary'
     }
-  }
+  ];
+
+  const recentActivity = [
+    {
+      id: 1,
+      user: 'Alice Johnson',
+      action: 'created a new group',
+      target: 'Marketing Team',
+      time: '2 minutes ago',
+      avatar: 'AJ'
+    },
+    {
+      id: 2,
+      user: 'Bob Smith',
+      action: 'shared a file in',
+      target: 'Design Review',
+      time: '5 minutes ago',
+      avatar: 'BS'
+    },
+    {
+      id: 3,
+      user: 'Carol Davis',
+      action: 'mentioned you in',
+      target: 'Project Updates',
+      time: '12 minutes ago',
+      avatar: 'CD'
+    },
+    {
+      id: 4,
+      user: 'David Wilson',
+      action: 'started a thread in',
+      target: 'General Discussion',
+      time: '1 hour ago',
+      avatar: 'DW'
+    }
+  ];
 
   return (
-    <Layout>
-      <div className="min-h-full">
-        <div className="py-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-              Start your intelligent AI conversation journey with MeshMemory
-            </p>
-            {isGuest && (
-              <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  You're in guest mode with limited features. Sign up for full access to import sources and create threads.
+    <div className="min-h-screen bg-background p-6 space-y-8">
+      {/* Quick Actions - Moved to top */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Quick Actions
+            </h2>
+            <p className="text-muted-foreground">Get started with these common tasks</p>
+          </div>
+          {/* <Badge className="bg-gradient-to-r from-primary/10 to-accent/10 text-primary border-primary/20">
+            <Zap className="w-4 h-4 mr-1" />
+            Fast Access
+          </Badge> */}
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {quickActions.map((action, index) => (
+            <motion.div
+              key={action.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -5, scale: 1.02 }}
+            >
+              <Card className="card-modern h-full cursor-pointer group border-2 border-border/20 hover:border-primary/30">
+                <CardContent className="p-6 text-center">
+                  <div className={`w-12 h-12 mx-auto mb-4 bg-gradient-to-r ${action.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <action.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="font-bold mb-2 text-lg">{action.title}</h3>
+                  <p className="text-sm text-muted-foreground">{action.description}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* Welcome Section */}
+      {/* <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="relative overflow-hidden"
+      >
+        <Card className="glass-effect border-2 border-primary/10">
+          <CardContent className="p-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold mb-2">
+                  Welcome back! 
+                  <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+                    {' '}Let's collaborate
+                  </span>
+                </h1>
+                <p className="text-muted-foreground text-lg">
+                  Your team communication hub is ready. Start engaging with your workspace.
                 </p>
               </div>
-            )}
-          </div>
-
-          {error && (
-            <ErrorMessage
-              message={error}
-              onRetry={fetchDashboardData}
-              className="mb-8"
-            />
-          )}
-
-          {/* Stats */}
-          {loading ? (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
-              <SkeletonLoader type="card" />
-              <SkeletonLoader type="card" />
-              <SkeletonLoader type="card" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
-              <Tooltip content="Total number of imported sources">
-                <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-md rounded-2xl transition-colors">
-                  <div className="p-5">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <MessageSquare className="h-6 w-6 text-blue-500" />
-                      </div>
-                      <div className="ml-5 w-0 flex-1">
-                        <dl>
-                          <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                            Total Sources
-                          </dt>
-                          <dd className="flex items-baseline">
-                            <div className="text-2xl font-semibold text-gray-900 dark:text-white">
-                              {stats.totalSources}
-                            </div>
-                          </dd>
-                        </dl>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Tooltip>
-
-              <Tooltip content="Active conversation threads organized by topic">
-                <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-md rounded-2xl transition-colors">
-                  <div className="p-5">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <Users className="h-6 w-6 text-green-500" />
-                      </div>
-                      <div className="ml-5 w-0 flex-1">
-                        <dl>
-                          <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                            Active Chats
-                          </dt>
-                          <dd className="flex items-baseline">
-                            <div className="text-2xl font-semibold text-gray-900 dark:text-white">
-                              {stats.totalChats}
-                            </div>
-                          </dd>
-                        </dl>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Tooltip>
-
-              <Tooltip content="Total follow-up conversations created">
-                <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-md rounded-2xl transition-colors">
-                  <div className="p-5">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <TrendingUp className="h-6 w-6 text-purple-500" />
-                      </div>
-                      <div className="ml-5 w-0 flex-1">
-                        <dl>
-                          <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                            Total Conversations
-                          </dt>
-                          <dd className="flex items-baseline">
-                            <div className="text-2xl font-semibold text-gray-900 dark:text-white">
-                              {stats.totalConversations}
-                            </div>
-                          </dd>
-                        </dl>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Tooltip>
-            </div>
-          )}
-
-          {/* Recent Activity & Threads */}
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            {/* Recent Activity */}
-            <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl transition-colors">
-              <div className="p-6">
-                <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h2>
-                {loading ? (
-                  <SkeletonLoader type="list" />
-                ) : recentActivity.length > 0 ? (
-                  <div className="space-y-4">
-                    {recentActivity.map((activity) => (
-                      <div key={activity.id} className="flex items-center space-x-3">
-                        <div className="flex-shrink-0">
-                          <div className="h-10 w-10 rounded-md bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                            <MessageSquare className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                            {activity.title}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {activity.type}
-                          </p>
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(activity.created_at).toLocaleTimeString()}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">No recent activity</p>
-                )}
+              <div className="hidden md:flex space-x-4">
+                <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center"
+                >
+                  <Sparkles className="w-8 h-8 text-white" />
+                </motion.div>
+                <motion.div 
+                  animate={{ y: [-5, 5, -5] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  className="w-16 h-16 bg-gradient-to-r from-secondary to-success rounded-full flex items-center justify-center"
+                >
+                  <Rocket className="w-8 h-8 text-white" />
+                </motion.div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      </motion.section> */}
 
-            {/* Recent Chats */}
-            <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl transition-colors">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-medium text-gray-900 dark:text-white">Recent Chats</h2>
-                  <Link
-                    to="/chat"
-                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-                  >
-                    View all
-                  </Link>
-                </div>
-                {loading ? (
-                  <SkeletonLoader type="list" />
-                ) : recentChats.length > 0 ? (
-                  <div className="space-y-4">
-                    {recentChats.map((chat) => (
-                      <Link
-                        key={chat.id}
-                        to={`/chat/${chat.id}`}
-                        className="block p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="flex-shrink-0">
-                            <div className="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                              <MessageCircle className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                              {chat.title || 'New Chat'}
-                            </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                              {chat.lastMessage || 'No messages yet'}
-                            </p>
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {chat.lastMessageTime ? (
-                              new Date(chat.lastMessageTime).toLocaleTimeString()
-                            ) : (
-                              '--:--'
-                            )}
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No chats yet</h3>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      Get started by creating a new chat.
-                    </p>
-                    <div className="mt-6">
-                      <Link
-                        to="/chat"
-                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-700 dark:hover:bg-indigo-600"
-                      >
-                        <Plus className="-ml-1 mr-2 h-5 w-5" />
-                        New Chat
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Experimental Features Section */}
-          <FeatureFlag flag="experimental_features">
-            <div className="mt-8">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Experimental Features</h2>
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-2xl p-6">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <Zap className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Global Mood Analysis</h3>
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                      Analyze the overall sentiment and mood across all your conversations.
-                    </p>
-                    <div className="mt-4">
-                      <button
-                        type="button"
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 dark:bg-purple-700 dark:hover:bg-purple-600"
-                        onClick={() => alert('Global Mood Analysis is coming soon!')}
-                      >
-                        Analyze Mood
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </FeatureFlag>
-
-          {/* Welcome Section */}
-          <div className="mt-12 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome to MeshMemory</h2>
-            <p className="mt-3 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-300">
-              Start by searching for information or exploring your existing conversations.
-            </p>
-            <div className="mt-6">
-              <Link
-                to="/search"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-700 dark:hover:bg-indigo-600"
-              >
-                <Search className="-ml-1 mr-3 h-5 w-5" />
-                Search Knowledge Base
-              </Link>
-            </div>
-          </div>
-          </div>
+      {/* Stats Grid */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-secondary to-success bg-clip-text text-transparent">
+            Team Overview
+          </h2>
+          <Badge className="bg-gradient-to-r from-secondary/10 to-success/10 text-secondary border-secondary/20">
+            <TrendingUp className="w-4 h-4 mr-1" />
+            Live Data
+          </Badge>
         </div>
-      </div>
-    </Layout>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
+              whileHover={{ y: -5, scale: 1.02 }}
+            >
+              <Card className="card-modern">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {stat.title}
+                    </CardTitle>
+                    <div className={`w-10 h-10 bg-gradient-to-r ${stat.color} rounded-lg flex items-center justify-center`}>
+                      <stat.icon className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold mb-1">{stat.value}</div>
+                  <p className={`text-sm ${stat.change.startsWith('+') ? 'text-success' : 'text-accent'}`}>
+                    {stat.change} from last month
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* Recent Activity */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+      >
+        <Card className="card-modern">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl bg-gradient-to-r from-accent to-secondary bg-clip-text text-transparent">
+                  Recent Activity
+                </CardTitle>
+                <CardDescription>
+                  Latest updates from your team
+                </CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="hover:bg-primary/10">
+                View All
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivity.map((activity, index) => (
+                <motion.div
+                  key={activity.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
+                  className="flex items-center space-x-4 p-3 rounded-xl hover:bg-muted/30 transition-colors"
+                >
+                  <Avatar className="ring-2 ring-primary/20">
+                    <AvatarImage src="" />
+                    <AvatarFallback className="bg-gradient-to-r from-primary to-accent text-white font-semibold">
+                      {activity.avatar}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm">
+                      <span className="font-semibold text-foreground">{activity.user}</span>
+                      <span className="text-muted-foreground"> {activity.action} </span>
+                      <span className="font-semibold text-primary">{activity.target}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">{activity.time}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.section>
+    </div>
   );
-}
+};
+
+export default Dashboard;

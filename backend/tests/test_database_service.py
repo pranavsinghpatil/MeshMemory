@@ -187,7 +187,7 @@ async def test_create_chunk_with_artefact_fields():
             "metadata": {}
         }
         
-        response = client.post("/api/sources/", json=source_data, headers=headers)
+        response = client.post("/sources/", json=source_data, headers=headers)
         assert response.status_code == 200, f"Source creation failed: {response.text}"
         source_id = response.json()["id"]
         print(f"Created source with ID: {source_id}")
@@ -205,13 +205,13 @@ async def test_create_chunk_with_artefact_fields():
         }
         
         # Create the chunk through the API
-        response = client.post("/api/chunks/", json=chunk_data, headers=headers)
+        response = client.post("/chunks/", json=chunk_data, headers=headers)
         assert response.status_code == 200, f"Chunk creation failed: {response.text}"
         chunk_id = response.json()["id"]
         print(f"Created chunk with ID: {chunk_id}")
         
         # Verify the chunk was created
-        response = client.get(f"/api/chunks/{chunk_id}", headers=headers)
+        response = client.get(f"/chunks/{chunk_id}", headers=headers)
         assert response.status_code == 200, f"Failed to retrieve chunk: {response.text}"
         chunk = response.json()
         

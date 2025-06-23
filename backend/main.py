@@ -66,6 +66,10 @@ app.add_middleware(
         # Local development
         "http://localhost:5173", 
         "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
         # Production deployments 
         "https://*.vercel.app", 
         "https://*.netlify.app",
@@ -81,6 +85,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Security
@@ -117,18 +122,18 @@ async def log_requests(request, call_next):
 
 # Include routers with authentication
 try:
-    app.include_router(auth.router, prefix="/api", tags=["auth"])
-    app.include_router(import_routes.router, prefix="/api", tags=["import"])
-    app.include_router(conversations_router, prefix="/api", tags=["conversations"])
-    app.include_router(chat_merge_router, prefix="/api", tags=["Chat Merge"])
-    app.include_router(search.router, prefix="/api", tags=["search"])
-    app.include_router(enhanced_search.router, prefix="/api", tags=["enhanced-search"])
-    app.include_router(user_settings.router, prefix="/api", tags=["user-settings"])
-    app.include_router(microchats.router, prefix="/api", tags=["microchats"])
-    app.include_router(analytics.router, prefix="/api", tags=["analytics"])
-    app.include_router(data_management.router, prefix="/api", tags=["data-management"])
-    app.include_router(pagination.router, prefix="/api", tags=["pagination"])
-    app.include_router(messages_router, prefix="/api", tags=["messages"])
+    app.include_router(auth.router, prefix="", tags=["auth"])
+    app.include_router(import_routes.router, prefix="", tags=["import"])
+    app.include_router(conversations_router, prefix="", tags=["conversations"])
+    app.include_router(chat_merge_router, prefix="", tags=["Chat Merge"])
+    app.include_router(search.router, prefix="", tags=["search"])
+    app.include_router(enhanced_search.router, prefix="", tags=["enhanced-search"])
+    app.include_router(user_settings.router, prefix="", tags=["user-settings"])
+    app.include_router(microchats.router, prefix="", tags=["microchats"])
+    app.include_router(analytics.router, prefix="", tags=["analytics"])
+    app.include_router(data_management.router, prefix="", tags=["data-management"])
+    app.include_router(pagination.router, prefix="", tags=["pagination"])
+    app.include_router(messages_router, prefix="", tags=["messages"])
 except Exception as e:
     logger.error(f"Error including router: {str(e)}")
     traceback.print_exc()
@@ -137,7 +142,7 @@ except Exception as e:
 async def root():
     return {"message": "MeshMemory API is running", "version": "1.0.0"}
 
-@app.get("/api/health")
+@app.get("/health")
 async def health_check():
     """Health check endpoint for monitoring"""
     services = {}

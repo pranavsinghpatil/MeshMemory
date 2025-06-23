@@ -201,7 +201,7 @@ http {
         }
 
         # Backend API
-        location /api/ {
+        location / {
             limit_req zone=api burst=20 nodelay;
             proxy_pass http://backend;
             proxy_set_header Host $host;
@@ -211,7 +211,7 @@ http {
         }
 
         # Search endpoints with stricter rate limiting
-        location /api/search {
+        location /search {
             limit_req zone=search burst=10 nodelay;
             proxy_pass http://backend;
             proxy_set_header Host $host;
@@ -608,7 +608,7 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-@app.get("/api/search")
+@app.get("/search")
 @limiter.limit("10/minute")
 async def search(request: Request):
     # Search implementation

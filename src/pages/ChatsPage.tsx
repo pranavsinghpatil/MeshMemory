@@ -1,106 +1,190 @@
-import React, { useState, useEffect } from 'react';
-import { Layers, Loader2, TrendingUp, MessageSquare } from 'lucide-react';
-import Layout from '../components/Layout';
-import ChatCard from '../components/ChatCard';
-import { chatsAPI } from '../lib/api';
 
-export default function ChatsPage() {
-  const [chats, setChats] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('updated_at');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Search, Plus, MessageCircle, Clock } from 'lucide-react';
 
-  useEffect(() => {
-    fetchChats();
-  }, [sortBy]);
+const ChatsPage = () => {
+  const [searchQuery, setSearchQuery] = useState('');
 
-  async function fetchChats() {
-    try {
-      setLoading(true);
-      const data = await chatsAPI.getAllChats();
-      
-      // Sort chats based on selected criteria
-      const sortedChats = [...data].sort((a: any, b: any) => {
-        if (sortBy === 'title') {
-          return a.title.localeCompare(b.title);
-        } else {
-          // For dates (updated_at or created_at)
-          return new Date(b[sortBy]).getTime() - new Date(a[sortBy]).getTime();
-        }
-      });
-      
-      setChats(sortedChats);
-    } catch (error) {
-      console.error('Error fetching chats:', error);
-    } finally {
-      setLoading(false);
+  const conversations = [
+    {
+      id: 1,
+      name: 'Sarah Johnson',
+      lastMessage: 'Hey, can we discuss the project timeline?',
+      timestamp: '2 min ago',
+      unread: 2,
+      avatar: '/api/placeholder/40/40',
+      online: true
+    },
+    {
+      id: 2,
+      name: 'Design Team',
+      lastMessage: 'The new mockups look great!',
+      timestamp: '15 min ago',
+      unread: 0,
+      avatar: '/api/placeholder/40/40',
+      online: false,
+      isGroup: true
+    },
+    {
+      id: 3,
+      name: 'Mike Chen',
+      lastMessage: 'Thanks for the update 👍',
+      timestamp: '1 hour ago',
+      unread: 1,
+      avatar: '/api/placeholder/40/40',
+      online: true
+    },
+    {
+      id: 4,
+      name: 'Product Team',
+      lastMessage: 'Meeting starts in 10 minutes',
+      timestamp: '2 hours ago',
+      unread: 0,
+      avatar: '/api/placeholder/40/40',
+      online: false,
+      isGroup: true
+    },
+    {
+      id: 5,
+      name: 'Emma Wilson',
+      lastMessage: 'Great work on the presentation!',
+      timestamp: 'Yesterday',
+      unread: 0,
+      avatar: '/api/placeholder/40/40',
+      online: false
     }
-  }
+  ];
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-        </div>
-      </Layout>
-    );
-  }
+  const filteredChats = conversations.filter(chat =>
+    chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <Layout>
-      <div className="py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Your Chats</h1>
-            <div className="flex space-x-2">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="updated_at">Recently Updated</option>
-                <option value="created_at">Date Created</option>
-                <option value="title">Title (A-Z)</option>
-              </select>
-              <button
-                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
-                aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
-              >
-                {viewMode === 'grid' ? (
-                  <Layers className="h-5 w-5" />
-                ) : (
-                  <MessageSquare className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {chats.length === 0 ? (
-            <div className="text-center py-12">
-              <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No chats yet</h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Get started by importing a conversation or creating a new chat.
-              </p>
-            </div>
-          ) : (
-            <div className={viewMode === 'grid' 
-              ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-              : 'space-y-4'}>
-              {chats.map((chat: any) => (
-                <ChatCard 
-                  key={chat.id} 
-                  chat={chat} 
-                  viewMode={viewMode} 
-                  onDelete={fetchChats} 
-                />
-              ))}
-            </div>
-          )}
+    <div className="h-full flex flex-col p-6">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex items-center justify-between mb-6"
+      >
+        <div>
+          <h1 className="text-3xl font-bold">Chats</h1>
+          <p className="text-muted-foreground">Stay connected with your team</p>
         </div>
-      </div>
-    </Layout>
+        <Button className="flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          New Chat
+        </Button>
+      </motion.div>
+
+      {/* Search */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="relative mb-6"
+      >
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+        <Input
+          placeholder="Search conversations..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </motion.div>
+
+      {/* Chat List */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="flex-1 space-y-2 overflow-auto"
+      >
+        {filteredChats.map((chat, index) => (
+          <motion.div
+            key={chat.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.05 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Card className="cursor-pointer hover:bg-muted/50 transition-all duration-200 border-2 hover:border-primary/30">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={chat.avatar} alt={chat.name} />
+                      <AvatarFallback>
+                        {chat.isGroup ? (
+                          <MessageCircle className="w-6 h-6" />
+                        ) : (
+                          chat.name.split(' ').map(n => n[0]).join('')
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
+                    {chat.online && !chat.isGroup && (
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-semibold truncate">{chat.name}</h3>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs text-muted-foreground flex items-center">
+                          <Clock className="w-3 h-3 mr-1" />
+                          {chat.timestamp}
+                        </span>
+                        {chat.unread > 0 && (
+                          <Badge className="w-6 h-6 p-0 flex items-center justify-center text-xs">
+                            {chat.unread}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {chat.lastMessage}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Empty State */}
+      {filteredChats.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex-1 flex flex-col items-center justify-center text-center"
+        >
+          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+            <MessageCircle className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-medium mb-2">No chats found</h3>
+          <p className="text-muted-foreground mb-4">
+            {searchQuery ? 'Try adjusting your search terms' : 'Start a new conversation to get connected'}
+          </p>
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Start New Chat
+          </Button>
+        </motion.div>
+      )}
+    </div>
   );
-}
+};
+
+export default ChatsPage;

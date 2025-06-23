@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, validator
 from ..services.microchat_service import MicrochatService
 from ..middleware.auth import get_current_user
 
-router = APIRouter(prefix="/api/microchats", tags=["microchats"])
+router = APIRouter(prefix="/microchats", tags=["microchats"])
 service = MicrochatService()
 
 # Request/Response Models

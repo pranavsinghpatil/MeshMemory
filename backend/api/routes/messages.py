@@ -7,7 +7,7 @@ import uuid
 from ..services.message_service import MessageService
 from ..middleware.auth import get_current_user
 
-router = APIRouter(prefix="/api/messages", tags=["messages"])
+router = APIRouter(prefix="/messages", tags=["messages"])
 service = MessageService()
 
 class MessageCreate(BaseModel):

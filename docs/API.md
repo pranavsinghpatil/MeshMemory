@@ -580,7 +580,7 @@ import_result = client.import_source(
 
 ```javascript
 // 1. Import a ChatGPT conversation
-const importResult = await fetch('/api/import', {
+const importResult = await fetch('/import', {
   method: 'POST',
   body: new FormData({
     type: 'chatgpt',
@@ -595,11 +595,11 @@ const { sourceId } = await importResult.json();
 await new Promise(resolve => setTimeout(resolve, 5000));
 
 // 3. Search the imported content
-const searchResult = await fetch('/api/search?q=useState hook');
+const searchResult = await fetch('/search?q=useState hook');
 const { results, aiResponse } = await searchResult.json();
 
 // 4. Create a follow-up question
-const microThread = await fetch('/api/thread', {
+const microThread = await fetch('/thread', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -615,7 +615,7 @@ const { answer } = await microThread.json();
 
 ```javascript
 // Get comprehensive analytics
-const analytics = await fetch('/api/analytics/dashboard');
+const analytics = await fetch('/analytics/dashboard');
 const data = await analytics.json();
 
 // Display key metrics
@@ -624,7 +624,7 @@ console.log(`Total Conversations: ${data.total_chunks}`);
 console.log(`Active Threads: ${data.total_threads}`);
 
 // Get conversation trends
-const trends = await fetch('/api/analytics/conversation-trends?days=30');
+const trends = await fetch('/analytics/conversation-trends?days=30');
 const trendData = await trends.json();
 
 // Visualize daily activity
