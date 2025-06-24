@@ -12,7 +12,7 @@ import { supabase } from '@/services/supabase';
 import Mesh from '@/components/mesh';
 
 const Register = () => {
-  const [step, setStep] = useState<'email' | 'details'>('email');
+  const [step, setStep] = useState<'email' | 'signin' | 'signup' | 'forgot'>('email');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,7 +23,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   const navigate = useNavigate();
 
   const passwordRequirements = [
@@ -113,131 +113,273 @@ const Register = () => {
               <CardDescription className="text-white/70">Sign in or register below</CardDescription>
             </CardHeader>
             <CardContent>
-              {step === 'email' ? (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!formData.email) return toast.error('Please enter your email');
-                    setStep('details');
-                  }}
-                  className="space-y-4"
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-white">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className="bg-white/10 border-white/20 text-white"
-                    />
-                  </div>
-                  <Button type="submit" className="w-full">Continue with Email</Button>
+              {step === 'email' && (
+  <form
+    onSubmit={async (e) => {
+      e.preventDefault();
+      if (!formData.email) return toast.error('Please enter your email');
+      setIsLoading(true);
+      try {
+        // Attempt sign-in with a dummy password to check if user exists
+        const { error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: 'dummy-password-check',
+        });
+        if (!error) {
+          // This would mean sign-in actually succeeded which is unexpected
+          setStep('signin');
+        } else if (error.message.toLowerCase().includes('invalid login credentials')) {
+          // User exists but wrong password supplied
+          setStep('signin');
+        } else if (error.message.toLowerCase().includes('user not found')) {
+          // Email not registered
+          setStep('signup');
+        } else {
+          toast.error('Error checking email: ' + error.message);
+        }
+      } catch (err: any) {
+        // Supabase returns AuthApiError
+        if (err && err.message) {
+          if (err.message.toLowerCase().includes('invalid login credentials')) {
+            setStep('signin');
+          } else if (err.message.toLowerCase().includes('user not found')) {
+            setStep('signup');
+          } else {
+            toast.error('Error checking email: ' + err.message);
+          }
+        } else {
+          toast.error('Error checking email. Please try again.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }}
+    className="space-y-4"
+  >
+    <div className="space-y-2">
+      <Label htmlFor="email" className="text-white">Email</Label>
+      <Input
+        id="email"
+        name="email"
+        type="email"
+        placeholder="your@email.com"
+        value={formData.email}
+        onChange={handleInputChange}
+        required
+        className="bg-white/10 border-white/20 text-white"
+      />
+    </div>
+    <Button type="submit" className="w-full" disabled={isLoading}>
+      {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+      Continue with Email
+    </Button>
+    <div className="flex items-center my-4">
+      <hr className="flex-grow border-white/20" />
+      <span className="mx-2 text-white/70 text-sm">OR</span>
+      <hr className="flex-grow border-white/20" />
+    </div>
+    <Button
+      type="button"
+      onClick={() => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/auth/callback` } })}
+      className="w-full bg-white text-gray-900 flex items-center justify-center gap-2"
+    >
+      <img src="/google-icon.svg" alt="Google" className="w-4 h-4" />
+      Continue with Google
+    </Button>
+    <Button
+      type="button"
+      onClick={() => supabase.auth.signInWithOAuth({ provider: 'github', options: { redirectTo: `${window.location.origin}/auth/callback` } })}
+      className="w-full bg-gray-800 text-white flex items-center justify-center gap-2"
+    >
+      <img src="/github-icon.svg" alt="GitHub" className="w-4 h-4" />
+      Continue with GitHub
+    </Button>
+  </form>
+)}
 
-                  <div className="flex items-center my-4">
-                    <hr className="flex-grow border-white/20" />
-                    <span className="mx-2 text-white/70 text-sm">OR</span>
-                    <hr className="flex-grow border-white/20" />
-                  </div>
+{step === 'signin' && (
+  <form
+    onSubmit={async (e) => {
+      e.preventDefault();
+      setIsLoading(true);
+      try {
+        await login(formData.email, formData.password);
+        toast.success('Signed in successfully!');
+        navigate('/app/dashboard');
+      } catch (err: any) {
+        toast.error(err.message || 'Invalid credentials');
+      } finally {
+        setIsLoading(false);
+      }
+    }}
+    className="space-y-4"
+  >
+    <div className="space-y-2">
+      <Label htmlFor="password" className="text-white">Password</Label>
+      <div className="relative">
+        <Input
+          id="password"
+          name="password"
+          type={showPassword ? 'text' : 'password'}
+          value={formData.password}
+          onChange={handleInputChange}
+          required
+          className="bg-white/10 border-white/20 text-white pr-10"
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="absolute right-0 top-0 h-full px-3 text-white/70"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </Button>
+      </div>
+    </div>
+    <Button type="submit" className="w-full" disabled={isLoading}>
+      {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+      Sign In
+    </Button>
+    <div className="flex justify-end">
+      <button
+        type="button"
+        onClick={() => setStep('forgot')}
+        className="text-sm text-blue-400 hover:underline"
+      >
+        Forgot password?
+      </button>
+    </div>
+  </form>
+)}
 
-                  <Button
-                    onClick={() => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/auth/callback` } })}
-                    className="w-full bg-white text-gray-900 flex items-center justify-center gap-2"
-                  >
-                    <img src="/google-icon.svg" alt="Google" className="w-4 h-4" />
-                    Continue with Google
-                  </Button>
+{step === 'forgot' && (
+  <form
+    onSubmit={async (e) => {
+      e.preventDefault();
+      setIsLoading(true);
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(formData.email);
+        if (error) {
+          toast.error(error.message || 'Failed to send reset email');
+        } else {
+          toast.success('Password reset email sent!');
+          setStep('signin');
+        }
+      } catch (err: any) {
+        toast.error(err.message || 'Error sending reset email');
+      } finally {
+        setIsLoading(false);
+      }
+    }}
+    className="space-y-4"
+  >
+    <div className="space-y-2">
+      <Label htmlFor="reset-email" className="text-white">Email</Label>
+      <Input
+        id="reset-email"
+        name="reset-email"
+        type="email"
+        value={formData.email}
+        disabled
+        className="bg-white/10 border-white/20 text-white"
+      />
+    </div>
+    <Button type="submit" className="w-full" disabled={isLoading}>
+      {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+      Send Password Reset Email
+    </Button>
+    <div className="flex justify-end">
+      <button
+        type="button"
+        onClick={() => setStep('signin')}
+        className="text-sm text-blue-400 hover:underline"
+      >
+        Back to sign in
+      </button>
+    </div>
+  </form>
+)}
 
-                  <Button
-                    onClick={() => supabase.auth.signInWithOAuth({ provider: 'github', options: { redirectTo: `${window.location.origin}/auth/callback` } })}
-                    className="w-full bg-gray-800 text-white flex items-center justify-center gap-2"
-                  >
-                    <img src="/github-icon.svg" alt="GitHub" className="w-4 h-4" />
-                    Continue with GitHub
-                  </Button>
-                </form>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-white">Full Name</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      className="bg-white/10 border-white/20 text-white"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-white">Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        required
-                        className="bg-white/10 border-white/20 text-white pr-10"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 text-white/70"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </Button>
-                    </div>
-                    {formData.password && passwordRequirements.map((req, idx) => (
-                      <div key={idx} className="flex items-center space-x-2 text-xs">
-                        <Check className={`w-3 h-3 ${req.met ? 'text-green-400' : 'text-white/50'}`} />
-                        <span className={req.met ? 'text-green-400' : 'text-white/50'}>{req.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        required
-                        className="bg-white/10 border-white/20 text-white pr-10"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 text-white/70"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </Button>
-                    </div>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Creating account...
-                      </>
-                    ) : (
-                      'Create Account'
-                    )}
-                  </Button>
-                </form>
-              )}
+{step === 'signup' && (
+  <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-2">
+      <Label htmlFor="name" className="text-white">Full Name</Label>
+      <Input
+        id="name"
+        name="name"
+        type="text"
+        placeholder="Enter your full name"
+        value={formData.name}
+        onChange={handleInputChange}
+        required
+        className="bg-white/10 border-white/20 text-white"
+      />
+    </div>
+    <div className="space-y-2">
+      <Label htmlFor="password" className="text-white">Password</Label>
+      <div className="relative">
+        <Input
+          id="password"
+          name="password"
+          type={showPassword ? 'text' : 'password'}
+          value={formData.password}
+          onChange={handleInputChange}
+          required
+          className="bg-white/10 border-white/20 text-white pr-10"
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="absolute right-0 top-0 h-full px-3 text-white/70"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </Button>
+      </div>
+      {formData.password && passwordRequirements.map((req, idx) => (
+        <div key={idx} className="flex items-center space-x-2 text-xs">
+          <Check className={`w-3 h-3 ${req.met ? 'text-green-400' : 'text-white/50'}`} />
+          <span className={req.met ? 'text-green-400' : 'text-white/50'}>{req.label}</span>
+        </div>
+      ))}
+    </div>
+    <div className="space-y-2">
+      <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
+      <div className="relative">
+        <Input
+          id="confirmPassword"
+          name="confirmPassword"
+          type={showConfirmPassword ? 'text' : 'password'}
+          value={formData.confirmPassword}
+          onChange={handleInputChange}
+          required
+          className="bg-white/10 border-white/20 text-white pr-10"
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="absolute right-0 top-0 h-full px-3 text-white/70"
+          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+        >
+          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </Button>
+      </div>
+    </div>
+    <Button type="submit" className="w-full" disabled={isLoading}>
+      {isLoading ? (
+        <>
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          Creating account...
+        </>
+      ) : (
+        'Create Account'
+      )}
+    </Button>
+  </form>
+)}
             </CardContent>
           </Card>
         </div>

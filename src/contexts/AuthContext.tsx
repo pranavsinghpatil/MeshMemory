@@ -66,10 +66,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Session:', session);
       console.log('Error:', error);
       setUser(session?.user ?? null);
-      setLoading(false);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error loading user:', error);
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
