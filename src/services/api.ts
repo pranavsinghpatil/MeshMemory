@@ -128,3 +128,7 @@ export interface ApiResponse<T> {
   data: T;
   error?: ApiError;
 }
+
+// In your api.ts
+console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
+console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);

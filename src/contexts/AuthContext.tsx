@@ -60,23 +60,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Load user from token on initial load
   const loadUser = async () => {
-    setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.getUser();
-      if (error) throw error;
-      if (data.user) {
-        const user = {
-          id: data.user.id,
-          email: data.user.email || '',
-          full_name: data.user.user_metadata?.full_name,
-          avatar_url: data.user.user_metadata?.avatar_url,
-        };
-        setUser(toAppUser(user));
-      }
-    } catch (err) {
-      console.error('Failed to load user', err);
-    } finally {
-      setIsLoading(false);
+      console.log('Loading user session...');
+      const { data: { session }, error } = await supabase.auth.getSession();
+      console.log('Session:', session);
+      console.log('Error:', error);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading user:', error);
+      setLoading(false);
     }
   };
 

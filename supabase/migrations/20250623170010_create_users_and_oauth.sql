@@ -1,4 +1,4 @@
--- 20250623170010_create_users_and_oauth.sql
+--  
 
 -- User profiles extending Supabase auth.users
 CREATE TABLE IF NOT EXISTS public.users (
@@ -20,14 +20,20 @@ CREATE TABLE IF NOT EXISTS public.users (
 CREATE OR REPLACE FUNCTION sync_auth_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.users (id, email, full_name, avatar_url, provider, provider_id, created_at)
-  VALUES (NEW.id, NEW.email, NEW.user_metadata->>'full_name', NEW.user_metadata->>'avatar_url', NEW.app_metadata->>'provider', NEW.app_metadata->>'provider_id', NOW())
+  INSERT INTO public.users (id, email, full_name, avatar_url, provider, created_at)
+  VALUES (
+    NEW.id, 
+    NEW.email, 
+    NEW.raw_user_meta_data->>'full_name', 
+    NEW.raw_user_meta_data->>'avatar_url', 
+    COALESCE(NEW.raw_app_meta_data->>'provider', 'email'),
+    NOW()
+  )
   ON CONFLICT (id) DO UPDATE SET
     email = EXCLUDED.email,
     full_name = EXCLUDED.full_name,
     avatar_url = EXCLUDED.avatar_url,
     provider = EXCLUDED.provider,
-    provider_id = EXCLUDED.provider_id,
     updated_at = NOW();
   RETURN NEW;
 END;
