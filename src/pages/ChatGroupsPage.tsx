@@ -1,5 +1,6 @@
 
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, Plus, Users, MessageCircle, Crown, Settings } from 'lucide-react';
 
 const ChatGroupsPage = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
   const chatGroups = [
@@ -91,9 +93,9 @@ const ChatGroupsPage = () => {
           <h1 className="text-3xl font-bold">Chat Groups</h1>
           <p className="text-muted-foreground">Collaborate with your teams</p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={() => navigate('/app/hybrid')}>
           <Plus className="w-4 h-4" />
-          Create Group
+          Create Hybrid
         </Button>
       </motion.div>
 
@@ -215,9 +217,9 @@ const ChatGroupsPage = () => {
           <p className="text-muted-foreground mb-4">
             {searchQuery ? 'Try adjusting your search terms' : 'Create your first group to get started'}
           </p>
-          <Button>
+          <Button onClick={() => navigate('/app/hybrid')}>
             <Plus className="w-4 h-4 mr-2" />
-            Create Group
+            Create Hybrid
           </Button>
         </motion.div>
       )}

@@ -32,18 +32,18 @@ const sidebarItems = [
     badge: 3 
   },
   { 
+    id: 'hybrid', 
+    label: 'Hybrid Chat', 
+    icon: GitBranch, 
+    path: '/app/hybrid', 
+    badge: null 
+  },
+  { 
     id: 'chat-groups', 
     label: 'Chat Groups', 
     icon: Users, 
     path: '/app/chat-groups', 
     badge: null 
-  },
-  { 
-    id: 'thread-groups', 
-    label: 'Thread Groups', 
-    icon: GitBranch, 
-    path: '/app/thread-groups', 
-    badge: 1 
   },
   { 
     id: 'analytics', 

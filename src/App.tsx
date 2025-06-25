@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ChatsPage from "./pages/ChatsPage";
+import CreateHybrid from "./pages/CreateHybrid";
 import ChatGroupsPage from "./pages/ChatGroupsPage";
 import ThreadGroupsPage from "./pages/ThreadGroupsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />
+            <Route path="/create-hybrid" element={<CreateHybrid />} />
             
             {/* Protected routes with layout */}
             <Route path="/app" element={<Layout />}>
@@ -63,6 +65,7 @@ const App = () => (
               <Route path="chats" element={<ChatsPage />} />
               <Route path="chat-groups" element={<ChatGroupsPage />} />
               <Route path="thread-groups" element={<ThreadGroupsPage />} />
+              <Route path="hybrid" element={<CreateHybrid />} />
               <Route path="analytics" element={<AnalyticsPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="help" element={<HelpPage />} />

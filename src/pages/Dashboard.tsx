@@ -1,5 +1,6 @@
 
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +21,7 @@ import {
 } from 'lucide-react';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   // Mock data
   const stats = [
     {
@@ -60,8 +62,8 @@ const Dashboard = () => {
       color: 'from-primary to-accent'
     },
     {
-      title: 'Create Group',
-      description: 'Set up a team workspace',
+      title: 'Create Hybrid Chat',
+      description: 'Combine multiple chat sources',
       icon: Users,
       color: 'from-secondary to-success'
     },
@@ -144,7 +146,10 @@ const Dashboard = () => {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               whileHover={{ y: -5, scale: 1.02 }}
             >
-              <Card className="card-modern h-full cursor-pointer group border-2 border-border/20 hover:border-primary/30">
+              <Card 
+                  className="card-modern h-full cursor-pointer group border-2 border-border/20 hover:border-primary/30" 
+                  onClick={() => action.title === 'Create Hybrid Chat' ? navigate('/app/hybrid') : null}
+                >
                 <CardContent className="p-6 text-center">
                   <div className={`w-12 h-12 mx-auto mb-4 bg-gradient-to-r ${action.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                     <action.icon className="w-6 h-6 text-white" />
@@ -200,53 +205,7 @@ const Dashboard = () => {
         </Card>
       </motion.section> */}
 
-      {/* Stats Grid */}
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-secondary to-success bg-clip-text text-transparent">
-            Team Overview
-          </h2>
-          <Badge className="bg-gradient-to-r from-secondary/10 to-success/10 text-secondary border-secondary/20">
-            <TrendingUp className="w-4 h-4 mr-1" />
-            Live Data
-          </Badge>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-              whileHover={{ y: -5, scale: 1.02 }}
-            >
-              <Card className="card-modern">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      {stat.title}
-                    </CardTitle>
-                    <div className={`w-10 h-10 bg-gradient-to-r ${stat.color} rounded-lg flex items-center justify-center`}>
-                      <stat.icon className="w-5 h-5 text-white" />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold mb-1">{stat.value}</div>
-                  <p className={`text-sm ${stat.change.startsWith('+') ? 'text-success' : 'text-accent'}`}>
-                    {stat.change} from last month
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
+    
 
       {/* Recent Activity */}
       <motion.section
