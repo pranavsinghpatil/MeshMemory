@@ -38,13 +38,13 @@ const CreateHybrid = () => {
   // Add a new source with importing status
   const addImportingSource = (title: string, type: 'text' | 'url' | 'file') => {
     const tempId = `temp-${Date.now()}-${Math.random()}`;
-    setSources((prev) => ([...prev, { id: tempId, title, messageCount: 0, status: 'importing', type }]));
+    setSources((prev) => [...prev, { id: tempId, title, messageCount: 0, status: 'importing', type }]);
     return tempId;
   };
 
   // Update a source by tempId
   const updateSource = (tempId: string, patch: Partial<ImportedSource>) => {
-    setSources((prev) => prev.map((s) => s.id === tempId ? { ...s, ...patch } : s));
+    setSources((prev) => prev.map((s) => (s.id === tempId ? { ...s, ...patch } : s)));
   };
 
   // Remove a source by id
@@ -58,6 +58,7 @@ const CreateHybrid = () => {
     const tempId = addImportingSource(title, 'text');
     setTextBlock('');
     setTextTitle('');
+    setIsImporting(true);
     try {
       const sourceId = await importChatText(textBlock, title);
       updateSource(tempId, { id: sourceId, status: 'done', messageCount: parseMessageCount(textBlock) });
@@ -65,6 +66,8 @@ const CreateHybrid = () => {
     } catch (err: any) {
       updateSource(tempId, { status: 'error', error: err.message || 'Import failed' });
       toast.error(err.message || 'Import failed');
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -74,6 +77,7 @@ const CreateHybrid = () => {
     const tempId = addImportingSource(title, 'url');
     setUrl('');
     setUrlTitle('');
+    setIsImporting(true);
     try {
       const sourceId = await importChatFromUrl(url, title);
       updateSource(tempId, { id: sourceId, status: 'done', messageCount: 0 });
@@ -81,6 +85,8 @@ const CreateHybrid = () => {
     } catch (err: any) {
       updateSource(tempId, { status: 'error', error: err.message || 'Import failed' });
       toast.error(err.message || 'Import failed');
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -90,6 +96,7 @@ const CreateHybrid = () => {
     const tempId = addImportingSource(title, 'file');
     setFile(null);
     setFileTitle('');
+    setIsImporting(true);
     try {
       const sourceId = await importChatFromFile(file, title);
       updateSource(tempId, { id: sourceId, status: 'done', messageCount: 0 });
@@ -97,18 +104,20 @@ const CreateHybrid = () => {
     } catch (err: any) {
       updateSource(tempId, { status: 'error', error: err.message || 'Import failed' });
       toast.error(err.message || 'Import failed');
+    } finally {
+      setIsImporting(false);
     }
   };
 
   const handleCreateHybrid = async () => {
-    if (sources.length < 2) {
-      return toast.error('Import at least two chats');
+    if (sources.filter(s => s.status === 'done').length < 2) {
+      return toast.error('At least two successfully imported chats are required');
     }
     setIsCreating(true);
     try {
       const payload = {
         title: 'Hybrid Chat',
-        chatIds: sources.map((s) => s.id),
+        chatIds: sources.filter(s => s.status === 'done').map(s => s.id),
       };
       const data = await createHybridChat(payload);
       toast.success('Hybrid chat created');
@@ -143,7 +152,11 @@ const CreateHybrid = () => {
               value={textBlock}
               onChange={(e) => setTextBlock(e.target.value)}
             />
-            <Button onClick={handleImportText} disabled={!textBlock.trim()}>
+            <Button 
+              onClick={handleImportText} 
+              disabled={!textBlock.trim() || isImporting}
+            >
+              {isImporting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Import Chat
             </Button>
           </CardContent>
@@ -165,7 +178,11 @@ const CreateHybrid = () => {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
             />
-            <Button onClick={handleImportUrl} disabled={!url.trim()}>
+            <Button 
+              onClick={handleImportUrl} 
+              disabled={!url.trim() || isImporting}
+            >
+              {isImporting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Import from URL
             </Button>
           </CardContent>
@@ -187,7 +204,11 @@ const CreateHybrid = () => {
               ref={fileInputRef}
               onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
-            <Button onClick={handleImportFile} disabled={!file}>
+            <Button 
+              onClick={handleImportFile} 
+              disabled={!file || isImporting}
+            >
+              {isImporting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Import from File
             </Button>
           </CardContent>
@@ -219,9 +240,19 @@ const CreateHybrid = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {src.status === 'importing' && <span className="text-xs text-blue-500 flex items-center gap-1"><Loader2 className="w-4 h-4 animate-spin"/> Importing...</span>}
-                  {src.status === 'error' && <span className="text-xs text-red-500">{src.error}</span>}
-                  {src.status === 'done' && <span className="text-sm text-muted-foreground">{src.messageCount} messages</span>}
+                  {src.status === 'importing' && (
+                    <span className="text-xs text-blue-500 flex items-center gap-1">
+                      <Loader2 className="w-4 h-4 animate-spin"/> Importing...
+                    </span>
+                  )}
+                  {src.status === 'error' && (
+                    <span className="text-xs text-red-500">{src.error}</span>
+                  )}
+                  {src.status === 'done' && (
+                    <span className="text-sm text-muted-foreground">
+                      {src.messageCount} messages
+                    </span>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -261,36 +292,6 @@ const CreateHybrid = () => {
           </Button>
         </div>
       )}
-    </div>
-  );
-                <CardHeader>
-                  <CardTitle className="text-lg">{src.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {src.messageCount} messages
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="mt-auto">
-        <Button
-          onClick={handleCreateHybrid}
-          disabled={isCreating || sources.length < 2}
-          className="flex items-center gap-2"
-        >
-          {isCreating ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Plus className="w-4 h-4" />
-          )}
-          Make Hybrid
-        </Button>
-      </div>
     </div>
   );
 };
