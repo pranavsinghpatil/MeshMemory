@@ -10,8 +10,11 @@ import { checkApiHealth, logEnvironmentInfo } from "./lib/apiHealth";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 import Dashboard from "./pages/Dashboard";
 import ChatsPage from "./pages/ChatsPage";
+import ChatView from "./pages/ChatView";
 import CreateHybrid from "./pages/CreateHybrid";
 import ChatGroupsPage from "./pages/ChatGroupsPage";
 import ThreadGroupsPage from "./pages/ThreadGroupsPage";
@@ -55,6 +58,8 @@ const App = () => (
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />
             <Route path="/auth/callback" element={<OAuthCallback />} />
             <Route path="/create-hybrid" element={<CreateHybrid />} />
@@ -64,6 +69,7 @@ const App = () => (
               <Route index element={<Dashboard />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="chats" element={<ChatsPage />} />
+              <Route path="chats/:chatId" element={<ChatView />} />
               <Route path="chat-groups" element={<ChatGroupsPage />} />
               <Route path="thread-groups" element={<ThreadGroupsPage />} />
               <Route path="hybrid" element={<CreateHybrid />} />

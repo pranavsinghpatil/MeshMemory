@@ -53,16 +53,34 @@ export interface HybridCreatePayload {
   chatIds: string[];
 }
 
-// Create hybrid chat
+// Create hybrid chat with imported context
 export const createHybridChat = async (payload: HybridCreatePayload) => {
   try {
     const response = await api.post('/chats/merge', {
       title: payload.title,
       source_chat_ids: payload.chatIds,
+      preserve_context: true, // This ensures the hybrid chat starts with the imported chat context
     });
+    
+    // Ensure we return the hybrid chat ID for proper navigation
+    if (response.data && !response.data.hybridChatId && response.data.id) {
+      response.data.hybridChatId = response.data.id;
+    }
+    
     return response.data;
   } catch (error) {
     console.error('Error creating hybrid chat:', error);
     throw new Error('Failed to create hybrid chat');
+  }
+};
+
+// Get the context information for a hybrid chat
+export const getHybridChatContext = async (chatId: string) => {
+  try {
+    const response = await api.get(`/chats/${chatId}/context`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching hybrid chat context:', error);
+    throw new Error('Failed to fetch hybrid chat context');
   }
 };

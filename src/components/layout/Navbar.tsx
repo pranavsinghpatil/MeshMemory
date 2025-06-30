@@ -56,13 +56,13 @@ const Navbar = () => {
           transition={{ duration: 0.3, delay: 0.1 }}
           className="flex items-center space-x-3"
         >
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg pulse-glow">
-            <span className="text-white font-bold text-lg">
-              <img src="../dalogo.svg" alt="Logo" className="w-8 h-8" />
+          <div className="w-10 h-10 bg-gradient-to-br from-[#333446] to-[#7F8CAA] rounded-xl flex items-center justify-center shadow-lg pulse-glow">
+            <span className="text-[#EAEFEF] font-bold text-lg">
+              K
             </span>
           </div>
-          <span className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-            MeshMemory
+          <span className="text-2xl font-bold bg-gradient-to-r from-[#333446] via-[#7F8CAA] to-[#B8CFCE] bg-clip-text text-transparent">
+            knitter.app
           </span>
           <Sparkles className="w-5 h-5 text-accent animate-pulse" />
         </motion.div>

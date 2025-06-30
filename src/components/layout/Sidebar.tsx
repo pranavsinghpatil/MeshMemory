@@ -104,7 +104,7 @@ const Sidebar = () => {
       {/* Header */}
       <div className="p-6 border-b border-sidebar-border/30">
         <div className="flex items-center justify-between">
-          {/* <AnimatePresence>
+          <AnimatePresence>
             {!isCollapsed && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -114,20 +114,20 @@ const Sidebar = () => {
                 className="flex items-center space-x-3"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg">M</span>
+                  <span className="text-white font-bold text-lg">K</span>
                 </div>
                 <span className="font-bold text-xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  MeshMemory
+                  knitter.app
                 </span>
               </motion.div>
             )}
-          </AnimatePresence> */}
+          </AnimatePresence>
           
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="w-15 h-15 p-0 hover:bg-sidebar-accent/50 rounded-xl transition-all duration-300"
+            className="w-15 h-15 p-0 hover:bg-[#B8CFCE]/30 rounded-xl transition-all duration-300 text-[#EAEFEF]"
           >
             <svg 
               width="20" 
@@ -159,8 +159,8 @@ const Sidebar = () => {
                       size="sm"
                       className={`w-12 h-12 p-0 relative rounded-xl transition-all duration-300 ${
                         isActive 
-                          ? "bg-gradient-to-r from-primary to-accent text-white shadow-lg" 
-                          : "hover:bg-sidebar-accent/50 hover:scale-105"
+                          ? "bg-gradient-to-r from-[#333446] to-[#7F8CAA] text-[#EAEFEF] shadow-lg" 
+                          : "hover:bg-[#B8CFCE]/20 hover:scale-105 text-[#EAEFEF]"
                       }`}
                     >
                       <Icon className="w-5 h-5" />
@@ -185,8 +185,8 @@ const Sidebar = () => {
                 variant={isActive ? "default" : "ghost"}
                 className={`w-full justify-start h-12 rounded-xl transition-all duration-300 ${
                   isActive 
-                    ? "bg-gradient-to-r from-primary to-accent text-white shadow-lg" 
-                    : "hover:bg-sidebar-accent/50 hover:scale-[1.02]"
+                    ? "bg-gradient-to-r from-[#333446] to-[#7F8CAA] text-[#EAEFEF] shadow-lg" 
+                    : "hover:bg-[#B8CFCE]/20 hover:scale-[1.02] text-[#EAEFEF]"
                 }`}
               >
                 <Icon className="w-5 h-5 mr-3" />

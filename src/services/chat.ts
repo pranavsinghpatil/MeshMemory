@@ -9,16 +9,22 @@ export interface Message {
   type: 'text' | 'file' | 'image';
   createdAt: string;
   updatedAt: string;
-  user: {
+  user?: {
     id: string;
     name: string;
     avatar?: string;
   };
+  attachments?: {
+    name: string;
+    url: string;
+    type: string;
+    size?: number;
+  }[];
 }
 
 export interface Chat {
   id: string;
-  type: 'direct' | 'group';
+  type: 'direct' | 'group' | 'hybrid';
   name?: string;
   participants: {
     id: string;
@@ -29,11 +35,17 @@ export interface Chat {
   unreadCount: number;
   createdAt: string;
   updatedAt: string;
+  sourceChats?: string[]; // IDs of source chats for hybrid chats
 }
 
 export interface SendMessageData {
   content: string;
   type?: 'text' | 'file' | 'image';
+  attachments?: {
+    name: string;
+    url: string;
+    type: string;
+  }[];
 }
 
 export const chatService = {

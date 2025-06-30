@@ -82,11 +82,15 @@ const Register = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="flex items-center justify-center space-x-3 mb-0"
           >
+            <Link to="/" className="inline-flex items-center text-white/80 hover:text-white transition-colors mb-8">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to home
+            </Link>
             <span
               onClick={() => navigate('/')}
               className="text-4xl font-bold text-white drop-shadow-lg hover:text-white transition-colors cursor-pointer"
             >
-              MeshMemory
+              knitter.app
             </span>
 
           </motion.div>
@@ -368,6 +372,17 @@ const Register = () => {
         </Button>
       </div>
     </div>
+    <div className="mt-4 text-xs text-white/50 text-center mb-4">
+      By signing up to knitter.app, you agree to our{' '}
+      <Link to="/terms" className="text-primary hover:text-primary/80">
+        Terms of Service
+      </Link>{' '}
+      and{' '}
+      <Link to="/privacy" className="text-primary hover:text-primary/80">
+        Privacy Policy
+      </Link>
+    </div>
+
     <Button type="submit" className="w-full" disabled={isLoading}>
       {isLoading ? (
         <>
