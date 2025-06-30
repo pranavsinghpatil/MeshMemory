@@ -27,7 +27,7 @@ async def delete_source(
                 if not source:
                     raise HTTPException(status_code=404, detail="Source not found")
                 
-                if source['user_id'] != current_user.id:
+                if source['user_id'] != current_user.get('id'):
                     raise HTTPException(status_code=403, detail="Not authorized to delete this source")
                 
                 # Delete in correct order to respect foreign key constraints
@@ -88,7 +88,7 @@ async def delete_thread(
                 if not thread:
                     raise HTTPException(status_code=404, detail="Thread not found")
                 
-                if thread['user_id'] != current_user.id:
+                if thread['user_id'] != current_user.get('id'):
                     raise HTTPException(status_code=403, detail="Not authorized to delete this thread")
                 
                 # Update chunks to remove thread_id (don't delete chunks)
@@ -148,7 +148,7 @@ async def delete_all_user_data(
         
         if conn:
             try:
-                user_id = current_user.id
+                user_id = current_user.get('id')
                 
                 # Delete in correct order
                 await conn.execute('DELETE FROM export_jobs WHERE user_id = $1', user_id)
@@ -214,7 +214,7 @@ async def export_user_data(
         
         if conn:
             try:
-                user_id = current_user.id
+                user_id = current_user.get('id')
                 
                 # Get all user data
                 sources = await conn.fetch('SELECT * FROM sources WHERE user_id = $1', user_id)

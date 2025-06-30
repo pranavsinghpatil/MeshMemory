@@ -29,7 +29,7 @@ const sidebarItems = [
     label: 'Chats', 
     icon: MessageCircle, 
     path: '/app/chats', 
-    badge: 3 
+    badge: null 
   },
   { 
     id: 'hybrid', 

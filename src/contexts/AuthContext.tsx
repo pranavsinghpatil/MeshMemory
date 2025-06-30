@@ -13,9 +13,10 @@ export interface User {
   updated_at?: string;
 }
 
-// Extend the User interface to make name required
+// Extend the User interface to make name required and add avatar
 interface AppUser extends User {
   name: string;
+  avatar?: string; // Add avatar property for use in components
 }
 
 export interface AuthContextType {
@@ -23,6 +24,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  isGuest: boolean; // Add isGuest property
   login: (email: string, password: string) => Promise<void>;
   register: (userData: { name: string; email: string; password: string; full_name?: string }) => Promise<void>;
   logout: () => Promise<void>;
@@ -47,6 +49,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isGuest, setIsGuest] = useState<boolean>(false);
   const navigate = useNavigate();
 
   // Helper to safely cast User to AppUser
@@ -55,6 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return {
       ...user,
       name: user.name || user.full_name || user.email.split('@')[0],
+      avatar: user.avatar_url, // Map avatar_url to avatar for consistency
     };
   };
 
@@ -65,7 +69,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { data: { session }, error } = await supabase.auth.getSession();
       console.log('Session:', session);
       console.log('Error:', error);
-      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Map Supabase user to our User interface
+        const userData: User = {
+          id: session.user.id,
+          email: session.user.email || '',
+          full_name: session.user.user_metadata?.full_name,
+          name: session.user.user_metadata?.name,
+          avatar_url: session.user.user_metadata?.avatar_url,
+        };
+        setUser(toAppUser(userData));
+      } else {
+        setUser(null);
+      }
+      
       setIsLoading(false);
     } catch (error) {
       console.error('Error loading user:', error);
@@ -73,13 +91,52 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Load user on mount
+  // Load user on mount and set up auth state change listener
   useEffect(() => {
     loadUser();
-  }, []);
+    
+    // Set up auth state change listener to keep session in sync
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Map Supabase user to our User interface
+          const userData: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            full_name: session.user.user_metadata?.full_name,
+            name: session.user.user_metadata?.name,
+            avatar_url: session.user.user_metadata?.avatar_url,
+          };
+          setUser(toAppUser(userData));
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          navigate('/login');
+        } else if (event === 'TOKEN_REFRESHED') {
+          // Session was refreshed, update the user data
+          if (session?.user) {
+            const userData: User = {
+              id: session.user.id,
+              email: session.user.email || '',
+              full_name: session.user.user_metadata?.full_name,
+              name: session.user.user_metadata?.name,
+              avatar_url: session.user.user_metadata?.avatar_url,
+            };
+            setUser(toAppUser(userData));
+          }
+        }
+      }
+    );
+    
+    // Clean up subscription when component unmounts
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   // Handle login
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<void> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -89,25 +146,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (error) throw error;
       
       if (data?.user) {
-        const user = {
+        const userData = {
           id: data.user.id,
           email: data.user.email || '',
           full_name: data.user.user_metadata?.full_name,
           avatar_url: data.user.user_metadata?.avatar_url,
+          name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'User',
         };
-        setUser(user);
+        setUser(toAppUser(userData));
         navigate('/app/dashboard');
       }
-      
-      return { user: data?.user || null, error };
     } catch (error) {
       console.error('Login error:', error);
+      setError(error.message || 'Failed to login');
       throw error;
     }
   };
 
   // Handle registration
-  const register = async (userData: { name: string; email: string; password: string; full_name?: string }) => {
+  const register = async (userData: { name: string; email: string; password: string; full_name?: string }): Promise<void> => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
@@ -123,19 +180,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (error) throw error;
       
       if (data?.user) {
-        const user = {
+        const newUser = {
           id: data.user.id,
           email: data.user.email || '',
           full_name: data.user.user_metadata?.full_name,
           avatar_url: data.user.user_metadata?.avatar_url,
+          name: userData.name,
         };
-        setUser(user);
+        setUser(toAppUser(newUser));
         navigate('/app/dashboard');
       }
-      
-      return { user: data?.user || null, error };
     } catch (error) {
       console.error('Registration error:', error);
+      setError(error.message || 'Failed to register');
       throw error;
     }
   };
@@ -164,6 +221,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: !!user,
     isLoading,
     error,
+    isGuest, // Add isGuest to the context value
     login,
     register,
     logout,

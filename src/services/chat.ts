@@ -38,17 +38,23 @@ export interface SendMessageData {
 
 export const chatService = {
   async getChats(): Promise<Chat[]> {
-    const response = await api.get('/conversations');
+    const response = await api.get('/chats');
     return response.data;
   },
 
   async createChat(participantIds: string[]): Promise<Chat> {
-    const response = await api.post('/conversations', { participantIds });
-    return response.data;
+    const response = await api.post('/chats/new', { 
+      title: "New Chat",
+      source_type: "manual",
+      metadata: {
+        participantIds
+      }
+    });
+    return response.data.chat;
   },
 
   async getChatDetails(chatId: string): Promise<Chat> {
-    const response = await api.get(`/conversations/${chatId}`);
+    const response = await api.get(`/chats/${chatId}`);
     return response.data;
   },
 

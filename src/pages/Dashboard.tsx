@@ -22,99 +22,42 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  // Mock data
-  const stats = [
-    {
-      title: 'Total Messages',
-      value: '2,847',
-      change: '+12.5%',
-      icon: MessageCircle,
-      color: 'from-blue-500 to-cyan-500'
-    },
-    {
-      title: 'Active Groups',
-      value: '23',
-      change: '+3.2%',
-      icon: Users,
-      color: 'from-green-500 to-emerald-500'
-    },
-    {
-      title: 'Response Time',
-      value: '2.3min',
-      change: '-8.1%',
-      icon: Clock,
-      color: 'from-purple-500 to-pink-500'
-    },
-    {
-      title: 'Team Score',
-      value: '94%',
-      change: '+5.7%',
-      icon: Star,
-      color: 'from-yellow-500 to-orange-500'
-    }
-  ];
+  // Stats data - empty array to be populated from backend
+  const stats = [];
 
   const quickActions = [
     {
       title: 'New Chat',
       description: 'Start a conversation',
       icon: MessageCircle,
-      color: 'from-primary to-accent'
+      color: 'from-primary to-accent',
+      path: '/app/chats'
     },
     {
       title: 'Create Hybrid Chat',
       description: 'Combine multiple chat sources',
       icon: Users,
-      color: 'from-secondary to-success'
+      color: 'from-primary to-accent',
+      path: '/app/hybrid'
     },
     {
       title: 'View Analytics',
       description: 'Check team insights',
       icon: BarChart3,
-      color: 'from-accent to-secondary'
+      color: 'from-accent to-secondary',
+      path: '/app/analytics'
     },
     {
       title: 'Invite Members',
       description: 'Add team members',
       icon: Plus,
-      color: 'from-success to-primary'
+      color: 'from-accent to-secondary',
+      path: '/app/team'
     }
   ];
 
-  const recentActivity = [
-    {
-      id: 1,
-      user: 'Alice Johnson',
-      action: 'created a new group',
-      target: 'Marketing Team',
-      time: '2 minutes ago',
-      avatar: 'AJ'
-    },
-    {
-      id: 2,
-      user: 'Bob Smith',
-      action: 'shared a file in',
-      target: 'Design Review',
-      time: '5 minutes ago',
-      avatar: 'BS'
-    },
-    {
-      id: 3,
-      user: 'Carol Davis',
-      action: 'mentioned you in',
-      target: 'Project Updates',
-      time: '12 minutes ago',
-      avatar: 'CD'
-    },
-    {
-      id: 4,
-      user: 'David Wilson',
-      action: 'started a thread in',
-      target: 'General Discussion',
-      time: '1 hour ago',
-      avatar: 'DW'
-    }
-  ];
+  // Recent activity - empty array to be populated from backend
+  const recentActivity = [];
 
   return (
     <div className="min-h-screen bg-background p-6 space-y-8">
@@ -148,7 +91,7 @@ const Dashboard = () => {
             >
               <Card 
                   className="card-modern h-full cursor-pointer group border-2 border-border/20 hover:border-primary/30" 
-                  onClick={() => action.title === 'Create Hybrid Chat' ? navigate('/app/hybrid') : null}
+                  onClick={() => navigate(action.path)}
                 >
                 <CardContent className="p-6 text-center">
                   <div className={`w-12 h-12 mx-auto mb-4 bg-gradient-to-r ${action.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
@@ -232,30 +175,36 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <motion.div
-                  key={activity.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
-                  className="flex items-center space-x-4 p-3 rounded-xl hover:bg-muted/30 transition-colors"
-                >
-                  <Avatar className="ring-2 ring-primary/20">
-                    <AvatarImage src="" />
-                    <AvatarFallback className="bg-gradient-to-r from-primary to-accent text-white font-semibold">
-                      {activity.avatar}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm">
-                      <span className="font-semibold text-foreground">{activity.user}</span>
-                      <span className="text-muted-foreground"> {activity.action} </span>
-                      <span className="font-semibold text-primary">{activity.target}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
-                  </div>
-                </motion.div>
-              ))}
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity, index) => (
+                  <motion.div
+                    key={activity.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
+                    className="flex items-center space-x-4 p-3 rounded-xl hover:bg-muted/30 transition-colors"
+                  >
+                    <Avatar className="ring-2 ring-primary/20">
+                      <AvatarImage src={activity.avatarUrl || ""} />
+                      <AvatarFallback className="bg-gradient-to-r from-primary to-accent text-white font-semibold">
+                        {activity.avatar}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">
+                        <span className="font-semibold text-foreground">{activity.user}</span>
+                        <span className="text-muted-foreground"> {activity.action} </span>
+                        <span className="font-semibold text-primary">{activity.target}</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-muted-foreground">
+                  <p>No recent activity</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

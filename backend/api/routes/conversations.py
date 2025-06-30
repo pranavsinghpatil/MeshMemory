@@ -191,8 +191,11 @@ async def create_new_chat(
         chat_id = request.chat_id or str(uuid.uuid4())
         now = datetime.utcnow().isoformat()
         
-        # Extract user ID from Supabase user object
-        user_id = current_user.user.id if hasattr(current_user, 'user') else current_user.id
+        # Extract user ID from Supabase user object (now returned as a dictionary from verify_token)
+        user_id = current_user.get('id')
+        if not user_id:
+            logger.error(f"Could not extract user ID from current_user: {current_user}")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user authentication")
         
         # Prepare the chat data to match the import chat structure
         chat_data = {

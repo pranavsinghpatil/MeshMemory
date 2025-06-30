@@ -8,62 +8,55 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, Plus, MessageCircle, Clock } from 'lucide-react';
 
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { chatService } from '@/services/chat';
+
 const ChatsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const conversations = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      lastMessage: 'Hey, can we discuss the project timeline?',
-      timestamp: '2 min ago',
-      unread: 2,
-      avatar: '/api/placeholder/40/40',
-      online: true
-    },
-    {
-      id: 2,
-      name: 'Design Team',
-      lastMessage: 'The new mockups look great!',
-      timestamp: '15 min ago',
-      unread: 0,
-      avatar: '/api/placeholder/40/40',
-      online: false,
-      isGroup: true
-    },
-    {
-      id: 3,
-      name: 'Mike Chen',
-      lastMessage: 'Thanks for the update 👍',
-      timestamp: '1 hour ago',
-      unread: 1,
-      avatar: '/api/placeholder/40/40',
-      online: true
-    },
-    {
-      id: 4,
-      name: 'Product Team',
-      lastMessage: 'Meeting starts in 10 minutes',
-      timestamp: '2 hours ago',
-      unread: 0,
-      avatar: '/api/placeholder/40/40',
-      online: false,
-      isGroup: true
-    },
-    {
-      id: 5,
-      name: 'Emma Wilson',
-      lastMessage: 'Great work on the presentation!',
-      timestamp: 'Yesterday',
-      unread: 0,
-      avatar: '/api/placeholder/40/40',
-      online: false
-    }
-  ];
+  // Remove mock data and fetch real chats
+  const [chats, setChats] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const filteredChats = conversations.filter(chat =>
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  useEffect(() => {
+    async function fetchChats() {
+      setLoading(true);
+      setError(null);
+      try {
+        // Replace with your backend or Supabase fetch logic
+        const response = await chatService.getChats();
+        setChats(response || []);
+      } catch (err: any) {
+        setError('Failed to load chats.');
+      }
+      setLoading(false);
+    }
+    if (user?.id) fetchChats();
+  }, [user]);
+
+  // Create new chat with Gemini bot
+  const handleNewChat = async () => {
+    try {
+      setLoading(true);
+      // Create a chat with the Gemini bot as participant
+      const geminiBotId = 'gemini-bot'; // Use your actual Gemini bot user id
+      const chat = await chatService.createChat([user.id, geminiBotId]);
+      navigate(`/app/chats/${chat.id}`);
+    } catch (err: any) {
+      setError('Failed to create new chat.');
+    }
+    setLoading(false);
+  };
+
+
+  const filteredChats = chats.filter(chat =>
+    chat.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.lastMessage?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -79,9 +72,9 @@ const ChatsPage = () => {
           <h1 className="text-3xl font-bold">Chats</h1>
           <p className="text-muted-foreground">Stay connected with your team</p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={handleNewChat} disabled={loading}>
           <Plus className="w-4 h-4" />
-          New Chat
+          {loading ? 'Creating...' : 'New Chat'}
         </Button>
       </motion.div>
 
@@ -177,9 +170,9 @@ const ChatsPage = () => {
           <p className="text-muted-foreground mb-4">
             {searchQuery ? 'Try adjusting your search terms' : 'Start a new conversation to get connected'}
           </p>
-          <Button>
+          <Button onClick={handleNewChat} disabled={loading}>
             <Plus className="w-4 h-4 mr-2" />
-            Start New Chat
+            {loading ? 'Creating...' : 'Start New Chat'}
           </Button>
         </motion.div>
       )}

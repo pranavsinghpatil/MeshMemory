@@ -56,6 +56,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />
+            <Route path="/auth/callback" element={<OAuthCallback />} />
             <Route path="/create-hybrid" element={<CreateHybrid />} />
             
             {/* Protected routes with layout */}

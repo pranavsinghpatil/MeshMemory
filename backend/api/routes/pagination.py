@@ -35,7 +35,7 @@ async def get_thread_chunks_paginated(
                 if not thread:
                     raise HTTPException(status_code=404, detail="Thread not found")
                 
-                if thread['user_id'] != current_user.id:
+                if thread['user_id'] != current_user.get('id'):
                     raise HTTPException(status_code=403, detail="Not authorized")
                 
                 # Calculate offset
@@ -115,7 +115,7 @@ async def get_source_chunks_paginated(
                 if not source:
                     raise HTTPException(status_code=404, detail="Source not found")
                 
-                if source['user_id'] != current_user.id:
+                if source['user_id'] != current_user.get('id'):
                     raise HTTPException(status_code=403, detail="Not authorized")
                 
                 # Calculate offset
@@ -195,7 +195,7 @@ async def search_with_pagination(
                     FROM chunks c
                     JOIN sources s ON c.source_id = s.id
                     WHERE s.user_id = $1 AND c.search_vector @@ plainto_tsquery('english', $2)
-                ''', current_user.id, q)
+                ''', current_user.get('id'), q)
                 
                 # Get paginated results
                 results = await conn.fetch('''
@@ -206,7 +206,7 @@ async def search_with_pagination(
                     WHERE s.user_id = $1 AND c.search_vector @@ plainto_tsquery('english', $2)
                     ORDER BY rank DESC
                     LIMIT $3 OFFSET $4
-                ''', current_user.id, q, limit, offset)
+                ''', current_user.get('id'), q, limit, offset)
                 
                 # Calculate pagination info
                 total_pages = (total_count + limit - 1) // limit

@@ -95,7 +95,7 @@ class DatabaseService:
             for k, v in data.items():
                 if isinstance(v, datetime):
                     data[k] = v.isoformat()
-            result = self.supabase.table('sources').insert(data).execute()
+            result = await self.supabase.table('sources').insert(data).execute()
             if hasattr(result, 'error') and result.error:
                 print(f"Database error creating source: {result.error}")
         except Exception as e:
@@ -478,8 +478,8 @@ class DatabaseService:
                 # Standard filtering for other types
                 else:
                     query = query.or_(
-                        f"type.eq.{source_type},"
-                        f"metadata->>import_method.eq.{source_type},"
+                        f"type.eq.{source_type}," 
+                        f"metadata->>import_method.eq.{source_type}," 
                         f"metadata->>source_type.eq.{source_type}"
                     )
             
@@ -496,7 +496,8 @@ class DatabaseService:
                 if source_type == 'chatgpt':
                     count_query = count_query.or_("type.eq.chatgpt,metadata->>import_method.eq.chatgpt,metadata->>import_method.eq.chatgpt-link")
             
-            total_count = count_query.execute().count or 0
+            count_result = await count_query.execute()
+            total_count = count_result.count if hasattr(count_result, 'count') else 0
             print(f"[DEBUG] Found {total_count} total sources (filtered: {bool(source_type)})")
             
             # For each source, get the chunk count
@@ -538,7 +539,7 @@ class DatabaseService:
                 })
             
             return chats
-            
+        
         except Exception as e:
             print(f"Error getting imported chats from Supabase: {e}")
             raise
@@ -546,7 +547,7 @@ class DatabaseService:
     async def _get_chunk_count_for_source(self, source_id: str) -> int:
         """Helper method to get chunk count for a source"""
         try:
-            result = (self.supabase.table('chunks')
+            result = await (self.supabase.table('chunks')
                     .select('id', count='exact')
                     .eq('source_id', source_id)
                     .execute())

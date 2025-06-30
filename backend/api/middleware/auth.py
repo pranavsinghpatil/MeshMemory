@@ -56,7 +56,7 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
             return {"id": "mock-user-id", "email": "dev@example.com"}
         
         # Verify the token and get user info using our custom client
-        user = supabase.verify_token(token)
+        user = await supabase.verify_token(token)
         if not user or not user.get("id"):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -83,9 +83,11 @@ async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] 
         return None
     
     try:
-        user = supabase.auth.get_user(credentials.credentials)
-        return user.user if user and user.user else None
-    except Exception:
+        # Use the verify_token method instead of auth.get_user
+        user = await supabase.verify_token(credentials.credentials)
+        return user if user else None
+    except Exception as e:
+        logger.error(f"Error getting optional user: {str(e)}")
         return None
 
 def require_auth(func):
