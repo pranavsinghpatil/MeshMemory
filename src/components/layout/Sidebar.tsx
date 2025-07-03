@@ -1,7 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -75,13 +75,44 @@ const sidebarItems = [
   },
 ];
 
-const Sidebar = () => {
+// Define interface for props
+interface SidebarProps {
+  onSidebarToggle?: (collapsed: boolean) => void;
+}
+
+const Sidebar = ({ onSidebarToggle }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
+  // Toggle sidebar state
   const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    // Notify parent component if callback provided
+    if (onSidebarToggle) {
+      onSidebarToggle(newState);
+    }
+    // Store preference in local storage
+    localStorage.setItem('sidebar-collapsed', newState ? 'true' : 'false');
   };
+  
+  // Handle navigation with active state tracking
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
+  
+  // Load saved sidebar state on component mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('sidebar-collapsed');
+    if (savedState) {
+      const newState = savedState === 'true';
+      setIsCollapsed(newState);
+      if (onSidebarToggle) {
+        onSidebarToggle(newState);
+      }
+    }
+  }, [onSidebarToggle]);
 
   const sidebarVariants = {
     expanded: { width: 280 },
@@ -99,10 +130,10 @@ const Sidebar = () => {
       animate={isCollapsed ? "collapsed" : "expanded"}
       variants={sidebarVariants}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="sidebar-modern border-r border-sidebar-border/30 flex flex-col shadow-xl"
+      className="sidebar-modern border-r border-[#B8CFCE]/20 flex flex-col shadow-xl bg-[#333446]/95 backdrop-blur-sm z-20 h-screen sticky top-0 left-0"
     >
       {/* Header */}
-      <div className="p-6 border-b border-sidebar-border/30">
+      <div className="p-6 border-b border-[#B8CFCE]/20">
         <div className="flex items-center justify-between">
           <AnimatePresence>
             {!isCollapsed && (
@@ -113,10 +144,10 @@ const Sidebar = () => {
                 transition={{ duration: 0.2 }}
                 className="flex items-center space-x-3"
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg">K</span>
+                <div className="w-10 h-10 bg-gradient-to-br from-[#333446] to-[#7F8CAA] rounded-xl flex items-center justify-center shadow-lg pulse-glow">
+                  <span className="text-[#EAEFEF] font-bold text-lg">K</span>
                 </div>
-                <span className="font-bold text-xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                <span className="font-bold text-xl bg-gradient-to-r from-[#B8CFCE] to-[#EAEFEF] bg-clip-text text-transparent">
                   knitter.app
                 </span>
               </motion.div>
@@ -127,7 +158,7 @@ const Sidebar = () => {
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="w-15 h-15 p-0 hover:bg-[#B8CFCE]/30 rounded-xl transition-all duration-300 text-[#EAEFEF]"
+            className="w-10 h-10 p-0 hover:bg-[#7F8CAA]/30 rounded-xl transition-all duration-300 text-[#EAEFEF]"
           >
             <svg 
               width="20" 
@@ -144,7 +175,7 @@ const Sidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-[#7F8CAA]/50 scrollbar-track-transparent">
         {sidebarItems.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
@@ -159,8 +190,8 @@ const Sidebar = () => {
                       size="sm"
                       className={`w-12 h-12 p-0 relative rounded-xl transition-all duration-300 ${
                         isActive 
-                          ? "bg-gradient-to-r from-[#333446] to-[#7F8CAA] text-[#EAEFEF] shadow-lg" 
-                          : "hover:bg-[#B8CFCE]/20 hover:scale-105 text-[#EAEFEF]"
+                          ? "bg-gradient-to-r from-[#7F8CAA] to-[#B8CFCE] text-[#333446] shadow-lg" 
+                          : "hover:bg-[#7F8CAA]/20 hover:scale-105 text-[#EAEFEF]"
                       }`}
                     >
                       <Icon className="w-5 h-5" />
@@ -185,8 +216,8 @@ const Sidebar = () => {
                 variant={isActive ? "default" : "ghost"}
                 className={`w-full justify-start h-12 rounded-xl transition-all duration-300 ${
                   isActive 
-                    ? "bg-gradient-to-r from-[#333446] to-[#7F8CAA] text-[#EAEFEF] shadow-lg" 
-                    : "hover:bg-[#B8CFCE]/20 hover:scale-[1.02] text-[#EAEFEF]"
+                    ? "bg-gradient-to-r from-[#7F8CAA] to-[#B8CFCE] text-[#333446] shadow-lg" 
+                    : "hover:bg-[#7F8CAA]/20 hover:scale-[1.02] text-[#EAEFEF]"
                 }`}
               >
                 <Icon className="w-5 h-5 mr-3" />
@@ -198,7 +229,7 @@ const Sidebar = () => {
                 </motion.span>
                 {item.badge && (
                   <motion.div variants={contentVariants}>
-                    <Badge className="ml-auto bg-gradient-to-r from-accent to-secondary text-white">
+                    <Badge className="ml-auto bg-gradient-to-r from-[#333446] to-[#7F8CAA] text-[#EAEFEF]">
                       {item.badge}
                     </Badge>
                   </motion.div>
@@ -210,16 +241,16 @@ const Sidebar = () => {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-sidebar-border/30">
+      <div className="p-4 border-t border-[#B8CFCE]/20">
         <motion.div
           variants={contentVariants}
           className={`${isCollapsed ? 'hidden' : 'block'}`}
         >
           <div className="glass-effect rounded-xl p-3 text-center">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg mx-auto mb-2 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">✨</span>
+            <div className="w-8 h-8 bg-gradient-to-r from-[#7F8CAA] to-[#B8CFCE] rounded-lg mx-auto mb-2 flex items-center justify-center">
+              <span className="text-[#333446] text-sm font-bold">✨</span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-[#EAEFEF]/80">
               Upgrade to Pro for unlimited features
             </p>
           </div>

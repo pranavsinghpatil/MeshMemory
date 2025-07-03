@@ -16,7 +16,17 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
 # JWT Configuration
-SECRET_KEY = os.getenv("JWT_SECRET", "your-secret-key-here")
+SECRET_KEY = os.getenv("JWT_SECRET")
+if not SECRET_KEY or SECRET_KEY == "your-secret-key-here":
+    # In production, this will cause the application to fail if no secret key is set
+    # which is better than using a default insecure key
+    if os.getenv("ENVIRONMENT", "").lower() == "production":
+        raise ValueError("JWT_SECRET environment variable must be set in production")
+    # For development only, generate a random key
+    import secrets
+    SECRET_KEY = secrets.token_hex(32)
+    print("WARNING: Using a randomly generated JWT secret key. This is only acceptable for development.")
+
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
@@ -34,10 +44,23 @@ def get_password_hash(password: str) -> str:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Create a new JWT access token."""
     to_encode = data.copy()
+    
+    # Set default token type if not specified
+    if "type" not in to_encode:
+        to_encode.update({"type": "access"})
+    
+    # Set issued at time for token
+    to_encode.update({"iat": datetime.utcnow()})
+    
+    # Set token ID for potential revocation
+    import uuid
+    to_encode.update({"jti": str(uuid.uuid4())})
+    
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -61,12 +84,29 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> Dict[str, Any
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        
+        # Validate token type and expiration
+        token_type = payload.get("type")
+        if token_type == "refresh":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token not valid for authentication",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+            
         user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception
+            
+        # Check if token is about to expire and should be renewed
+        exp = payload.get("exp")
+        if exp and datetime.fromtimestamp(exp) < datetime.utcnow() + timedelta(minutes=5):
+            # Mark token as needing refresh
+            return {"user_id": user_id, "token": token, "needs_refresh": True}
+            
         # Here you would typically fetch the user from your database
         # For now, we'll just return the user_id
-        return {"user_id": user_id, "token": token}
+        return {"user_id": user_id, "token": token, "needs_refresh": False}
     except JWTError:
         raise credentials_exception
 

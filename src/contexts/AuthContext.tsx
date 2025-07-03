@@ -1,6 +1,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/services/supabase';
+import { sanitizeErrorMessage } from '@/services/api';
 
 export interface User {
   id: string;
@@ -98,7 +99,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Set up auth state change listener to keep session in sync
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
+        // Use development logging
+        if (import.meta.env.DEV) {
+          console.log('Auth state changed:', event, session?.user?.id);
+        }
         
         if (event === 'SIGNED_IN' && session?.user) {
           // Map Supabase user to our User interface
@@ -158,7 +162,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      setError(error.message || 'Failed to login');
+      setError(sanitizeErrorMessage(error));
       throw error;
     }
   };
@@ -192,7 +196,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setError(error.message || 'Failed to register');
+      setError(sanitizeErrorMessage(error));
       throw error;
     }
   };
@@ -202,12 +206,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await supabase.auth.signOut();
       setUser(null);
-      navigate('/login');
+      // Add a small delay before navigating to ensure state is cleared
+      setTimeout(() => navigate('/login'), 50);
     } catch (err) {
       console.error('Logout error:', err);
       // Even if logout fails, clear the user state
       setUser(null);
-      navigate('/login');
+      setError(sanitizeErrorMessage(err));
+      setTimeout(() => navigate('/login'), 50);
     }
   };
 

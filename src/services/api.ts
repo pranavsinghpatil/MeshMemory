@@ -3,6 +3,7 @@ import { authService } from './auth';
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const IS_PRODUCTION = import.meta.env.MODE === 'production';
 
 // Create axios instance
 export const api = axios.create({
@@ -10,6 +11,7 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest', // Helps with CSRF protection
   },
   withCredentials: true, // Important for cookies if using httpOnly
 });
@@ -44,8 +46,10 @@ api.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (error) {
-      console.warn('Failed to get auth token:', error);
       // Continue without token if we can't get one
+      if (!IS_PRODUCTION) {
+        console.warn('Failed to get auth token:', error);
+      }
     }
     return config;
   },
@@ -69,7 +73,12 @@ api.interceptors.response.use(
     if (originalRequest._retry || originalRequest.url?.includes('/auth/refresh')) {
       // Clear auth data and redirect to login
       authService.clearAuthData();
-      window.location.href = '/login';
+      
+      // Use relative path and don't expose URL structure in production
+      const loginPath = '/login';
+      if (window.location.pathname !== loginPath) {
+        window.location.href = loginPath;
+      }
       return Promise.reject(error);
     }
 
@@ -106,7 +115,12 @@ api.interceptors.response.use(
       // Clear auth data and redirect to login
       processQueue(refreshError, null);
       authService.clearAuthData();
-      window.location.href = '/login';
+      
+      // Use relative path and don't expose URL structure in production
+      const loginPath = '/login';
+      if (window.location.pathname !== loginPath) {
+        window.location.href = loginPath;
+      }
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
@@ -129,6 +143,17 @@ export interface ApiResponse<T> {
   error?: ApiError;
 }
 
-// In your api.ts
-console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
-console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
+// Sanitize error messages to avoid leaking sensitive information
+export const sanitizeErrorMessage = (error: any): string => {
+  if (!error) return 'An unknown error occurred';
+  
+  // For security, don't show detailed DB or server errors to users
+  if (IS_PRODUCTION) {
+    // Generic error message in production
+    return 'An error occurred. Please try again or contact support.';
+  }
+  
+  // In development, return more details
+  if (typeof error === 'string') return error;
+  return error.message || 'An error occurred';
+};

@@ -1,0 +1,97 @@
+/* Theme Colors CSS Variables */
+:root {
+  /* Default fallback colors */
+  --color-primary: #333446;
+  --color-secondary: #7F8CAA;
+  --color-accent: #B8CFCE;
+  --color-text: #EAEFEF;
+  --color-background: #333446;
+  --color-border: #7F8CAA;
+  --color-muted: #7F8CAA80;
+}
+
+/* Dark theme colors (default) */
+.dark {
+  --color-primary: #333446;
+  --color-secondary: #7F8CAA;
+  --color-accent: #B8CFCE;
+  --color-text: #EAEFEF;
+  --color-background: #333446;
+  --color-border: #7F8CAA;
+  --color-muted: #7F8CAA80;
+
+  /* Additional semantic variables */
+  --color-surface: #40425A;
+  --color-sidebar-bg: rgba(51, 52, 70, 0.95);
+  --color-navbar-bg: rgba(51, 52, 70, 0.95);
+  --color-card-bg: rgba(127, 140, 170, 0.15);
+  --color-hover: rgba(184, 207, 206, 0.2);
+  --color-active: rgba(184, 207, 206, 0.6);
+}
+
+/* Light theme colors */
+.light {
+  --color-primary: #3B3B1A;
+  --color-secondary: #8A784E;
+  --color-accent: #AEC8A4;
+  --color-text: #3B3B1A;
+  --color-background: #E7EFC7;
+  --color-border: #8A784E;
+  --color-muted: #8A784E80;
+
+  /* Additional semantic variables */
+  --color-surface: #F5F9E3;
+  --color-sidebar-bg: rgba(231, 239, 199, 0.95);
+  --color-navbar-bg: rgba(231, 239, 199, 0.95);
+  --color-card-bg: rgba(138, 120, 78, 0.15);
+  --color-hover: rgba(174, 200, 164, 0.2);
+  --color-active: rgba(174, 200, 164, 0.6);
+}
+
+/* Glass effect utility class */
+.glass-effect {
+  backdrop-filter: blur(8px);
+  background: var(--color-card-bg);
+  border: 1px solid rgba(var(--color-border), 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Pulse glow animation */
+.pulse-glow {
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 5px var(--color-accent);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--color-accent), 0 0 30px var(--color-accent);
+  }
+  100% {
+    box-shadow: 0 0 5px var(--color-accent);
+  }
+}
+
+/* Modern scrollbar styling */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--color-secondary);
+  border-radius: 6px;
+}
+
+/* Utility classes for theme colors */
+.bg-primary { background-color: var(--color-primary); }
+.bg-secondary { background-color: var(--color-secondary); }
+.bg-accent { background-color: var(--color-accent); }
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-secondary); }
+.text-accent { color: var(--color-accent); }
+.border-themed { border-color: var(--color-border); }

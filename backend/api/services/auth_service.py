@@ -6,15 +6,40 @@ from typing import Optional, Dict, Any
 from ..services.supabase_client import create_client, SupabaseClient as Client
 from ..models.schemas import UserCreate, UserLogin, UserSession
 from fastapi import HTTPException, status
-from passlib.context import CryptContext
+from ..core.security import verify_password, get_password_hash, create_access_token, create_refresh_token, SECRET_KEY, ALGORITHM
+import logging
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# JWT settings
-SECRET_KEY = os.getenv("JWT_SECRET", "your-secret-key")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# Rate limiting settings
+from collections import defaultdict
+from threading import Lock
+
+# Simple in-memory rate limiter for login attempts
+class LoginRateLimiter:
+    def __init__(self, max_attempts=5, window_seconds=300):
+        self.max_attempts = max_attempts
+        self.window_seconds = window_seconds
+        self.attempts = defaultdict(list)
+        self.lock = Lock()
+    
+    def is_rate_limited(self, ip_address):
+        with self.lock:
+            now = time.time()
+            # Remove old attempts
+            self.attempts[ip_address] = [t for t in self.attempts[ip_address] 
+                                       if now - t < self.window_seconds]
+            # Check if rate limited
+            if len(self.attempts[ip_address]) >= self.max_attempts:
+                return True
+            # Add new attempt
+            self.attempts[ip_address].append(now)
+            return False
+
+# Initialize rate limiter
+login_rate_limiter = LoginRateLimiter()
 
 class AuthService:
     def __init__(self):
@@ -39,8 +64,8 @@ class AuthService:
                     detail="Email already registered"
                 )
             
-            # Hash the password
-            hashed_password = pwd_context.hash(user_credentials.password)
+            # Hash the password using the imported function
+            hashed_password = get_password_hash(user_credentials.password)
             
             # Create user in the database
             user_data = {
@@ -61,15 +86,13 @@ class AuthService:
             
             # Create a session
             user = result.data[0]
-            access_token = self.create_access_token(data={"sub": user["email"]})
+            tokens = self.generate_tokens(user["email"])
             
             return UserSession(
                 user=user,
                 session={
-                    "access_token": access_token,
-                    "refresh_token": "",  # Implement refresh tokens if needed
-                    "expires_in": ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-                    "token_type": "bearer"
+                    **tokens,
+                    "expires_in": 60 * 30  # 30 minutes in seconds
                 }
             )
             
@@ -81,15 +104,21 @@ class AuthService:
                 detail=f"Error registering user: {str(e)}"
             )
 
-    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None) -> str:
-        """Create a JWT access token."""
-        to_encode = data.copy()
-        if expires_delta:
-            expire = datetime.utcnow() + expires_delta
-        else:
-            expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        to_encode.update({"exp": expire})
-        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    def generate_tokens(self, user_email: str) -> dict:
+        """Generate access and refresh tokens."""
+        # Use the imported create_access_token from security.py
+        access_token = create_access_token(
+            data={"sub": user_email, "type": "access"}
+        )
+        
+        # Generate a refresh token
+        refresh_token = create_refresh_token(user_email)
+        
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer"
+        }
 
     async def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
         """Get a user by email."""
@@ -98,36 +127,42 @@ class AuthService:
             return result.data[0]
         return None
 
-    async def login_user(self, user_credentials: UserLogin) -> UserSession:
+    async def login_user(self, user_credentials: UserLogin, client_ip: str = None) -> UserSession:
         """Authenticate a user and return a session."""
         try:
+            # Apply rate limiting if IP is provided
+            if client_ip and login_rate_limiter.is_rate_limited(client_ip):
+                logger.warning(f"Rate limit exceeded for IP: {client_ip}")
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Too many login attempts. Please try again later."
+                )
+                
             # Get user from database
             user = await self.get_user_by_email(user_credentials.email)
             if not user:
+                # Use a consistent error message to prevent user enumeration
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Incorrect email or password"
                 )
             
-            # Verify password
-            if not pwd_context.verify(user_credentials.password, user["hashed_password"]):
+            # Verify password using the imported function
+            if not verify_password(user_credentials.password, user["hashed_password"]):
+                logger.warning(f"Failed login attempt for email: {user_credentials.email}")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Incorrect email or password"
                 )
             
-            # Create access token
-            access_token = self.create_access_token(
-                data={"sub": user["email"]}
-            )
+            # Generate tokens
+            tokens = self.generate_tokens(user["email"])
             
             return UserSession(
                 user=user,
                 session={
-                    "access_token": access_token,
-                    "refresh_token": "",  # Implement refresh tokens if needed
-                    "expires_in": ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-                    "token_type": "bearer"
+                    **tokens,
+                    "expires_in": 60 * 30  # 30 minutes in seconds
                 }
             )
             
@@ -142,7 +177,23 @@ class AuthService:
     async def get_current_user(self, token: str) -> Dict[str, Any]:
         """Get the current user from a JWT token."""
         try:
+            # Check for token type before decoding to prevent timing attacks
+            if not token or not isinstance(token, str):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid authentication credentials"
+                )
+                
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            
+            # Verify token type is 'access'
+            token_type = payload.get("type")
+            if token_type != "access":
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid token type"
+                )
+                
             email: str = payload.get("sub")
             if email is None:
                 raise HTTPException(

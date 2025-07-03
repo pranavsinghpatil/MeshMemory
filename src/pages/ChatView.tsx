@@ -112,33 +112,6 @@ const ChatView = () => {
   // Check if chat has AI capabilities
   const hasAiCapabilities = chat?.participants.some(p => p.id === 'gemini-bot') ?? false;
   
-  // Render file attachment component
-  const renderFileAttachment = (attachment: any) => {
-    const isImage = attachment.type.startsWith('image/');
-    
-    return (
-      <div className="mt-2 border rounded-md p-2 bg-secondary/30 max-w-[300px]">
-        {isImage ? (
-          <img 
-            src={attachment.url} 
-            alt={attachment.name} 
-            className="rounded-md max-h-[200px] object-contain" 
-          />
-        ) : (
-          <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            <div className="overflow-hidden">
-              <p className="font-medium truncate">{attachment.name}</p>
-              {attachment.size && (
-                <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   const handleSendMessage = async () => {
     if ((!newMessage.trim() && !file) || sending) return;
     
@@ -284,14 +257,40 @@ const ChatView = () => {
     toast.info(`AI model set to ${model}`);
   };
 
+  const renderFileAttachment = (attachment: any) => {
+    const isImage = attachment.type.startsWith('image/');
+
+    return (
+      <div className="mt-2 border rounded-md p-2 bg-secondary/30 max-w-[300px]">
+        {isImage ? (
+          <img
+            src={attachment.url}
+            alt={attachment.name}
+            className="rounded-md max-h-[200px] object-contain"
+          />
+        ) : (
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            <div className="overflow-hidden">
+              <p className="font-medium truncate">{attachment.name}</p>
+              {attachment.size && (
+                <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Chat header */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => navigate('/app/chats')}
           >
             <ArrowLeft className="h-5 w-5" />
@@ -310,25 +309,11 @@ const ChatView = () => {
             </div>
           </div>
         </div>
-
         {/* AI Model Selector */}
-        <Select value={selectedModel} onValueChange={handleModelChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select AI Model" />
-          </SelectTrigger>
-          <SelectContent>
-            {AI_MODELS.map(model => (
-              <SelectItem 
-                key={model.id} 
-                value={model.id}
-                disabled={model.id !== 'gemini'} // Only Gemini is enabled for now
-      </div>
-      
-      {hasAiCapabilities && (
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <Select value={selectedModel} onValueChange={handleModelChange}>
-            <SelectTrigger className="w-[130px] h-8 text-xs">
-              <SelectValue placeholder="AI Model" />
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select AI Model" />
             </SelectTrigger>
             <SelectContent>
               {AI_MODELS.map(model => (
@@ -342,7 +327,6 @@ const ChatView = () => {
               ))}
             </SelectContent>
           </Select>
-          
           {!apiKeyConfigured && (
             <TooltipProvider>
               <Tooltip>
@@ -358,118 +342,110 @@ const ChatView = () => {
             </TooltipProvider>
           )}
         </div>
-      )}
-    </div>
+      </div>
 
-    {/* Main chat area */}
-    <ScrollArea className="flex-1 p-4 overflow-auto" ref={messagesContainerRef}>
-      {loading ? (
-        <div className="flex items-center justify-center h-full">
-          <p>Loading messages...</p>
-        </div>
-      ) : messages.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full text-center">
-          <p className="text-muted-foreground">No messages yet</p>
-          {isHybrid && hybridContext && (
-            <div className="mt-4 max-w-md bg-secondary/20 p-4 rounded-lg border">
-              <p className="text-sm font-medium mb-2">This hybrid chat was created from:</p>
-              <p className="text-sm text-muted-foreground">{hybridContext.summary || 'Multiple merged conversations'}</p>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {messages.map(message => {
-            const isUser = message.userId === user.id;
-            const isAi = message.userId === 'gemini-bot';
-            return (
-              <motion.div 
-                key={message.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`flex gap-2 max-w-[85%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <Avatar className="h-8 w-8 mt-1">
-                    {!isUser && message.user?.avatar ? (
-                      <AvatarImage src={message.user?.avatar} alt={message.user?.name} />
-                    ) : null}
-                    <AvatarFallback>
-                      {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-                    </AvatarFallback>
-                  </Avatar>
-                  <Card className={`${isUser ? 'bg-primary text-primary-foreground' : ''} ${message.content === '...' ? 'animate-pulse' : ''}`}>
-                    <CardContent className="p-3 break-words">
-                      {message.content === '...' ? (
-                        <p>AI is thinking...</p>
-                      ) : (
-                        <>
-                          <p>{message.content}</p>
-                          {message.type === 'file' && message.attachments?.length > 0 && (
-                            renderFileAttachment(message.attachments[0])
-                          )}
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </motion.div>
-            );
-          })}
-          <div ref={messagesEndRef} />
-        </div>
-      )}
-    </ScrollArea>
-
-    {/* Message input area */}
-    <div className="border-t p-3 dark:border-gray-800">
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="icon" onClick={handleFileSelect} disabled={sending}>
-          <Paperclip className="h-5 w-5" />
-        </Button>
-        <input
-          type="file"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept=".txt,.pdf,.doc,.docx,.csv,image/*"
-        />
-        
-        <div className="flex-1 flex gap-2 items-center">
-          {file && (
-            <div className="flex items-center text-xs bg-secondary rounded-md px-2 py-1">
-              <span className="truncate max-w-[100px]">{file.name}</span>
-              <Button variant="ghost" size="sm" className="h-5 w-5 ml-1" onClick={() => setFile(null)}>
-                <span className="sr-only">Remove</span>
-                &times;
-              </Button>
-            </div>
-          )}
-          <Input
-            value={newMessage}
-            onChange={e => setNewMessage(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder="Type a message..."
-            disabled={sending}
-            className="flex-1"
-          />
-        </div>
-        
-        <Button 
-          onClick={handleSendMessage} 
-          disabled={sending || (!newMessage.trim() && !file)}
-          className="bg-primary hover:bg-primary/90"
-        >
-          <SendHorizontal className="h-5 w-5" />
-          {sending && <span className="ml-2">...</span>}
-        </Button>
-              size="sm"
-              onClick={() => setFile(null)}
-            >
-              Remove
-            </Button>
+      {/* Main chat area */}
+      <ScrollArea className="flex-1 p-4 overflow-auto" ref={messagesContainerRef}>
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <p>Loading messages...</p>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <p className="text-muted-foreground">No messages yet</p>
+            {isHybrid && hybridContext && (
+              <div className="mt-4 max-w-md bg-secondary/20 p-4 rounded-lg border">
+                <p className="text-sm font-medium mb-2">This hybrid chat was created from:</p>
+                <p className="text-sm text-muted-foreground">{hybridContext.summary || 'Multiple merged conversations'}</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {messages.map(message => {
+              const isUser = message.userId === user.id;
+              const isAi = message.userId === 'gemini-bot';
+              return (
+                <motion.div 
+                  key={message.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`flex gap-2 max-w-[85%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <Avatar className="h-8 w-8 mt-1">
+                      {!isUser && message.user?.avatar ? (
+                        <AvatarImage src={message.user?.avatar} alt={message.user?.name} />
+                      ) : null}
+                      <AvatarFallback>
+                        {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                      </AvatarFallback>
+                    </Avatar>
+                    <Card className={`${isUser ? 'bg-primary text-primary-foreground' : ''} ${message.content === '...' ? 'animate-pulse' : ''}`}>
+                      <CardContent className="p-3 break-words">
+                        {message.content === '...' ? (
+                          <p>AI is thinking...</p>
+                        ) : (
+                          <>
+                            <p>{message.content}</p>
+                            {message.type === 'file' && message.attachments?.length > 0 && (
+                              renderFileAttachment(message.attachments[0])
+                            )}
+                          </>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </motion.div>
+              );
+            })}
+            <div ref={messagesEndRef} />
           </div>
         )}
+      </ScrollArea>
+
+      {/* Message input area */}
+      <div className="border-t p-3 dark:border-gray-800">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={handleFileSelect} disabled={sending}>
+            <Paperclip className="h-5 w-5" />
+          </Button>
+          <input
+            type="file"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept=".txt,.pdf,.doc,.docx,.csv,image/*"
+          />
+          <div className="flex-1 flex gap-2 items-center">
+            {file && (
+              <div className="flex items-center text-xs bg-secondary rounded-md px-2 py-1">
+                <span className="truncate max-w-[100px]">{file.name}</span>
+                <Button variant="ghost" size="sm" className="h-5 w-5 ml-1" onClick={() => setFile(null)}>
+                  <span className="sr-only">Remove</span>
+                  &times;
+                </Button>
+              </div>
+            )}
+            <Input
+              value={newMessage}
+              onChange={e => setNewMessage(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="Type a message..."
+              disabled={sending}
+              className="flex-1"
+            />
+          </div>
+          
+          <Button 
+            onClick={handleSendMessage} 
+            disabled={sending || (!newMessage.trim() && !file)}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <SendHorizontal className="h-5 w-5" />
+            {sending && <span className="ml-2">...</span>}
+          </Button>
+        </div>
       </div>
     </div>
   );
