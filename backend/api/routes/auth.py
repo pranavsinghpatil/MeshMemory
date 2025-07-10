@@ -5,9 +5,16 @@ from typing import Optional
 from ..models.schemas import UserCreate, UserLogin, TokenResponse, UserResponse, UserSession
 from ..services.auth_service import AuthService, pwd_context
 
-router = APIRouter()
+router = APIRouter(prefix="/auth")
 security = HTTPBearer()
 auth_service = AuthService()
+
+@router.get("/callback")
+async def auth_callback():
+    """
+    OAuth callback endpoint (dummy for dev).
+    """
+    return {"message": "Auth callback received"}
 
 # Request/Response Schemas
 class RegisterRequest(BaseModel):
@@ -32,7 +39,7 @@ class MeResponse(BaseModel):
     email: EmailStr
     full_name: Optional[str] = None
 
-@router.post("/auth/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_credentials: RegisterRequest):
     """
     Register a new user.
@@ -63,7 +70,7 @@ async def register(user_credentials: RegisterRequest):
             detail=str(e)
         )
 
-@router.post("/auth/login", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse)
 async def login(user_credentials: LoginRequest):
     """
     Authenticate user and return a token.

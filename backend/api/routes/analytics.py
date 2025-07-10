@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, Body, status
 from typing import Dict, Any, List, Optional
 from ..services.analytics_service import AnalyticsService
-from ..middleware.auth import get_current_user
+from ..dependencies import get_current_user  # Minimal stub for dev/demo; replace with real auth if needed
 
 router = APIRouter()
 analytics_service = AnalyticsService()

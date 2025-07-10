@@ -8,6 +8,7 @@ from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
+from api.routes import auth
 from typing import List, Optional, Union
 import uvicorn
 import os
@@ -23,7 +24,7 @@ load_dotenv(env_path)
 
 # Import route modules
 try:
-    from api.routes import auth
+    
     from api.routes import import_routes
     from api.routes import search
     from api.routes import user_settings
@@ -55,9 +56,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 app = FastAPI(
     title="MeshMemory API",
-    description="AI Conversation Management Backend with Error Monitoring",
-    version="1.0.0"
+    description="API for MeshMemory - A smart chat management system",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
+
+
 
 # CORS middleware
 app.add_middleware(
@@ -122,18 +127,18 @@ async def log_requests(request, call_next):
 
 # Include routers with authentication
 try:
-    app.include_router(auth.router, prefix="", tags=["auth"])
-    app.include_router(import_routes.router, prefix="", tags=["import"])
-    app.include_router(conversations_router, prefix="", tags=["conversations"])
-    app.include_router(chat_merge_router, prefix="", tags=["Chat Merge"])
-    app.include_router(search.router, prefix="", tags=["search"])
-    app.include_router(enhanced_search.router, prefix="", tags=["enhanced-search"])
-    app.include_router(user_settings.router, prefix="", tags=["user-settings"])
-    app.include_router(microchats.router, prefix="", tags=["microchats"])
-    app.include_router(analytics.router, prefix="", tags=["analytics"])
-    app.include_router(data_management.router, prefix="", tags=["data-management"])
-    app.include_router(pagination.router, prefix="", tags=["pagination"])
-    app.include_router(messages_router, prefix="", tags=["messages"])
+    app.include_router(auth.router, tags=["auth"])
+    app.include_router(import_routes.router, prefix="/import", tags=["import"])
+    app.include_router(conversations_router, prefix="/conversations", tags=["conversations"])
+    app.include_router(chat_merge_router, prefix="/chat-merge", tags=["Chat Merge"])
+    app.include_router(search.router, prefix="/search", tags=["search"])
+    app.include_router(enhanced_search.router, prefix="/enhanced-search", tags=["enhanced-search"])
+    app.include_router(user_settings.router, prefix="/user-settings", tags=["user-settings"])
+    app.include_router(microchats.router, prefix="/microchats", tags=["microchats"])
+    app.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
+    app.include_router(data_management.router, prefix="/data-management", tags=["data-management"])
+    app.include_router(pagination.router, prefix="/pagination", tags=["pagination"])
+    app.include_router(messages_router, prefix="/messages", tags=["messages"])
 except Exception as e:
     logger.error(f"Error including router: {str(e)}")
     traceback.print_exc()

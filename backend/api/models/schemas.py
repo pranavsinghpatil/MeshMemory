@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, validator, root_validator
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 from fastapi import UploadFile
+import uuid
 
 # Import/Export Schemas
 class ImportRequest(BaseModel):
@@ -106,31 +107,115 @@ class SearchResponse(BaseModel):
     totalResults: int
     metadata: Optional[Dict[str, Any]] = None
 
-# # Thread Schemas  [Not used]
-# class ThreadSummary(BaseModel):
-#     id: str
-#     title: str
-#     created_at: Union[datetime, str]
-#     updated_at: Union[datetime, str]
-#     chunkCount: int
-#     topics: List[str]
-#     metadata: Optional[Dict[str, Any]] = None
+# Microchat Schemas
+class MicrochatCreate(BaseModel):
+    parent_message_id: str = Field(..., description="ID of the parent message")
+    user_message: str = Field(..., min_length=1, max_length=1000, description="Initial user message")
+    is_branch: bool = Field(False, description="Whether this is a branch microchat")
+    parent_chat_id: Optional[str] = Field(None, description="ID of the parent chat (required if is_branch=True)")
+    branch_type: Optional[str] = Field(None, description="Type of branch (deep-dive, refactor, translate, summarize, custom)")
 
-# class ThreadResponse(BaseModel): 
-#     id: str
-#     title: str
-#     chunks: List[ChunkResponse]
-#     centroidEmbedding: Optional[List[float]] = None
-#     created_at: Union[datetime, str]
-#     updated_at: Union[datetime, str]
-#     metadata: Optional[Dict[str, Any]] = None
-#     summary: Optional[str] = None
+    @validator('parent_message_id', 'parent_chat_id')
+    def validate_id(cls, v, values):
+        if v is None and 'is_branch' in values and values['is_branch'] and values.get('parent_chat_id') is None:
+            # Only validate parent_chat_id if is_branch is True
+            if v is None and values.get('parent_chat_id') is None:
+                return v
+        
+        if v is not None:
+            try:
+                uuid.UUID(v)
+                return v
+            except ValueError:
+                field_name = 'parent_message_id' if v == values.get('parent_message_id') else 'parent_chat_id'
+                raise ValueError(f"Invalid UUID format for {field_name}")
+        return v
+    
+    @validator('branch_type')
+    def validate_branch_type(cls, v, values):
+        if v is not None and values.get('is_branch'):
+            valid_types = ['deep-dive', 'refactor', 'translate', 'summarize', 'custom']
+            if v not in valid_types:
+                raise ValueError(f"branch_type must be one of {valid_types}")
+        return v
+        
+    @root_validator
+    def validate_branch_fields(cls, values):
+        is_branch = values.get('is_branch')
+        parent_chat_id = values.get('parent_chat_id')
+        branch_type = values.get('branch_type')
+        
+        if is_branch:
+            if not parent_chat_id:
+                raise ValueError("parent_chat_id is required when is_branch is True")
+            if not branch_type:
+                raise ValueError("branch_type is required when is_branch is True")
+        
+        return values
 
-# class MergeThreadRequest(BaseModel):
-#     targetThreadId: str
+class MessageCreate(BaseModel):
+    """Model for creating a new message in a microchat."""
+    content: str = Field(..., min_length=1, max_length=10000, description="The message content")
+    role: str = Field("user", description="The role of the message sender (e.g., 'user' or 'assistant')")
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata for the message")
 
-# class SplitThreadRequest(BaseModel):
-#     chunkId: str
+    @validator('role')
+    def validate_role(cls, v):
+        valid_roles = ['user', 'assistant', 'system']
+        if v not in valid_roles:
+            raise ValueError(f"role must be one of {valid_roles}")
+        return v
+
+class MicrochatResponse(BaseModel):
+    id: str
+    parent_message_id: str
+    user_id: str
+    created_at: Union[datetime, str]
+    updated_at: Union[datetime, str]
+    messages: List[Dict[str, Any]]
+    context: Dict[str, Any]
+    is_branch: bool = False
+    branch_status: Optional[str] = None
+    promoted_to_message_id: Optional[str] = None
+    title: Optional[str] = None
+
+
+
+class DeleteMicrochatRequest(BaseModel):
+    microchat_id: str
+
+class UpdateBranchStatusRequest(BaseModel):
+    microchat_id: str
+    status: str
+    
+    @validator('status')
+    def validate_status(cls, v):
+        valid_statuses = ['ephemeral', 'pinned']
+        if v not in valid_statuses:
+            raise ValueError(f"status must be one of {valid_statuses}")
+        return v
+    
+    @validator('microchat_id')
+    def validate_id(cls, v):
+        try:
+            uuid.UUID(v)
+            return v
+        except ValueError:
+            raise ValueError("Invalid UUID format for microchat_id")
+
+class PromoteBranchRequest(BaseModel):
+    microchat_id: str
+    
+    @validator('microchat_id')
+    def validate_id(cls, v):
+        try:
+            uuid.UUID(v)
+            return v
+        except ValueError:
+            raise ValueError("Invalid UUID format for microchat_id")
+
+class BranchesResponse(BaseModel):
+    branches: List[MicrochatResponse]
 
 # Chat Schemas
 class ChatListResponse(BaseModel):
@@ -193,15 +278,6 @@ class UserSession(BaseModel):
     session: Dict[str, Any]
     error: Optional[str] = None
 
-# Micro-thread Schemas  [Not used]
-# class MicroThreadRequest(BaseModel):
-#     parentThreadId: str
-#     selectedText: str
-#     query: str
-#     contextBefore: Optional[str] = None
-#     contextAfter: Optional[str] = None
-#     responseChunkId: str  # ID of the chunk containing the selected text
-#     title: Optional[str] = None
 
 class MicroThreadResponse(BaseModel):
     id: str
@@ -246,11 +322,3 @@ class UsageLog(BaseModel):
     errorMessage: Optional[str] = None
     timestamp: Union[datetime, str]
 
-# Thread Changelog Schema  [Not used]
-# class ThreadChangelogEntry(BaseModel):
-#     id: str
-#     threadId: str
-#     changeType: str  # "merge", "split", "create", "update", "delete"
-#     description: str
-#     metadata: Optional[Dict[str, Any]] = None
-#     timestamp: Union[datetime, str]
