@@ -12,12 +12,12 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ChatsPage from "./pages/ChatsPage";
-import ChatGroupsPage from "./pages/ChatGroupsPage";
-import ThreadGroupsPage from "./pages/ThreadGroupsPage";
+
+
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
 import HelpPage from "./pages/HelpPage";
-import TeamWorkspacePage from "./pages/TeamWorkspacePage";
+
 import NotFound from "./pages/NotFound";
 import "./index.css";
 import { OAuthCallback } from "./pages/OAuthCallback";
@@ -55,18 +55,20 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />
+            {/* Alias for Supabase default callback URL */}
+            <Route path="/auth/callback" element={<OAuthCallback />} />
             
             {/* Protected routes with layout */}
             <Route path="/app" element={<Layout />}>
               <Route index element={<Dashboard />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="chats" element={<ChatsPage />} />
-              <Route path="chat-groups" element={<ChatGroupsPage />} />
-              <Route path="thread-groups" element={<ThreadGroupsPage />} />
+              
+              
               <Route path="analytics" element={<AnalyticsPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="help" element={<HelpPage />} />
-              <Route path="team" element={<TeamWorkspacePage />} />
+              
             </Route>
             
             {/* Catch-all route */}

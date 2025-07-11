@@ -12,19 +12,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Bell, User, LogOut, Palette, Sparkles } from 'lucide-react';
+import { User, LogOut, Palette, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const pageNames: Record<string, string> = {
   '/app': 'Dashboard',
   '/app/dashboard': 'Dashboard',
   '/app/chats': 'Chats',
-  '/app/chat-groups': 'Chat Groups',
-  '/app/thread-groups': 'Thread Groups',
+
+
   '/app/analytics': 'Analytics',
   '/app/settings': 'Settings',
   '/app/help': 'Help',
-  '/app/team': 'Team Workspace',
+
 };
 
 const Navbar = () => {
@@ -74,18 +74,6 @@ const Navbar = () => {
           transition={{ duration: 0.3, delay: 0.2 }}
           className="flex items-center space-x-3"
         >
-          {/* Notifications */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="w-10 h-10 p-0 relative rounded-xl hover:bg-muted/50 transition-all duration-300 hover:scale-110"
-          >
-            <Bell className="w-5 h-5" />
-            <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 text-xs bg-gradient-to-r from-accent to-secondary animate-pulse">
-              2
-            </Badge>
-          </Button>
-
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

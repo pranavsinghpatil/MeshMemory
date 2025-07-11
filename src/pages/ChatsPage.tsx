@@ -11,7 +11,59 @@ import { Search, Plus, MessageCircle, Clock } from 'lucide-react';
 const ChatsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const conversations = [
+  /* Mock conversations removed for production
+const conversationsBackup = [
+    {
+      id: 1,
+      name: 'Sarah Johnson',
+      lastMessage: 'Hey, can we discuss the project timeline?',
+      timestamp: '2 min ago',
+      unread: 2,
+      avatar: '/api/placeholder/40/40',
+      online: true
+    },
+    {
+      id: 2,
+      name: 'Design Team',
+      lastMessage: 'The new mockups look great!',
+      timestamp: '15 min ago',
+      unread: 0,
+      avatar: '/api/placeholder/40/40',
+      online: false,
+      isGroup: true
+    },
+    {
+      id: 3,
+      name: 'Mike Chen',
+      lastMessage: 'Thanks for the update 👍',
+      timestamp: '1 hour ago',
+      unread: 1,
+      avatar: '/api/placeholder/40/40',
+      online: true
+    },
+    {
+      id: 4,
+      name: 'Product Team',
+      lastMessage: 'Meeting starts in 10 minutes',
+      timestamp: '2 hours ago',
+      unread: 0,
+      avatar: '/api/placeholder/40/40',
+      online: false,
+      isGroup: true
+    },
+    {
+      id: 5,
+      name: 'Emma Wilson',
+      lastMessage: 'Great work on the presentation!',
+      timestamp: 'Yesterday',
+      unread: 0,
+      avatar: '/api/placeholder/40/40',
+      online: false
+    }
+  ];
+*/
+
+  const conversationsBackup = [
     {
       id: 1,
       name: 'Sarah Johnson',
@@ -61,6 +113,14 @@ const ChatsPage = () => {
     }
   ];
 
+  const [conversations, setConversations] = useState(conversationsBackup);
+
+  const handleNewChat = () => {
+    console.log("New chat button clicked!");
+    // In a real application, you would navigate to a new chat creation page
+    // or open a modal for new chat creation here.
+  };
+
   const filteredChats = conversations.filter(chat =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
@@ -79,7 +139,7 @@ const ChatsPage = () => {
           <h1 className="text-3xl font-bold">Chats</h1>
           <p className="text-muted-foreground">Stay connected with your team</p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={handleNewChat}>
           <Plus className="w-4 h-4" />
           New Chat
         </Button>
@@ -177,7 +237,7 @@ const ChatsPage = () => {
           <p className="text-muted-foreground mb-4">
             {searchQuery ? 'Try adjusting your search terms' : 'Start a new conversation to get connected'}
           </p>
-          <Button>
+          <Button onClick={handleNewChat}>
             <Plus className="w-4 h-4 mr-2" />
             Start New Chat
           </Button>

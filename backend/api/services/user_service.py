@@ -5,17 +5,17 @@ from typing import Dict, Any, Optional
 import asyncio
 from datetime import datetime
 from .database_service import DatabaseService
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 
 class UserService:
     def __init__(self):
-        self.db_service = DatabaseService()
-        
-        # Set up encryption for API keys
-        # In production, this key would be stored securely, not hardcoded
-        self.encryption_key = os.getenv("ENCRYPTION_KEY", "YourFallbackEncryptionKeyHere1234567890123=")
-        print(f"ENCRYPTION_KEY: '{self.encryption_key}'")
-        self.cipher = Fernet(self.encryption_key.encode())
+        self.encryption_key = os.getenv("FERNET_KEY")
+        if not self.encryption_key:
+            raise ValueError("FERNET_KEY environment variable is not set")
+        try:
+            self.cipher = Fernet(self.encryption_key.encode())
+        except Exception as e:
+            raise ValueError(f"Invalid FERNET_KEY: {e}")
         
         # For demo/fallback, use in-memory storage
         self.user_settings = {}
