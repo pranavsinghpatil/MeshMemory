@@ -7,10 +7,11 @@ from ..services.supabase_client import create_client, SupabaseClient as Client
 from ..models.schemas import UserCreate, UserLogin, UserSession
 from fastapi import HTTPException, status
 from passlib.context import CryptContext
+from dotenv import load_dotenv
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+load_dotenv() 
 # JWT settings
 SECRET_KEY = os.getenv("JWT_SECRET", "your-secret-key")
 ALGORITHM = "HS256"

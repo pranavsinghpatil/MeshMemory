@@ -6,7 +6,7 @@ import json
 from ..services.user_service import UserService
 from ..services.llm_service import LLMService
 
-from ..middleware.auth import get_current_user
+from ..dependencies import get_current_user  # Minimal stub for dev/demo; replace with real auth if needed
 
 router = APIRouter()
 user_service = UserService()

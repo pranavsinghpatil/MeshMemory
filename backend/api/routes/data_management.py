@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from typing import List, Dict, Any
-from ..middleware.auth import get_current_user
+from ..dependencies import get_current_user  # Minimal stub for dev/demo; replace with real auth if needed
 from ..services.database_service import DatabaseService
 from ..services.cache_service import CacheService
 

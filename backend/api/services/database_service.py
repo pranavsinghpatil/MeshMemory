@@ -30,6 +30,8 @@ class DatabaseService:
         self.chunks = {}
         self.threads = {}
         self.micro_threads = {}
+        self.microchats = {}      # in-memory storage for microchats
+        self.microchat_messages = {}
         
         if use_supabase:
             try:
@@ -595,3 +597,227 @@ class DatabaseService:
         except Exception as e:
             logger.error(f"Error creating message: {e}")
             raise
+            
+    # ===== Microchat Operations =====
+    
+    async def create_microchat(self, microchat_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a new microchat"""
+        try:
+            data = microchat_data.copy()
+            # Convert metadata to dict if it's a string
+            if isinstance(data.get("metadata"), str):
+                try:
+                    data["metadata"] = json.loads(data["metadata"])
+                except Exception:
+                    data["metadata"] = {}
+                    
+            if isinstance(data.get("context"), str):
+                try:
+                    data["context"] = json.loads(data["context"])
+                except Exception:
+                    data["context"] = {}
+                    
+            # Convert all datetime objects to isoformat strings for Supabase
+            for k, v in data.items():
+                if isinstance(v, datetime):
+                    data[k] = v.isoformat()
+            
+            # Remove messages from data as they'll be inserted separately
+            messages = data.pop("messages", [])
+            
+            # Insert the microchat record
+            result = self.supabase.table('microchats').insert(data).execute()
+            
+            if not result.data:
+                raise ValueError("Failed to create microchat")
+                
+            microchat_id = data.get("id")
+            
+            # Now insert all messages
+            for msg in messages:
+                msg["microchat_id"] = microchat_id
+                await self.add_microchat_message(microchat_id, msg)
+                
+            # Get the complete microchat with messages
+            return await self.get_microchat(microchat_id)
+            
+        except Exception as e:
+            logger.error(f"Error creating microchat: {e}")
+            # Fallback to in-memory
+            microchat_id = microchat_data.get("id")
+            self.microchats[microchat_id] = microchat_data
+            return microchat_data
+    
+    async def get_microchat(self, microchat_id: str) -> Optional[Dict[str, Any]]:
+        """Get a microchat by ID with its messages"""
+        try:
+            # Get the microchat record
+            result = self.supabase.table('microchats').select('*').eq('id', microchat_id).single().execute()
+            
+            if not result.data:
+                return None
+                
+            microchat = result.data
+            
+            # Get all messages for this microchat
+            messages_result = self.supabase.table('microchat_messages').select('*').eq('microchat_id', microchat_id).order('timestamp').execute()
+            
+            # Add messages to the microchat
+            microchat["messages"] = messages_result.data if messages_result.data else []
+            
+            return microchat
+            
+        except Exception as e:
+            logger.error(f"Error getting microchat: {e}")
+            # Fallback to in-memory
+            return self.microchats.get(microchat_id)
+    
+    async def add_microchat_message(self, microchat_id: str, message_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Add a message to a microchat"""
+        try:
+            data = message_data.copy()
+            data["microchat_id"] = microchat_id
+            
+            # Convert metadata to dict if it's a string
+            if isinstance(data.get("metadata"), str):
+                try:
+                    data["metadata"] = json.loads(data["metadata"])
+                except Exception:
+                    data["metadata"] = {}
+                    
+            # Convert all datetime objects to isoformat strings for Supabase
+            for k, v in data.items():
+                if isinstance(v, datetime):
+                    data[k] = v.isoformat()
+                    
+            # Insert the message
+            result = self.supabase.table('microchat_messages').insert(data).execute()
+            
+            if not result.data:
+                raise ValueError("Failed to add message to microchat")
+                
+            # Update the microchat's updated_at timestamp
+            self.supabase.table('microchats').update({"updated_at": datetime.utcnow().isoformat()}).eq('id', microchat_id).execute()
+            
+            return result.data[0]
+            
+        except Exception as e:
+            logger.error(f"Error adding message to microchat: {e}")
+            # Store in memory as fallback
+            if microchat_id not in self.microchat_messages:
+                self.microchat_messages[microchat_id] = []
+            self.microchat_messages[microchat_id].append(message_data)
+            return message_data
+    
+    async def search_microchats(self, query: str, user_id: Optional[str] = None, limit: int = 10) -> List[Dict[str, Any]]:
+        """Search microchats by text content"""
+        try:
+            # Base query
+            db_query = self.supabase.table('microchats').select(
+                'id', 'parent_message_id', 'created_at', 'updated_at', 'is_branch', 
+                'parent_chat_id', 'branch_type', 'branch_status', 'title', 'context')
+            
+            # Add user filter if provided
+            if user_id:
+                db_query = db_query.eq('user_id', user_id)
+                
+            # Get results
+            result = db_query.order('updated_at', desc=True).limit(limit).execute()
+            
+            # TODO: Implement proper text search once Supabase supports it for this table
+            # For now, we'll get recent microchats and filter client-side
+            
+            return result.data if result.data else []
+            
+        except Exception as e:
+            logger.error(f"Error searching microchats: {e}")
+            return []
+    
+    async def delete_microchat(self, microchat_id: str) -> bool:
+        """Delete a microchat and all its messages"""
+        try:
+            # Supabase will cascade delete the messages due to the foreign key constraint
+            result = self.supabase.table('microchats').delete().eq('id', microchat_id).execute()
+            return True
+        except Exception as e:
+            logger.error(f"Error deleting microchat: {e}")
+            # Remove from in-memory store
+            if microchat_id in self.microchats:
+                del self.microchats[microchat_id]
+            if microchat_id in self.microchat_messages:
+                del self.microchat_messages[microchat_id]
+            return False
+    
+    async def update_microchat(self, microchat_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Update microchat properties (like branch_status, title, etc.)"""
+        try:
+            data = update_data.copy()
+            
+            # Don't allow updating certain fields
+            for field in ['id', 'user_id', 'parent_message_id', 'created_at']:
+                if field in data:
+                    del data[field]
+                    
+            # Set updated_at timestamp
+            data['updated_at'] = datetime.utcnow().isoformat()
+            
+            # Update the microchat
+            result = self.supabase.table('microchats').update(data).eq('id', microchat_id).execute()
+            
+            if not result.data:
+                return None
+                
+            return result.data[0]
+            
+        except Exception as e:
+            logger.error(f"Error updating microchat: {e}")
+            return None
+            
+    async def get_branches_for_message(self, parent_message_id: str) -> List[Dict[str, Any]]:
+        """Get all branches created from a specific message"""
+        try:
+            result = self.supabase.table('microchats')\
+                .select('*')\
+                .eq('parent_message_id', parent_message_id)\
+                .eq('is_branch', True)\
+                .order('created_at')\
+                .execute()
+                
+            return result.data if result.data else []
+            
+        except Exception as e:
+            logger.error(f"Error getting branches for message: {e}")
+            return []
+            
+    async def get_branches_for_chat(self, parent_chat_id: str) -> List[Dict[str, Any]]:
+        """Get all branches for a specific chat"""
+        try:
+            result = self.supabase.table('microchats')\
+                .select('*')\
+                .eq('parent_chat_id', parent_chat_id)\
+                .eq('is_branch', True)\
+                .order('created_at')\
+                .execute()
+                
+            return result.data if result.data else []
+            
+        except Exception as e:
+            logger.error(f"Error getting branches for chat: {e}")
+            return []
+            
+    async def promote_branch_to_main(self, microchat_id: str, new_message_id: str) -> bool:
+        """Mark a branch as promoted to main chat and set the message ID it was promoted to"""
+        try:
+            result = self.supabase.table('microchats')\
+                .update({
+                    'promoted_to_message_id': new_message_id,
+                    'updated_at': datetime.utcnow().isoformat()
+                })\
+                .eq('id', microchat_id)\
+                .execute()
+                
+            return bool(result.data)
+            
+        except Exception as e:
+            logger.error(f"Error promoting branch to main: {e}")
+            return False
