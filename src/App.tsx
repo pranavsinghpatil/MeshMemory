@@ -17,6 +17,7 @@ import ChatsPage from "./pages/ChatsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
 import HelpPage from "./pages/HelpPage";
+import ChatInterface from "./pages/ChatInterface";
 
 import NotFound from "./pages/NotFound";
 import "./index.css";
@@ -63,6 +64,7 @@ const App = () => (
               <Route index element={<Dashboard />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="chats" element={<ChatsPage />} />
+              <Route path="chat/:chatId" element={<ChatInterface />} />
               
               
               <Route path="analytics" element={<AnalyticsPage />} />

@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,99 +19,9 @@ import {
 } from 'lucide-react';
 
 const Dashboard = () => {
-  // Mock data
-  const stats = [
-    {
-      title: 'Total Messages',
-      value: '2,847',
-      change: '+12.5%',
-      icon: MessageCircle,
-      color: 'from-blue-500 to-cyan-500'
-    },
-    {
-      title: 'Active Groups',
-      value: '23',
-      change: '+3.2%',
-      icon: Users,
-      color: 'from-green-500 to-emerald-500'
-    },
-    {
-      title: 'Response Time',
-      value: '2.3min',
-      change: '-8.1%',
-      icon: Clock,
-      color: 'from-purple-500 to-pink-500'
-    },
-    {
-      title: 'Team Score',
-      value: '94%',
-      change: '+5.7%',
-      icon: Star,
-      color: 'from-yellow-500 to-orange-500'
-    }
-  ];
-
-  const quickActions = [
-    {
-      title: 'New Chat',
-      description: 'Start a conversation',
-      icon: MessageCircle,
-      color: 'from-primary to-accent'
-    },
-    {
-      title: 'Create Group',
-      description: 'Set up a team workspace',
-      icon: Users,
-      color: 'from-secondary to-success'
-    },
-    {
-      title: 'View Analytics',
-      description: 'Check team insights',
-      icon: BarChart3,
-      color: 'from-accent to-secondary'
-    },
-    {
-      title: 'Invite Members',
-      description: 'Add team members',
-      icon: Plus,
-      color: 'from-success to-primary'
-    }
-  ];
-
-  const recentActivity = [
-    {
-      id: 1,
-      user: 'Alice Johnson',
-      action: 'created a new group',
-      target: 'Marketing Team',
-      time: '2 minutes ago',
-      avatar: 'AJ'
-    },
-    {
-      id: 2,
-      user: 'Bob Smith',
-      action: 'shared a file in',
-      target: 'Design Review',
-      time: '5 minutes ago',
-      avatar: 'BS'
-    },
-    {
-      id: 3,
-      user: 'Carol Davis',
-      action: 'mentioned you in',
-      target: 'Project Updates',
-      time: '12 minutes ago',
-      avatar: 'CD'
-    },
-    {
-      id: 4,
-      user: 'David Wilson',
-      action: 'started a thread in',
-      target: 'General Discussion',
-      time: '1 hour ago',
-      avatar: 'DW'
-    }
-  ];
+  const stats = [];
+  const quickActions = [];
+  const recentActivity = [];
 
   return (
     <div className="min-h-screen bg-background p-6 space-y-8">

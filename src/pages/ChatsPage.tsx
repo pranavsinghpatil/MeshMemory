@@ -7,118 +7,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, Plus, MessageCircle, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const ChatsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
-
-  /* Mock conversations removed for production
-const conversationsBackup = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      lastMessage: 'Hey, can we discuss the project timeline?',
-      timestamp: '2 min ago',
-      unread: 2,
-      avatar: '/api/placeholder/40/40',
-      online: true
-    },
-    {
-      id: 2,
-      name: 'Design Team',
-      lastMessage: 'The new mockups look great!',
-      timestamp: '15 min ago',
-      unread: 0,
-      avatar: '/api/placeholder/40/40',
-      online: false,
-      isGroup: true
-    },
-    {
-      id: 3,
-      name: 'Mike Chen',
-      lastMessage: 'Thanks for the update 👍',
-      timestamp: '1 hour ago',
-      unread: 1,
-      avatar: '/api/placeholder/40/40',
-      online: true
-    },
-    {
-      id: 4,
-      name: 'Product Team',
-      lastMessage: 'Meeting starts in 10 minutes',
-      timestamp: '2 hours ago',
-      unread: 0,
-      avatar: '/api/placeholder/40/40',
-      online: false,
-      isGroup: true
-    },
-    {
-      id: 5,
-      name: 'Emma Wilson',
-      lastMessage: 'Great work on the presentation!',
-      timestamp: 'Yesterday',
-      unread: 0,
-      avatar: '/api/placeholder/40/40',
-      online: false
-    }
-  ];
-*/
-
-  const conversationsBackup = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      lastMessage: 'Hey, can we discuss the project timeline?',
-      timestamp: '2 min ago',
-      unread: 2,
-      avatar: '/api/placeholder/40/40',
-      online: true
-    },
-    {
-      id: 2,
-      name: 'Design Team',
-      lastMessage: 'The new mockups look great!',
-      timestamp: '15 min ago',
-      unread: 0,
-      avatar: '/api/placeholder/40/40',
-      online: false,
-      isGroup: true
-    },
-    {
-      id: 3,
-      name: 'Mike Chen',
-      lastMessage: 'Thanks for the update 👍',
-      timestamp: '1 hour ago',
-      unread: 1,
-      avatar: '/api/placeholder/40/40',
-      online: true
-    },
-    {
-      id: 4,
-      name: 'Product Team',
-      lastMessage: 'Meeting starts in 10 minutes',
-      timestamp: '2 hours ago',
-      unread: 0,
-      avatar: '/api/placeholder/40/40',
-      online: false,
-      isGroup: true
-    },
-    {
-      id: 5,
-      name: 'Emma Wilson',
-      lastMessage: 'Great work on the presentation!',
-      timestamp: 'Yesterday',
-      unread: 0,
-      avatar: '/api/placeholder/40/40',
-      online: false
-    }
-  ];
-
-  const [conversations, setConversations] = useState(conversationsBackup);
+  const [conversations, setConversations] = useState([]);
+  const navigate = useNavigate();
 
   const handleNewChat = () => {
-    console.log("New chat button clicked!");
-    // In a real application, you would navigate to a new chat creation page
-    // or open a modal for new chat creation here.
+    const newChatId = `new-${Date.now()}`;
+    navigate(`/app/chat/${newChatId}`);
   };
 
   const filteredChats = conversations.filter(chat =>
