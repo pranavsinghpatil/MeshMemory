@@ -5,10 +5,12 @@ from datetime import datetime
 import uuid
 
 from ..services.message_service import MessageService
+from ..services.ai_service import AIService
 from ..middleware.auth import get_current_user
 
 router = APIRouter(prefix="/messages", tags=["messages"])
 service = MessageService()
+ai_service = AIService()
 
 class MessageCreate(BaseModel):
     source_id: str = Field(..., description="ID of the conversation source")
@@ -36,11 +38,12 @@ class MessageResponse(BaseModel):
 
 @router.get("", response_model=List[MessageResponse])
 async def list_messages(
+    source_id: Optional[str] = Query(None, description="Filter messages by source ID"),
     limit: int = Query(50, gt=0),
     offset: int = Query(0, ge=0),
     current_user: dict = Depends(get_current_user)
 ):
-    msgs = await service.list_messages(limit=limit, offset=offset)
+    msgs = await service.list_messages(source_id=source_id, limit=limit, offset=offset)
     return msgs
 
 @router.get("/{message_id}", response_model=MessageResponse)
@@ -68,6 +71,19 @@ async def create_message(
     msg_data['timestamp'] = datetime.utcnow().isoformat()
     try:
         saved = await service.create_message(msg_data)
+        # If it's a user message, get AI response
+        if data.participant_label == 'User':
+            ai_response_content = await ai_service.get_gemini_response(data.content)
+            if ai_response_content:
+                ai_msg_data = {
+                    'id': str(uuid.uuid4()),
+                    'source_id': data.source_id,
+                    'participant_label': 'Gemini',
+                    'content': ai_response_content,
+                    'model': 'gemini-pro',
+                    'timestamp': datetime.utcnow().isoformat()
+                }
+                await service.create_message(ai_msg_data)
         return saved
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

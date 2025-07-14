@@ -558,12 +558,14 @@ class DatabaseService:
             return 0
 
     # Message operations
-    async def list_messages(self, limit: int = 50, offset: int = 0) -> List[Dict[str, Any]]:
-        """List all main chat messages"""
+    async def list_messages(self, source_id: Optional[str] = None, limit: int = 50, offset: int = 0) -> List[Dict[str, Any]]:
+        """List all main chat messages, optionally filtered by source_id"""
         try:
-            result = (self.supabase.table('messages')
-                      .select('*')
-                      .order('timestamp', desc=True)
+            query = self.supabase.table('messages').select('*')
+            if source_id:
+                query = query.eq('source_id', source_id)
+            result = (query
+                      .order('timestamp', desc=False)
                       .range(offset, offset + limit - 1)
                       .execute())
             return result.data or []
