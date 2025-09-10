@@ -4,19 +4,9 @@ import { useState } from "react";
 export default function Home() {
   const [input, setInput] = useState("");
   const [query, setQuery] = useState("");
-  // const [result, setResult] = useState<any[]>([]); // instead of null
   const [result, setResult] = useState<any[]>([]);
-
-
-  // const handleIngest = async () => {
-  //   const formData = new FormData();
-  //   formData.append("text", input);
-  //   const res = await fetch("http://localhost:8000/ingest", {
-  //     method: "POST",
-  //     body: formData,
-  //   });
-  //   setResult(await res.json());
-  // };
+  const [qaQuery, setQaQuery] = useState("");
+  const [qaAnswer, setQaAnswer] = useState("");
 
 const handleIngest = async () => {
   const res = await fetch("http://localhost:8000/ingest", {
@@ -33,6 +23,16 @@ const handleSearch = async () => {
   const res = await fetch(`http://localhost:8000/search?query=${query}`);
   const json = await res.json();
   setResult(json.data?.Get?.Note || []); // always array
+};
+
+const handleQA = async () => {
+  const res = await fetch("http://localhost:8000/qa", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query: qaQuery }),
+  });
+  const data = await res.json();
+  setQaAnswer(data.answer);
 };
 
   return (
@@ -84,6 +84,28 @@ const handleSearch = async () => {
           ))}
         </div>
       )}
+      {/* QA form */}
+      <div className="mb-6 p-4 border rounded-lg">
+        <h2 className="font-semibold mb-2">Ask Agent</h2>
+        <input
+          className="w-full p-2 border rounded mb-2"
+          value={qaQuery}
+          onChange={(e) => setQaQuery(e.target.value)}
+          placeholder="Ask a question..."
+        />
+        <button
+          onClick={handleQA}
+          className="px-4 py-2 bg-purple-600 text-white rounded"
+        >
+          Ask
+        </button>
+        {qaAnswer && (
+          <div className="mt-3 p-3 bg-gray-50 border rounded">
+            {qaAnswer}
+          </div>
+        )}
+      </div>
+
 
     </main>
   );
