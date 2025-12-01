@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
 import { checkHealth, ingestNote, ingestPDF, searchNotes, askBrain, getGraphData } from "@/lib/api";
 
 // Dynamically import ForceGraph2D to avoid SSR issues
@@ -92,7 +93,12 @@ export default function Home() {
         <div className="lg:col-span-7 space-y-6">
           
           {/* Ingest Card */}
-          <div className="bg-neutral-900/50 rounded-2xl border border-white/5 p-6 backdrop-blur-sm hover:border-white/10 transition-colors">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-neutral-900/50 rounded-2xl border border-white/5 p-6 backdrop-blur-sm hover:border-white/10 transition-colors"
+          >
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-200">
               <span className="text-blue-400">📥</span> Ingest Knowledge
             </h2>
@@ -132,10 +138,15 @@ export default function Home() {
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Graph Visualization */}
-          <div className="bg-neutral-900/50 rounded-2xl border border-white/5 h-[500px] relative overflow-hidden group">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="bg-neutral-900/50 rounded-2xl border border-white/5 h-[500px] relative overflow-hidden group"
+          >
              <div className="absolute top-4 left-6 z-10">
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-gray-200">
                   <span className="text-purple-400">🕸️</span> Knowledge Graph
@@ -151,14 +162,19 @@ export default function Home() {
                 backgroundColor="#00000000"
                 nodeRelSize={6}
              />
-          </div>
+          </motion.div>
         </div>
 
         {/* Right Column: Interaction (Search & QA) */}
         <div className="lg:col-span-5 space-y-6">
           
           {/* Search Card */}
-          <div className="bg-neutral-900/50 rounded-2xl border border-white/5 p-6 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-neutral-900/50 rounded-2xl border border-white/5 p-6 backdrop-blur-sm"
+          >
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-200">
               <span className="text-green-400">🔍</span> Recall Memory
             </h2>
@@ -186,18 +202,29 @@ export default function Home() {
                 <p className="text-center text-gray-500 py-8 text-sm">No memories found.</p>
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Chat Interface */}
-          <div className="bg-neutral-900/50 rounded-2xl border border-white/5 p-6 backdrop-blur-sm h-[600px] flex flex-col">
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="bg-neutral-900/50 rounded-2xl border border-white/5 p-6 backdrop-blur-sm h-[600px] flex flex-col"
+          >
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-200">
               <span className="text-orange-400">🧠</span> Chat with Brain
             </h2>
             
             {/* Chat History */}
             <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2 custom-scrollbar">
+              <AnimatePresence>
               {chatHistory.map((turn, i) => (
-                <div key={i} className="space-y-4">
+                <motion.div 
+                  key={i} 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
                   {/* User Message */}
                   <div className="flex justify-end">
                     <div className="bg-blue-600/20 border border-blue-500/30 text-blue-100 px-4 py-2 rounded-2xl rounded-tr-sm max-w-[80%] text-sm">
@@ -223,14 +250,19 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
+              </AnimatePresence>
               {loading && (
-                 <div className="flex justify-start">
+                 <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex justify-start"
+                 >
                      <div className="bg-neutral-800 border border-white/10 text-gray-400 px-4 py-2 rounded-2xl rounded-tl-sm text-sm animate-pulse">
                       Thinking...
                     </div>
-                  </div>
+                  </motion.div>
               )}
             </div>
 
@@ -252,7 +284,7 @@ export default function Home() {
                 Send
               </button>
             </div>
-          </div>
+          </motion.div>
 
         </div>
       </main>

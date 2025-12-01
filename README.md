@@ -1,33 +1,52 @@
-# 🧠 MeshMemory Node
-**Your Local, Agentic Second Brain.**
+# 🧠 MeshMemory: Local Agentic Brain
 
-> **Status**: 🟢 Active | **Version**: 1.0 (Local Node)
+> **A "Second Brain" that runs 100% locally.**  
+> Powered by **Ollama** (Llama 3), **Weaviate** (Vector DB), and **MCP** (Model Context Protocol).
 
-## 🚀 How to Run (Windows)
+![MeshMemory Dashboard](https://via.placeholder.com/1200x600?text=MeshMemory+Dashboard+Preview)
 
-**Just double-click `launch.bat`!**
+## 🚀 Why MeshMemory?
+Most "memory" tools are just file search. MeshMemory is different:
+*   **🕸️ Knowledge Graph**: It builds a semantic web of your ideas, linking related concepts automatically.
+*   **💬 Chat with History**: Have a real conversation with your data. It remembers context.
+*   **🛡️ Privacy First**: Your data *never* leaves your machine. No OpenAI keys. No cloud.
+*   **🔌 Agent Ready**: Implements **MCP**, so you can connect it to Claude Desktop or Cursor.
 
-This will automatically:
-1.  Start the **Vector Database** (Docker).
-2.  Start the **Brain** (FastAPI + Ollama).
-3.  Start the **Control Center** (Web UI).
+## ✨ Key Features
+*   **Universal Ingestion**: Drag & Drop PDFs or paste raw text.
+*   **Semantic Search**: Find things by *meaning*, not just keywords.
+*   **RAG Pipeline**: Answers questions using your data + Llama 3.
+*   **Source Citations**: Tells you exactly *where* the answer came from (e.g., `manual.pdf (part 1)`).
+*   **Premium UI**: Dark mode, smooth animations, and interactive physics graph.
+
+## 🛠️ Quick Start (Windows)
+
+1.  **Prerequisites**:
+    *   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for Weaviate)
+    *   [Ollama](https://ollama.com/) (run `ollama pull llama3`)
+    *   [Python 3.10+](https://www.python.org/)
+    *   [Node.js](https://nodejs.org/)
+
+2.  **One-Click Launch**:
+    Double-click `launch.bat`.
+    *   It starts the Vector DB.
+    *   It starts the Backend Brain (Port 8000).
+    *   It starts the Control Center UI (Port 3000).
+
+3.  **Open the UI**:
+    Go to [http://localhost:3000](http://localhost:3000).
+
+## 🧩 Architecture
+*   **Frontend**: Next.js 14, Tailwind CSS, Framer Motion, React Force Graph.
+*   **Backend**: FastAPI, PyPDF, Sentence Transformers (Local Embeddings).
+*   **Database**: Weaviate (Local Docker Container).
+*   **LLM**: Ollama (Llama 3).
+
+## 🤖 MCP Integration
+To use MeshMemory as a tool for **Claude Desktop**:
+1.  Add the configuration to your `claude_desktop_config.json`.
+2.  Point it to `d:\MeshMemory\mesh-core\backend\mcp_server.py`.
+3.  Claude can now "Save Memory" and "Recall Memory" directly!
 
 ---
-
-## 🌍 Access Points
-
--   **Control Center**: [http://localhost:3000](http://localhost:3000)
-    -   *Ingest notes, Search memories, Chat with your brain.*
--   **API Endpoint**: [http://localhost:8000](http://localhost:8000)
--   **MCP Server**: `d:\MeshMemory\mesh-core\backend\mcp_server.py`
-    -   *Plug this path into Claude Desktop to give it memory!*
-
-## 🛠️ Requirements
--   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Running)
--   [Ollama](https://ollama.com/) (Running `ollama serve` with `llama3` model)
--   Python 3.10+ & Node.js 18+
-
-## 🤖 Features
--   **100% Local**: No OpenAI keys needed. Uses Llama 3 on your machine.
--   **Agent Ready**: Implements **MCP (Model Context Protocol)**.
--   **Semantic Search**: Finds concepts, not just keywords.
+*Built with ❤️ by Pranav's AI Agent*
