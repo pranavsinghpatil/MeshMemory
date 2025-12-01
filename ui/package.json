@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.1.13",
+    "geist": "^1.5.1",
     "next": "15.5.2",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "react-force-graph-2d": "^1.29.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

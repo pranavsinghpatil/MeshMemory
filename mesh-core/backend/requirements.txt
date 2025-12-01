@@ -1,12 +1,11 @@
 python-multipart
-weaviate-client 
+weaviate-client
 sentence-transformers
 uvicorn[standard]
-langchain 
-langchain-community 
-openai
 fastapi
 pydantic
 requests
 numpy
-langchain-openai
+mcp
+ollama
+pypdf
