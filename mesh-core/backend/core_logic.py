@@ -1,3 +1,17 @@
+import weaviate
+from weaviate.classes.config import Property, DataType
+from weaviate.classes.init import AdditionalConfig, Timeout
+from sentence_transformers import SentenceTransformer
+import ollama
+import uuid
+import os
+from pypdf import PdfReader
+import numpy as np
+
+# --- Configuration ---
+WEAVIATE_URL = os.getenv("WEAVIATE_URL", "localhost")
+WEAVIATE_PORT = int(os.getenv("WEAVIATE_PORT", 8080))
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3")
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
 CLASS_NAME = "Note"
 
@@ -221,7 +235,7 @@ def get_graph_data():
             sim_matrix = np.dot(normalized_matrix, normalized_matrix.T)
             
             # Create links for high similarity
-            THRESHOLD = 0.75
+            THRESHOLD = 0.60
             for i in range(len(ids)):
                 for j in range(i + 1, len(ids)): # Upper triangle only
                     sim = sim_matrix[i][j]
@@ -232,7 +246,7 @@ def get_graph_data():
                             "value": float(sim) # Strength of link
                         })
                         
-        print(f"Generated {len(nodes)} nodes and {len(links)} semantic links.")
+        print(f"Generated {len(nodes)} nodes and {len(links)} semantic links (Threshold: {THRESHOLD}).")
         return {"nodes": nodes, "links": links}
     except Exception as e:
         print(f"!!! Error in get_graph_data: {e}")
