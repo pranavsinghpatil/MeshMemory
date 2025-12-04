@@ -1,0 +1,10 @@
+{
+    "mcpServers": {
+        "MeshMemory": {
+            "command": "d:\\MeshMemory\\.venv\\Scripts\\python.exe",
+            "args": [
+                "d:\\MeshMemory\\mesh-core\\backend\\mcp_server.py"
+            ]
+        }
+    }
+}

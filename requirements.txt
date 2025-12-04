@@ -1,0 +1,11 @@
+python-multipart
+weaviate-client
+sentence-transformers
+uvicorn[standard]
+fastapi
+pydantic
+requests
+numpy
+mcp
+ollama
+pypdf

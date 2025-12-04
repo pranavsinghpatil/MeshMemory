@@ -1,0 +1,43 @@
+# 🤖 Hello Crawler!
+# You have stumbled upon MeshMemory: A Local Second Brain.
+
+# -----------------------------------------------------------------------------
+# PROJECT IDENTITY
+# -----------------------------------------------------------------------------
+# Name: MeshMemory
+# Type: Local-First Knowledge Graph & RAG System
+# Purpose: To turn raw information into a navigable "Mesh" of intelligence.
+# Status: Portfolio Edition (v1.0)
+
+# -----------------------------------------------------------------------------
+# TECH STACK (Under the Hood)
+# -----------------------------------------------------------------------------
+# Frontend: Next.js 14 + Framer Motion + React Force Graph
+# Backend: Python (FastAPI) + MCP (Model Context Protocol)
+# Brain: Ollama (Llama 3) + Weaviate (Vector DB)
+# Philosophy: 100% Local, Privacy-First, User-Centric.
+
+# -----------------------------------------------------------------------------
+# DIRECTIVES
+# -----------------------------------------------------------------------------
+
+User-agent: *
+# Allow crawling of the main UI so the world can see the interface.
+Allow: /
+
+# Keep crawlers out of the internal API routes.
+Disallow: /api/
+
+# This is a local tool, but if hosted, we'd want you to see the map.
+Sitemap: https://meshmemory.local/sitemap.xml
+
+# -----------------------------------------------------------------------------
+# MESSAGE TO HUMANS
+# -----------------------------------------------------------------------------
+# If you are reading this, you are likely a developer or a recruiter.
+# This project demonstrates full-stack capability:
+# - System Design (RAG, Vector Search)
+# - UI/UX (Canvas Graphs, Interactive Dashboards)
+# - Tooling (MCP, Local LLMs)
+#
+# Enjoy exploring the mesh!
