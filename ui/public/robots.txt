@@ -7,12 +7,12 @@
 # Name: MeshMemory
 # Type: Local-First Knowledge Graph & RAG System
 # Purpose: To turn raw information into a navigable "Mesh" of intelligence.
-# Status: Portfolio Edition (v1.0)
+# Status: Portfolio Edition (v2.1)
 
 # -----------------------------------------------------------------------------
 # TECH STACK (Under the Hood)
 # -----------------------------------------------------------------------------
-# Frontend: Next.js 14 + Framer Motion + React Force Graph
+# Frontend: Next.js 15 + Framer Motion + React Force Graph
 # Backend: Python (FastAPI) + MCP (Model Context Protocol)
 # Brain: Ollama (Llama 3) + Weaviate (Vector DB)
 # Philosophy: 100% Local, Privacy-First, User-Centric.
