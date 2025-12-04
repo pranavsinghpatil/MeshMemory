@@ -160,25 +160,21 @@ Simply double-click the **`launch.bat`** file in the root directory. It will:
 
 ## 🏗️ Architecture
 
-```mermaid
-graph TD
-    User[User UI] <--> NextJS[Next.js Frontend]
-    NextJS <--> FastAPI[Python Backend API]
-    
-    subgraph "Local Intelligence"
-        FastAPI <--> Ollama[Ollama (Llama3 + Embeddings)]
-        FastAPI <--> Weaviate[Weaviate Vector DB (Docker)]
-    end
-    
-    subgraph "Data Flow"
-        Ingest[Ingest] --> Chunking
-        Chunking --> Embedding
-        Embedding --> Weaviate
-        Query --> Embedding
-        Embedding --> VectorSearch
-        VectorSearch --> RAG
-        RAG --> Ollama
-    end
+```text
++----------------+      +------------------+      +------------------------+
+|   User (UI)    | <--> | Next.js Frontend | <--> |   Python Backend API   |
++----------------+      +------------------+      +-----------+------------+
+                                                              |
+                                         +--------------------+--------------------+
+                                         |                                         |
+                                 +-------v-------+                         +-------v-------+
+                                 |    Ollama     |                         |   Weaviate    |
+                                 | (LLM + Embed) |                         |  (Vector DB)  |
+                                 +---------------+                         +---------------+
+
+Data Flow:
+[Ingest] -> [Chunking] -> [Embedding Model] -> [Vector DB]
+[Query]  -> [Embedding Model] -> [Vector Search] -> [RAG Construction] -> [LLM Generation]
 ```
 
 ---
