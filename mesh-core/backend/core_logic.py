@@ -63,6 +63,35 @@ def add_note(text: str, source: str = "user") -> str:
         print(f"!!! Error in add_note: {e}")
         raise e
 
+def delete_note(note_id: str) -> bool:
+    """Deletes a note by UUID."""
+    print(f"--- Deleting Note: {note_id} ---")
+    try:
+        notes_collection.data.delete_by_id(uuid.UUID(note_id))
+        print(f"Deleted UUID: {note_id}")
+        return True
+    except Exception as e:
+        print(f"!!! Error in delete_note: {e}")
+        return False
+
+def update_note(note_id: str, new_text: str) -> bool:
+    """Updates a note's text and re-embeds it."""
+    print(f"--- Updating Note: {note_id} ---")
+    try:
+        # Re-embed
+        vector = embedding_model.encode(new_text).tolist()
+        
+        notes_collection.data.update(
+            uuid=uuid.UUID(note_id),
+            properties={"text": new_text},
+            vector=vector
+        )
+        print(f"Updated UUID: {note_id}")
+        return True
+    except Exception as e:
+        print(f"!!! Error in update_note: {e}")
+        return False
+
 def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 100):
     """Splits text into chunks with overlap."""
     chunks = []
@@ -121,7 +150,8 @@ def search_notes(query: str, limit: int = 5):
             results.append({
                 "text": obj.properties["text"],
                 "source": obj.properties.get("source", "unknown"),
-                "distance": obj.metadata.distance
+                "distance": obj.metadata.distance,
+                "id": str(obj.uuid)
             })
         print(f"Found {len(results)} results.")
         return results
@@ -129,9 +159,35 @@ def search_notes(query: str, limit: int = 5):
         print(f"!!! Error in search_notes: {e}")
         return []
 
-def ask_brain(question: str, history: list = []) -> dict:
-    """RAG: Retrieves context and answers using Ollama with history."""
-    print(f"--- Asking Brain: '{question}' (History: {len(history)} turns) ---")
+import google.generativeai as genai
+
+def ask_gemini(question: str, context_text: str, history_text: str, api_key: str) -> str:
+    """Queries Google's Gemini API."""
+    print(f"--- Asking Gemini (Cloud) ---")
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        
+        prompt = f"""You are MeshMemory, an advanced knowledge engine.
+        Answer strictly based on the context provided.
+        
+        Context:
+        {context_text}
+        
+        Chat History:
+        {history_text}
+        
+        User Question: {question}
+        """
+        
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"Gemini Error: {str(e)}"
+
+def ask_brain(question: str, history: list = [], mode: str = "local", api_key: str = "") -> dict:
+    """RAG: Retrieves context and answers using Ollama OR Gemini."""
+    print(f"--- Asking Brain: '{question}' (Mode: {mode}) ---")
     
     # 1. Retrieve
     context_docs = search_notes(question, limit=5)
@@ -155,7 +211,12 @@ def ask_brain(question: str, history: list = []) -> dict:
     for turn in history[-3:]: # Keep last 3 turns
         history_text += f"User: {turn['user']}\nAI: {turn['ai']}\n"
     
-    # 4. Augment
+    # 4. Route Request
+    if mode == "cloud" and api_key:
+        answer = ask_gemini(question, context_text, history_text, api_key)
+        return {"answer": answer, "sources": sources}
+    
+    # 5. Local Fallback (Ollama)
     prompt = f"""You are MeshMemory, an advanced local knowledge engine. 
     Your goal is to provide accurate, concise, and well-formatted answers based strictly on the provided context.
     
@@ -175,7 +236,6 @@ def ask_brain(question: str, history: list = []) -> dict:
     
     Answer:"""
     
-    # 5. Generate (Ollama)
     try:
         print(f"Sending prompt to Ollama (Model: {OLLAMA_MODEL})...")
         response = ollama.chat(model=OLLAMA_MODEL, messages=[

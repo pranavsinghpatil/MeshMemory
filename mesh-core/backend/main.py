@@ -1,9 +1,22 @@
 from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from core_logic import add_note, search_notes, ask_brain, ingest_pdf, get_graph_data
+from core_logic import add_note, search_notes, ask_brain, ingest_pdf, get_graph_data, delete_note, update_note
 import shutil
 import os
+
+class QARequest(BaseModel):
+    query: str
+    history: list = []
+    mode: str = "local"
+    api_key: str = ""
+
+class IngestRequest(BaseModel):
+    text: str
+    source: str = "user"
+
+class UpdateRequest(BaseModel):
+    text: str
 
 app = FastAPI(title="MeshMemory API")
 
@@ -15,14 +28,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-class IngestRequest(BaseModel):
-    text: str
-    source: str = "user"
-
-class QARequest(BaseModel):
-    query: str
-    history: list = []
 
 @app.get("/")
 def root():
@@ -70,5 +75,23 @@ async def graph():
 @app.post("/qa")
 async def qa(req: QARequest):
     """Ask the brain."""
-    response = ask_brain(req.query, req.history)
+    response = ask_brain(req.query, req.history, req.mode, req.api_key)
     return {"query": req.query, "answer": response["answer"], "sources": response["sources"]}
+
+@app.delete("/notes/{note_id}")
+async def delete_note_endpoint(note_id: str):
+    """Delete a note."""
+    success = delete_note(note_id)
+    if success:
+        return {"status": "deleted", "uuid": note_id}
+    else:
+        return {"status": "error", "message": "Failed to delete"}
+
+@app.put("/notes/{note_id}")
+async def update_note_endpoint(note_id: str, req: UpdateRequest):
+    """Update a note."""
+    success = update_note(note_id, req.text)
+    if success:
+        return {"status": "updated", "uuid": note_id}
+    else:
+        return {"status": "error", "message": "Failed to update"}

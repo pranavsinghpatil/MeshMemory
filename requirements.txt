@@ -9,3 +9,4 @@ numpy
 mcp
 ollama
 pypdf
+google-generativeai

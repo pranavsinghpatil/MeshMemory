@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
 export default function HowItWorks() {
   const steps = [
@@ -140,6 +141,7 @@ export default function HowItWorks() {
             </div>
         </motion.div>
       </main>
+      <Footer />
     </div>
   );
 }
