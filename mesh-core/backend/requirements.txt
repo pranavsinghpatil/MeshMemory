@@ -9,3 +9,9 @@ numpy
 mcp
 ollama
 pypdf
+google-generativeai
+groq
+slowapi
+beautifulsoup4
+requests
+youtube-transcript-api

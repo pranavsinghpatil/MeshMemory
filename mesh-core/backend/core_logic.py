@@ -1,16 +1,20 @@
 import weaviate
 from weaviate.classes.config import Property, DataType
-from weaviate.classes.init import AdditionalConfig, Timeout
+from weaviate.classes.init import AdditionalConfig, Timeout, Auth
 from sentence_transformers import SentenceTransformer
 import ollama
 import uuid
 import os
 from pypdf import PdfReader
 import numpy as np
+from ingest_logic import ingest_url, ingest_youtube
+import google.generativeai as genai
+from groq import Groq
 
 # --- Configuration ---
 WEAVIATE_URL = os.getenv("WEAVIATE_URL", "localhost")
 WEAVIATE_PORT = int(os.getenv("WEAVIATE_PORT", 8080))
+WEAVIATE_API_KEY = os.getenv("WEAVIATE_API_KEY", "")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3")
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
 CLASS_NAME = "Note"
@@ -18,11 +22,31 @@ CLASS_NAME = "Note"
 # --- Singleton Initialization ---
 # We use a global client for simplicity in this script, 
 # but in production, you might want dependency injection.
-client = weaviate.connect_to_local(
-    port=WEAVIATE_PORT,
-    skip_init_checks=True,
-    additional_config=AdditionalConfig(timeout=Timeout(init=30))
-)
+import time
+
+def connect_to_weaviate(retries=5, delay=2):
+    for i in range(retries):
+        try:
+            if WEAVIATE_URL != "localhost" and WEAVIATE_API_KEY:
+                print(f"Connecting to Weaviate Cloud: {WEAVIATE_URL}")
+                return weaviate.connect_to_wcs(
+                    cluster_url=WEAVIATE_URL,
+                    auth_credentials=Auth.api_key(WEAVIATE_API_KEY),
+                    additional_config=AdditionalConfig(timeout=Timeout(init=30))
+                )
+            else:
+                print(f"Connecting to Local Weaviate: {WEAVIATE_URL}:{WEAVIATE_PORT} (Attempt {i+1}/{retries})")
+                return weaviate.connect_to_local(
+                    port=WEAVIATE_PORT,
+                    skip_init_checks=True,
+                    additional_config=AdditionalConfig(timeout=Timeout(init=30))
+                )
+        except Exception as e:
+            print(f"Connection failed: {e}. Retrying in {delay}s...")
+            time.sleep(delay)
+    raise Exception("Could not connect to Weaviate after multiple attempts.")
+
+client = connect_to_weaviate()
 
 # Load embedding model once
 embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
@@ -35,6 +59,8 @@ def ensure_schema():
             properties=[
                 Property(name="text", data_type=DataType.TEXT),
                 Property(name="source", data_type=DataType.TEXT), # e.g., "user", "web"
+                Property(name="title", data_type=DataType.TEXT),
+                Property(name="summary", data_type=DataType.TEXT),
             ]
         )
         print(f"Created collection: {CLASS_NAME}")
@@ -45,15 +71,46 @@ notes_collection = client.collections.get(CLASS_NAME)
 
 # --- Core Functions ---
 
-def add_note(text: str, source: str = "user") -> str:
+def generate_summary(text: str) -> dict:
+    """Generates a title and summary using LLM."""
+    prompt = f"""Analyze the following text and provide a JSON response with two fields:
+    1. "title": A concise title (max 6 words).
+    2. "summary": A one-sentence summary.
+    
+    Text: {text[:2000]}
+    
+    JSON Response:"""
+    
+    try:
+        # Use Ollama for speed/cost (or Gemini if configured globally, but keeping it simple for now)
+        # For simplicity, we'll try to use the global OLLAMA_MODEL
+        response = ollama.chat(model=OLLAMA_MODEL, messages=[
+            {'role': 'user', 'content': prompt},
+        ], format='json')
+        
+        import json
+        return json.loads(response['message']['content'])
+    except Exception as e:
+        print(f"Summary generation failed: {e}")
+        return {"title": text[:50] + "...", "summary": text[:100] + "..."}
+
+def add_note(text: str, source: str = "user", title: str = "") -> str:
     """Ingests a note into the memory."""
     print(f"--- Ingesting Note (Source: {source}) ---")
+    
+    summary = ""
+    if not title:
+        print("Generating smart title & summary...")
+        meta = generate_summary(text)
+        title = meta.get("title", text[:50])
+        summary = meta.get("summary", "")
+        
     try:
         vector = embedding_model.encode(text).tolist()
         print(f"Encoded text. Vector length: {len(vector)}")
         obj_uuid = uuid.uuid4()
         notes_collection.data.insert(
-            properties={"text": text, "source": source},
+            properties={"text": text, "source": source, "title": title, "summary": summary},
             vector=vector,
             uuid=obj_uuid
         )
@@ -134,15 +191,78 @@ def ingest_pdf(file_path: str) -> str:
         print(f"!!! Error in ingest_pdf: {e}")
         raise e
 
+def ingest_generic_file(file_path: str, mime_type: str, api_key: str = "") -> str:
+    """Ingests audio/video/image using Gemini."""
+    print(f"--- Processing File: {file_path} ({mime_type}) ---")
+    
+    if not api_key:
+        # Try env var
+        api_key = os.getenv("GEMINI_API_KEY", "")
+        
+    if not api_key:
+        raise ValueError("Gemini API Key required for multimodal ingestion.")
+        
+    try:
+        genai.configure(api_key=api_key)
+        # Use 1.5 Flash for multimodal speed/cost
+        model = genai.GenerativeModel('gemini-1.5-flash') 
+        
+        print("Uploading to Gemini...")
+        uploaded_file = genai.upload_file(file_path, mime_type=mime_type)
+        
+        print("Generating content...")
+        prompt = "Analyze this file in detail. If it's audio/video, provide a full transcript. If it's an image, describe every detail. If it's a document, summarize it comprehensively."
+        response = model.generate_content([prompt, uploaded_file])
+        
+        text = response.text
+        title = f"File: {os.path.basename(file_path)}"
+        
+        # Ingest
+        return add_note(text, source=f"file:{os.path.basename(file_path)}", title=title)
+        
+    except Exception as e:
+        print(f"!!! Error in ingest_generic_file: {e}")
+        raise e
+
+def ingest_url_note(url: str) -> str:
+    """Ingests a webpage."""
+    data = ingest_url(url)
+    # Chunking
+    chunks = chunk_text(data['text'])
+    first_uuid = None
+    for i, chunk in enumerate(chunks):
+        source_name = f"{data['source']} (part {i+1})"
+        uid = add_note(chunk, source=source_name, title=data['title'])
+        if first_uuid is None:
+            first_uuid = uid
+    return str(first_uuid)
+
+def ingest_youtube_note(url: str) -> str:
+    """Ingests a YouTube video."""
+    data = ingest_youtube(url)
+    # Chunking
+    chunks = chunk_text(data['text'])
+    first_uuid = None
+    for i, chunk in enumerate(chunks):
+        source_name = f"{data['source']} (part {i+1})"
+        uid = add_note(chunk, source=source_name, title=data['title'])
+        if first_uuid is None:
+            first_uuid = uid
+    return str(first_uuid)
+
 def search_notes(query: str, limit: int = 5):
-    """Semantic search for notes."""
-    print(f"--- Searching: '{query}' ---")
+    """Hybrid search (Keyword + Vector) for notes."""
+    print(f"--- Searching (Hybrid): '{query}' ---")
     try:
         query_vector = embedding_model.encode(query).tolist()
-        response = notes_collection.query.near_vector(
-            near_vector=query_vector,
+        # Hybrid search: alpha=0.5 balances keyword (BM25) and vector search
+        response = notes_collection.query.hybrid(
+            query=query,
+            vector=query_vector,
             limit=limit,
-            return_metadata=["distance"]
+            alpha=0.5,
+            return_metadata=["score"],
+            include_vector=True # Needed for Graph RAG
         )
         # Format results
         results = []
@@ -150,7 +270,8 @@ def search_notes(query: str, limit: int = 5):
             results.append({
                 "text": obj.properties["text"],
                 "source": obj.properties.get("source", "unknown"),
-                "distance": obj.metadata.distance,
+                "distance": obj.metadata.score,
+                "vector": obj.vector, # Keep vector for graph traversal
                 "id": str(obj.uuid)
             })
         print(f"Found {len(results)} results.")
@@ -159,7 +280,79 @@ def search_notes(query: str, limit: int = 5):
         print(f"!!! Error in search_notes: {e}")
         return []
 
-import google.generativeai as genai
+def search_with_graph_context(query: str, limit: int = 3, graph_depth: int = 1):
+    """Graph RAG: Retrieves notes + their semantic neighbors."""
+    print(f"--- Graph RAG Search: '{query}' ---")
+    
+    # 1. Initial Search (Top K)
+    initial_results = search_notes(query, limit=limit)
+    
+    final_results = {res['id']: res for res in initial_results}
+    
+    # 2. Graph Traversal (Find neighbors for each result)
+    for res in initial_results:
+        try:
+            # Use the result's vector to find similar notes (edges)
+            # We handle vector structure (v4 client)
+            vec = res.get('vector')
+            if isinstance(vec, dict):
+                vec = vec.get('default') or list(vec.values())[0]
+                
+            neighbors = notes_collection.query.near_vector(
+                near_vector=vec,
+                limit=2, # Get top 2 neighbors per node
+                return_metadata=["distance"],
+                return_properties=["text", "source"]
+            )
+            
+            for obj in neighbors.objects:
+                if str(obj.uuid) not in final_results:
+                    print(f"  -> Found neighbor: {obj.properties.get('text')[:30]}...")
+                    final_results[str(obj.uuid)] = {
+                        "text": obj.properties["text"],
+                        "source": obj.properties.get("source", "unknown"),
+                        "distance": obj.metadata.distance,
+                        "id": str(obj.uuid)
+                    }
+        except Exception as e:
+            print(f"Error traversing graph for node {res['id']}: {e}")
+            
+    return list(final_results.values())
+
+
+
+def ask_groq(question: str, context_text: str, history_text: str, api_key: str) -> str:
+    """Queries Groq API."""
+    print(f"--- Asking Groq (Cloud) ---")
+    try:
+        client = Groq(api_key=api_key)
+        
+        system_prompt = f"""You are MeshMemory, an advanced knowledge engine.
+        Answer strictly based on the context provided.
+        
+        Context:
+        {context_text}
+        
+        Chat History:
+        {history_text}
+        """
+        
+        completion = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": question}
+            ],
+            temperature=0.7,
+            max_tokens=1024,
+            top_p=1,
+            stream=False,
+            stop=None,
+        )
+        
+        return completion.choices[0].message.content
+    except Exception as e:
+        return f"Groq Error: {str(e)}"
 
 def ask_gemini(question: str, context_text: str, history_text: str, api_key: str) -> str:
     """Queries Google's Gemini API."""
@@ -187,10 +380,24 @@ def ask_gemini(question: str, context_text: str, history_text: str, api_key: str
 
 def ask_brain(question: str, history: list = [], mode: str = "local", api_key: str = "") -> dict:
     """RAG: Retrieves context and answers using Ollama OR Gemini."""
+    
+    # Check for env var if api_key not provided
+    if not api_key:
+        # Priority: Groq > Gemini > Ollama
+        groq_key = os.getenv("GROQ_API_KEY", "")
+        gemini_key = os.getenv("GEMINI_API_KEY", "")
+        
+        if groq_key:
+            mode = "groq"
+            api_key = groq_key
+        elif gemini_key:
+            mode = "gemini"
+            api_key = gemini_key
+
     print(f"--- Asking Brain: '{question}' (Mode: {mode}) ---")
     
-    # 1. Retrieve
-    context_docs = search_notes(question, limit=5)
+    # 1. Retrieve (Graph RAG)
+    context_docs = search_with_graph_context(question, limit=5)
     
     # 2. Prepare Context
     context_text = ""
@@ -212,8 +419,11 @@ def ask_brain(question: str, history: list = [], mode: str = "local", api_key: s
         history_text += f"User: {turn['user']}\nAI: {turn['ai']}\n"
     
     # 4. Route Request
-    if mode == "cloud" and api_key:
+    if mode == "gemini" and api_key:
         answer = ask_gemini(question, context_text, history_text, api_key)
+        return {"answer": answer, "sources": sources}
+    elif mode == "groq" and api_key:
+        answer = ask_groq(question, context_text, history_text, api_key)
         return {"answer": answer, "sources": sources}
     
     # 5. Local Fallback (Ollama)
