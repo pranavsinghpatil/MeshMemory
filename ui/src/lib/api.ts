@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 export async function checkHealth() {
     try {
@@ -29,6 +29,39 @@ export async function ingestPDF(file: File) {
     return res.json();
 }
 
+export async function ingestFile(file: File, apiKey: string = "") {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (apiKey) {
+        formData.append("api_key", apiKey);
+    }
+
+    const res = await fetch(`${API_URL}/ingest/file`, {
+        method: "POST",
+        body: formData,
+    });
+    return res.json();
+}
+
+
+export async function ingestURL(url: string) {
+    const res = await fetch(`${API_URL}/ingest/url`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+    });
+    return res.json();
+}
+
+export async function ingestYouTube(url: string) {
+    const res = await fetch(`${API_URL}/ingest/youtube`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+    });
+    return res.json();
+}
+
 export async function searchNotes(query: string) {
     const res = await fetch(`${API_URL}/search?query=${encodeURIComponent(query)}`);
     return res.json();
@@ -44,8 +77,14 @@ export async function askBrain(query: string, history: any[] = [], mode: string 
 }
 
 export async function getGraphData() {
-    const res = await fetch(`${API_URL}/graph`);
-    return res.json();
+    try {
+        const res = await fetch(`${API_URL}/graph`);
+        if (!res.ok) throw new Error("Graph fetch failed");
+        return res.json();
+    } catch (e) {
+        console.error("Failed to fetch graph data:", e);
+        return { nodes: [], links: [] };
+    }
 }
 
 export async function deleteNote(uuid: string) {
