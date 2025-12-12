@@ -10,6 +10,7 @@ export default function ChatPage() {
   const [mode, setMode] = useState("local");
   const [apiKey, setApiKey] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isReadOnly = process.env.NEXT_PUBLIC_READ_ONLY === "true";
 
   useEffect(() => {
     const savedKey = localStorage.getItem("gemini_api_key");
@@ -60,6 +61,12 @@ export default function ChatPage() {
             <h1 className="text-2xl font-bold text-white flex items-center gap-2">
                 💬 Neural Chat
             </h1>
+            {!isReadOnly && (
+                <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                    <span className={`w-2 h-2 rounded-full ${mode === "cloud" ? "bg-purple-500" : "bg-blue-500"}`}></span>
+                    Using {mode === "cloud" ? "Gemini 1.5 Flash" : "Ollama Local"}
+                </p>
+            )}
         </div>
       </header>
 

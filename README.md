@@ -5,6 +5,8 @@ MeshMemory is a sophisticated, privacy-focused knowledge management system that 
 
 Built for privacy enthusiasts, it runs **100% locally** using Ollama and Docker, ensuring your personal data never leaves your machine unless you explicitly choose to use cloud models.
 
+> **Note**: This repository contains the code for both the **Local Node** (for personal use) and the **Cloud Deployment** (for the live demo). By default, it is configured to run locally.
+
 ---
 
 ## ✨ Key Features

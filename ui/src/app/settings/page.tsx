@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 export default function SettingsPage() {
@@ -8,7 +9,15 @@ export default function SettingsPage() {
   const [apiKey, setApiKey] = useState("");
   const [toast, setToast] = useState<string | null>(null);
 
+  const router = useRouter(); // Import at top
+
   useEffect(() => {
+    // Security Check: Redirect if Read-Only
+    if (process.env.NEXT_PUBLIC_READ_ONLY === "true") {
+        router.push("/");
+        return;
+    }
+
     const savedKey = localStorage.getItem("gemini_api_key");
     const savedMode = localStorage.getItem("brain_mode");
     if (savedKey) setApiKey(savedKey);

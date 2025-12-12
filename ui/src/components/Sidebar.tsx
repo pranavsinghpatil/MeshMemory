@@ -4,15 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
-const menuItems = [
-  { icon: "🏠", label: "Dashboard", href: "/" },
-  { icon: "💬", label: "Chat", href: "/chat" },
-  { icon: "🧠", label: "Memories", href: "/memories" },
-  { icon: "❓", label: "How it Works", href: "/how-it-works" },
-];
-
 export default function Sidebar() {
   const pathname = usePathname();
+  // Check read-only mode directly from env (available at build/run time)
+  const isReadOnly = process.env.NEXT_PUBLIC_READ_ONLY === "true";
+
+  const menuItems = [
+    { icon: "🏠", label: "Dashboard", href: "/" },
+    { icon: "💬", label: "Chat", href: "/chat" },
+    { icon: "🧠", label: "Memories", href: "/memories" },
+    // Only show Settings in Local Mode (Write Access)
+    ...(!isReadOnly ? [{ icon: "⚙️", label: "Settings", href: "/settings" }] : []),
+    { icon: "❓", label: "How it Works", href: "/how-it-works" },
+  ];
 
   return (
     <div className="w-20 h-screen bg-black/50 backdrop-blur-xl border-r border-white/5 flex flex-col items-center p-4 shrink-0 transition-all duration-300 z-50">
