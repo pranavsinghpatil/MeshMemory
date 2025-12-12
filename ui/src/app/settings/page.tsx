@@ -69,7 +69,7 @@ export default function SettingsPage() {
                 >
                     <div className="text-2xl mb-3">☁️</div>
                     <div className="font-bold mb-1">Cloud (Gemini)</div>
-                    <div className="text-xs opacity-70">Uses Google's Gemini 1.5 Flash. Faster and multimodal. Requires API Key.</div>
+                    <div className="text-xs opacity-70">Uses Google&apos;s Gemini 1.5 Flash. Faster and multimodal. Requires API Key.</div>
                 </button>
             </div>
         </div>

@@ -71,7 +71,7 @@ export default function HowItWorks() {
                 Under the Hood
             </h1>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                MeshMemory isn't just a database. It's a <span className="text-white font-semibold">Living Organism</span> of information. Here is how raw data becomes intelligence.
+                MeshMemory isn&apos;t just a database. It&apos;s a <span className="text-white font-semibold">Living Organism</span> of information. Here is how raw data becomes intelligence.
             </p>
         </motion.div>
 

@@ -4,7 +4,7 @@ export async function checkHealth() {
     try {
         const res = await fetch(`${API_URL}/`);
         return res.ok;
-    } catch (e) {
+    } catch {
         return false;
     }
 }
@@ -67,7 +67,7 @@ export async function searchNotes(query: string) {
     return res.json();
 }
 
-export async function askBrain(query: string, history: any[] = [], mode: string = "local", apiKey: string = "") {
+export async function askBrain(query: string, history: Array<{ user: string, ai: string, sources?: string[] }> = [], mode: string = "local", apiKey: string = "") {
     const res = await fetch(`${API_URL}/qa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

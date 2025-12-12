@@ -4,9 +4,17 @@ import { useState, useEffect } from "react";
 import { searchNotes, deleteNote, updateNote } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface Note {
+  id: string;
+  text: string;
+  source: string;
+  date?: string;
+  title?: string;
+}
+
 export default function MemoriesPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Note[]>([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 

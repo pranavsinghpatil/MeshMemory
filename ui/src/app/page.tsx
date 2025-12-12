@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { checkHealth, ingestNote, ingestPDF, getGraphData, ingestURL, ingestYouTube, ingestFile } from "@/lib/api";
+import { checkHealth, ingestNote, getGraphData, ingestURL, ingestYouTube, ingestFile } from "@/lib/api";
 
 // Dynamically import ForceGraph2D to avoid SSR issues
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false });
@@ -284,7 +284,7 @@ export default function Home() {
                         nodeLabel="name"
                         backgroundColor="rgba(0,0,0,0)"
                         nodeRelSize={6}
-                        nodeColor={(node: any) => node.source === "user" ? "#ffffff" : stringToColor(node.source || "")}
+                        nodeColor={(node: { source: string }) => node.source === "user" ? "#ffffff" : stringToColor(node.source || "")}
                         linkColor={() => "rgba(255,255,255,0.15)"}
                         linkWidth={1.5}
                         linkDirectionalParticles={2}

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { askBrain } from "@/lib/api";
-import { motion, AnimatePresence } from "framer-motion";
 
 export default function ChatPage() {
   const [qaQuery, setQaQuery] = useState("");
@@ -43,7 +42,7 @@ export default function ChatPage() {
             newHistory[newHistory.length - 1] = { user: currentQuery, ai: res.answer, sources: res.sources };
             return newHistory;
         });
-    } catch (e) {
+    } catch {
         setChatHistory(prev => {
             const newHistory = [...prev];
             newHistory[newHistory.length - 1] = { user: currentQuery, ai: "Error: Could not reach the brain.", sources: [] };
