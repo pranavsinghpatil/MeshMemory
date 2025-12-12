@@ -465,8 +465,8 @@ def get_graph_data():
     try:
         # Fetch notes with vectors
         response = notes_collection.query.fetch_objects(
-            limit=50, 
-            return_properties=["text", "source"],
+            limit=500, 
+            return_properties=["text", "source", "title"],
             include_vector=True
         )
         
@@ -486,11 +486,24 @@ def get_graph_data():
             if isinstance(vec, dict):
                 vec = vec.get('default') or list(vec.values())[0]
             
+            # Smart Naming: Use Title if available, else Source, else Text snippet
+            title = obj.properties.get("title", "")
+            source = obj.properties.get("source", "unknown")
+            text_snippet = obj.properties.get("text", "")[:20] + "..."
+            
+            if title and title != "unknown":
+                name = title[:30] + "..." if len(title) > 30 else title
+            elif source and source != "user" and source != "unknown":
+                name = os.path.basename(source) # Clean up path/url
+                if len(name) > 20: name = name[:20] + "..."
+            else:
+                name = text_snippet
+
             nodes.append({
                 "id": str(obj.uuid),
-                "name": obj.properties.get("text", "")[:20] + "...",
+                "name": name,
                 "fullText": obj.properties.get("text", ""),
-                "source": obj.properties.get("source", "unknown"),
+                "source": source,
                 "val": 1
             })
             vectors.append(vec)
