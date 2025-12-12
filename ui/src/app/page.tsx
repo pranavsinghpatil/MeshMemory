@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { checkHealth, ingestNote, getGraphData, ingestURL, ingestYouTube, ingestFile } from "@/lib/api";
+import Footer from "@/components/Footer";
 
 // Dynamically import ForceGraph2D to avoid SSR issues
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false });
@@ -126,15 +127,10 @@ export default function Home() {
         {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       </AnimatePresence>
 
-      {/* Header */}
       <header className="flex justify-between items-center">
         <div>
             <h1 className="text-2xl font-bold text-white">Dashboard</h1>
             <p className="text-sm text-gray-500">Overview of your knowledge base.</p>
-        </div>
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${health ? "bg-green-500/10 border-green-500/20" : "bg-red-500/10 border-red-500/20"}`}>
-            <div className={`w-2 h-2 rounded-full ${health ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
-            <span className={`text-xs font-medium ${health ? "text-green-400" : "text-red-400"}`}>{health ? "System Online" : "System Offline"}</span>
         </div>
       </header>
 
@@ -297,6 +293,7 @@ export default function Home() {
         </div>
 
       </div>
+      <Footer />
     </div>
   );
 }

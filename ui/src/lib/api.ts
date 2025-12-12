@@ -1,4 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const READ_ONLY = process.env.NEXT_PUBLIC_READ_ONLY === "true";
 
 export async function checkHealth() {
     try {
@@ -10,6 +11,7 @@ export async function checkHealth() {
 }
 
 export async function ingestNote(text: string) {
+    if (READ_ONLY) throw new Error("System is in Read-Only Mode. Contact Developer.");
     const res = await fetch(`${API_URL}/ingest`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -19,6 +21,7 @@ export async function ingestNote(text: string) {
 }
 
 export async function ingestPDF(file: File) {
+    if (READ_ONLY) throw new Error("System is in Read-Only Mode. Contact Developer.");
     const formData = new FormData();
     formData.append("file", file);
 
@@ -30,6 +33,7 @@ export async function ingestPDF(file: File) {
 }
 
 export async function ingestFile(file: File, apiKey: string = "") {
+    if (READ_ONLY) throw new Error("System is in Read-Only Mode. Contact Developer.");
     const formData = new FormData();
     formData.append("file", file);
     if (apiKey) {
@@ -45,6 +49,7 @@ export async function ingestFile(file: File, apiKey: string = "") {
 
 
 export async function ingestURL(url: string) {
+    if (READ_ONLY) throw new Error("System is in Read-Only Mode. Contact Developer.");
     const res = await fetch(`${API_URL}/ingest/url`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -54,6 +59,7 @@ export async function ingestURL(url: string) {
 }
 
 export async function ingestYouTube(url: string) {
+    if (READ_ONLY) throw new Error("System is in Read-Only Mode. Contact Developer.");
     const res = await fetch(`${API_URL}/ingest/youtube`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -88,6 +94,7 @@ export async function getGraphData() {
 }
 
 export async function deleteNote(uuid: string) {
+    if (READ_ONLY) throw new Error("System is in Read-Only Mode. Contact Developer.");
     const res = await fetch(`${API_URL}/notes/${uuid}`, {
         method: "DELETE",
     });
@@ -95,6 +102,7 @@ export async function deleteNote(uuid: string) {
 }
 
 export async function updateNote(uuid: string, text: string) {
+    if (READ_ONLY) throw new Error("System is in Read-Only Mode. Contact Developer.");
     const res = await fetch(`${API_URL}/notes/${uuid}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
