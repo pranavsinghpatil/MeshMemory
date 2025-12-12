@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MeshMemory",
   description: "Your Local-First, AI-Powered Second Brain.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 

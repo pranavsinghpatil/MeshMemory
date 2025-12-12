@@ -359,7 +359,7 @@ def ask_gemini(question: str, context_text: str, history_text: str, api_key: str
     print(f"--- Asking Gemini (Cloud) ---")
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         prompt = f"""You are MeshMemory, an advanced knowledge engine.
         Answer strictly based on the context provided.
@@ -476,6 +476,10 @@ def get_graph_data():
         ids = []
         
         # 1. Create Nodes & Collect Vectors
+        if not response.objects:
+            print("Graph is empty.")
+            return {"nodes": [], "links": []}
+
         for obj in response.objects:
             # Handle vector structure (v4 client)
             vec = obj.vector
