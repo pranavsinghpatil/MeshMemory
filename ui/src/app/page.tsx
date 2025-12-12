@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { checkHealth, ingestNote, getGraphData, ingestURL, ingestYouTube, ingestFile } from "@/lib/api";
@@ -35,9 +36,21 @@ export default function Home() {
   const [graphDimensions, setGraphDimensions] = useState({ width: 0, height: 0 });
   const graphWrapperRef = useRef<HTMLDivElement>(null);
   const [apiKey, setApiKey] = useState("");
+  const [loading, setLoading] = useState(true); // Added loading state
+  const router = useRouter(); // Added useRouter hook
 
   useEffect(() => {
+    // 1. Check if first time visitor
+    const hasVisited = localStorage.getItem("mesh_visited");
+    if (!hasVisited && process.env.NEXT_PUBLIC_READ_ONLY === "true") {
+        router.push("/demo");
+        return;
+    }
+
+    // 2. Health Check
     checkHealth().then(setHealth);
+
+    // 3. Load Graph
     refreshGraph();
     
     const savedKey = localStorage.getItem("gemini_api_key");

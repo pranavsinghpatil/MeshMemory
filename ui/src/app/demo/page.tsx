@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 
 export default function DemoPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-gray-100 font-sans selection:bg-purple-500/30 overflow-y-auto custom-scrollbar">
+    <div className="h-full bg-[#0a0a0a] text-gray-100 font-sans selection:bg-purple-500/30 overflow-y-auto custom-scrollbar">
       <div className="max-w-5xl mx-auto px-6 py-16">
         
         {/* Hero Section */}
@@ -79,7 +79,7 @@ export default function DemoPage() {
             <FeatureCard 
                 icon="🔌"
                 title="Model Context Protocol (MCP)"
-                desc="Works with Anthropic's Claude Desktop! Simply connect MeshMemory as an MCP server to let Claude browse your local brain."
+                desc="Works with Anthropic's Claude Desktop! (Local Mode Only) Connect it to let Claude browse your personal brain."
                 delay={0.7}
             />
         </div>
@@ -96,7 +96,10 @@ export default function DemoPage() {
             </p>
             <div className="flex flex-col md:flex-row gap-4 justify-center">
                 <Link href="/">
-                    <button className="bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-gray-200 transition-colors shadow-lg shadow-white/10 w-full md:w-auto">
+                    <button 
+                        onClick={() => localStorage.setItem("mesh_visited", "true")}
+                        className="bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-gray-200 transition-colors shadow-lg shadow-white/10 w-full md:w-auto"
+                    >
                         Enter Dashboard
                     </button>
                 </Link>
