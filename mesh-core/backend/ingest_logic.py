@@ -65,12 +65,14 @@ def ingest_youtube(url: str) -> dict:
         for item in transcript_list:
             full_text += item['text'] + " "
             
-        # Get title (hacky way without API key, or just use URL)
-        # For now, we'll use the URL as title or try to fetch page title
+        # Get title using oEmbed (Official/Clean way)
         try:
-            response = requests.get(url)
-            soup = BeautifulSoup(response.content, 'html.parser')
-            title = soup.title.string.replace(" - YouTube", "")
+            oembed_url = f"https://www.youtube.com/oembed?url={url}&format=json"
+            response = requests.get(oembed_url)
+            if response.status_code == 200:
+                title = response.json()['title']
+            else:
+                title = f"YouTube Video ({video_id})"
         except:
             title = f"YouTube Video ({video_id})"
             

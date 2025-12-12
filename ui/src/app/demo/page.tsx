@@ -24,6 +24,9 @@ export default function DemoPage() {
             <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
                 The Personal AI Second Brain of <span className="text-white font-semibold">@pranavsinghpatil</span>.
             </p>
+            <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl max-w-2xl mx-auto">
+                <p className="text-red-400 font-bold animate-pulse">⚠️ FIRST TIME VISITORS: PLEASE READ BELOW BEFORE ENTERING</p>
+            </div>
         </motion.div>
 
         {/* Status Card */}
