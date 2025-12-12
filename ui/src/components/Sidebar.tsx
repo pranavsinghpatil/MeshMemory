@@ -8,7 +8,6 @@ const menuItems = [
   { icon: "🏠", label: "Dashboard", href: "/" },
   { icon: "💬", label: "Chat", href: "/chat" },
   { icon: "🧠", label: "Memories", href: "/memories" },
-  { icon: "⚙️", label: "Settings", href: "/settings" },
   { icon: "❓", label: "How it Works", href: "/how-it-works" },
 ];
 
@@ -18,9 +17,9 @@ export default function Sidebar() {
   return (
     <div className="w-20 h-screen bg-black/50 backdrop-blur-xl border-r border-white/5 flex flex-col items-center p-4 shrink-0 transition-all duration-300 z-50">
       <div className="flex items-center justify-center mb-8">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-blue-500/20">
-          M
-        </div>
+        <Link href="/">
+            <img src="/favicon.ico" alt="Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-blue-500/20 hover:scale-105 transition-transform" />
+        </Link>
       </div>
 
       <nav className="space-y-4 flex-1 w-full">
