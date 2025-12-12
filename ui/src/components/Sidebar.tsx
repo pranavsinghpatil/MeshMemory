@@ -55,9 +55,6 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-auto pt-6 border-t border-white/5 w-full flex justify-center">
-         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" title="System Online"></div>
-      </div>
     </div>
   );
 }

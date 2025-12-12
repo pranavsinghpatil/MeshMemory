@@ -128,9 +128,17 @@ export default function Home() {
       </AnimatePresence>
 
       <header className="flex justify-between items-center">
+{/*         
         <div>
             <h1 className="text-2xl font-bold text-white">Dashboard</h1>
             <p className="text-sm text-gray-500">Overview of your knowledge base.</p>
+        </div> */}
+        <span className="font-bold text-gray-400 flex items-center gap-2">
+                🧠 MeshMemory <span className="text-[12px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 rounded-full">Dashboard</span>
+            </span>
+        <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
+            <div className={`w-1.5 h-1.5 rounded-full ${health ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
+            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">{health ? "Online" : "Offline"}</span>
         </div>
       </header>
 
