@@ -284,7 +284,7 @@ export default function Home() {
                         nodeLabel="name"
                         backgroundColor="rgba(0,0,0,0)"
                         nodeRelSize={6}
-                        nodeColor={(node: { source: string }) => node.source === "user" ? "#ffffff" : stringToColor(node.source || "")}
+                        nodeColor={(node: any) => node.source === "user" ? "#ffffff" : stringToColor(node.source || "")}
                         linkColor={() => "rgba(255,255,255,0.15)"}
                         linkWidth={1.5}
                         linkDirectionalParticles={2}
