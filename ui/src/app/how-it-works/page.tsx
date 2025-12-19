@@ -39,28 +39,7 @@ export default function HowItWorks() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-gray-100 font-sans selection:bg-purple-500/30">
-      {/* Navbar */}
-      <header className="border-b border-white/10 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="cursor-pointer hover:opacity-80 transition-opacity">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white">
-                M
-                </div>
-            </Link>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">MeshMemory</h1>
-              <p className="text-xs text-gray-500 font-mono">LOCAL NODE v1.0</p>
-            </div>
-          </div>
-          <nav className="flex gap-6 text-sm font-medium">
-            <Link href="/" className="text-gray-400 hover:text-white transition-colors">Control Center</Link>
-            <Link href="/how-it-works" className="text-white">How it Works</Link>
-          </nav>
-        </div>
-      </header>
-
+    <div className="h-full bg-[#0a0a0a] text-gray-100 font-sans selection:bg-purple-500/30 overflow-y-auto custom-scrollbar">
       <main className="max-w-4xl mx-auto px-6 py-16">
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -71,7 +50,7 @@ export default function HowItWorks() {
                 Under the Hood
             </h1>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                MeshMemory isn't just a database. It's a <span className="text-white font-semibold">Living Organism</span> of information. Here is how raw data becomes intelligence.
+                MeshMemory isn&apos;t just a database. It&apos;s a <span className="text-white font-semibold">Living Organism</span> of information. Here is how raw data becomes intelligence.
             </p>
         </motion.div>
 

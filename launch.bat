@@ -1,68 +1,31 @@
 @echo off
-setlocal enabledelayedexpansion
+title MeshMemory Launcher
+color 0A
 
-echo ==========================================
-echo 🧠 Starting MeshMemory Node...
-echo ==========================================
+echo ===================================================
+echo       MeshMemory 2.0 - Second Brain Launcher
+echo ===================================================
+echo.
 
-:: 0. Environment Setup
-echo [0/4] Checking Environment...
-
-if exist ".venv" goto :venv_exists
-
-echo    - Creating virtual environment (.venv)...
-python -m venv .venv
-if %errorlevel% neq 0 goto :error_venv
-
-:venv_exists
-echo    - Virtual environment found.
-echo    - Activating venv...
-call .venv\Scripts\activate.bat
-if %errorlevel% neq 0 goto :error_activate
-
-echo    - Installing dependencies...
-pip install -r requirements.txt
-if %errorlevel% neq 0 goto :error_install
-
-:: 1. Start Weaviate (Docker)
-echo [1/4] Starting Vector Database (Docker)...
+echo [1/3] Checking for Weaviate...
+echo Starting Database...
 docker-compose up -d
-if %errorlevel% neq 0 goto :error_docker
+timeout /t 10 /nobreak >nul
+echo.
 
-:: 2. Start Backend (in a new window)
-echo [2/4] Starting Backend Brain...
-start "MeshMemory Backend" cmd /k "call .venv\Scripts\activate.bat && cd mesh-core\backend && uvicorn main:app --reload"
+echo [2/3] Starting Backend (Port 8000)...
+start "MeshMemory Backend" cmd /k "cd mesh-core\backend && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000"
 
-:: 3. Start Frontend (in a new window)
-echo [3/4] Starting Control Center UI...
-start "MeshMemory UI" cmd /k "cd ui && npm install && npm run dev"
+echo [3/3] Starting Frontend (Port 3000)...
+start "MeshMemory Frontend" cmd /k "cd ui && npm run dev"
 
 echo.
-echo ✅ System Launching!
-echo ------------------------------------------
-echo 🌍 UI:      http://localhost:3000
-echo 🔌 Backend: http://localhost:8000
-echo ------------------------------------------
-echo Press any key to close this launcher (services will keep running)...
+echo ===================================================
+echo       MeshMemory is launching! 🚀
+echo ===================================================
+echo.
+echo Backend: http://localhost:8000/docs
+echo Frontend: http://localhost:3000
+echo.
+echo Press any key to exit this launcher (windows will stay open)...
 pause >nul
-goto :eof
-
-:error_venv
-echo ❌ Error: Failed to create venv. Is Python installed?
-pause
-exit /b 1
-
-:error_activate
-echo ❌ Error: Failed to activate venv.
-pause
-exit /b 1
-
-:error_install
-echo ❌ Error: Failed to install dependencies.
-pause
-exit /b 1
-
-:error_docker
-echo ❌ Error: Docker is not running or docker-compose failed.
-pause
-exit /b 1
