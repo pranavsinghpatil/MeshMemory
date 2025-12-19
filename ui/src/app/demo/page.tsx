@@ -53,6 +53,30 @@ export default function DemoPage() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
         </motion.div>
 
+        {/* 🎥 Video Showcase Section (Placeholder) */}
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="mb-20"
+        >
+             <div className="aspect-video w-full bg-black/50 rounded-3xl border border-white/10 flex items-center justify-center relative overflow-hidden group">
+                {/* Replace this 'iframe' with your actual YouTube/X embed later */}
+                {/* <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID" className="absolute inset-0 w-full h-full" ... /> */}
+                
+                <div className="text-center p-8">
+                    <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md group-hover:scale-110 transition-transform cursor-pointer">
+                        <span className="text-4xl ml-1">▶️</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Watch the Walkthrough</h3>
+                    <p className="text-gray-400">See how I use MeshMemory to ingest, connect, and chat with my data.</p>
+                </div>
+                
+                {/* Decorative BG */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 to-purple-500/5 pointer-events-none"></div>
+             </div>
+        </motion.div>
+
         {/* Walkthrough Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
             <FeatureCard 
