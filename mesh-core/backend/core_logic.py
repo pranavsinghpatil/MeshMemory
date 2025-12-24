@@ -522,7 +522,8 @@ def get_graph_data():
             sim_matrix = np.dot(normalized_matrix, normalized_matrix.T)
             
             # Create links for high similarity
-            THRESHOLD = 0.40
+            # Higher threshold (0.65) means only very similar/related nodes connect
+            THRESHOLD = 0.65
             for i in range(len(ids)):
                 for j in range(i + 1, len(ids)): # Upper triangle only
                     sim = sim_matrix[i][j]
