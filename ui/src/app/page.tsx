@@ -98,25 +98,34 @@ export default function Home() {
   const handleIngest = async () => {
     setIngesting(true);
     try {
+      let res;
       if (activeTab === "file" && file) {
-        await ingestFile(file, apiKey);
+        res = await ingestFile(file, apiKey);
+        if (res.status === "error") throw new Error(res.message);
         setFile(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
         setToast("File Ingested Successfully!");
       } else if (activeTab === "note" && note) {
-        await ingestNote(note);
+        res = await ingestNote(note);
+        if (res.status === "error") throw new Error(res.message);
         setNote("");
         setToast("Memory Stored Successfully!");
       } else if (activeTab === "web" && urlInput) {
-        await ingestURL(urlInput);
+        res = await ingestURL(urlInput);
+        if (res.status === "error") throw new Error(res.message);
         setUrlInput("");
         setToast("Web Page Ingested Successfully!");
       } else if (activeTab === "youtube" && urlInput) {
-        await ingestYouTube(urlInput);
+        res = await ingestYouTube(urlInput);
+        if (res.status === "error") throw new Error(res.message);
         setUrlInput("");
         setToast("YouTube Video Ingested Successfully!");
       }
-      await refreshGraph(); 
+      
+      // Small delay to allow vector DB to index
+      setTimeout(async () => {
+        await refreshGraph();
+      }, 1500); 
     } catch (e) {
       alert("Error ingesting: " + e);
     }

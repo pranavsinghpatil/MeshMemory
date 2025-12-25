@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://meshmemory.onrender.com";
 const READ_ONLY = process.env.NEXT_PUBLIC_READ_ONLY === "true";
 
 // Helper to check for admin password if in read-only mode
@@ -102,7 +102,7 @@ export async function askBrain(query: string, history: Array<{ user: string, ai:
 
 export async function getGraphData() {
     try {
-        const res = await fetch(`${API_URL}/graph`);
+        const res = await fetch(`${API_URL}/graph?t=${Date.now()}`);
         if (!res.ok) throw new Error("Graph fetch failed");
         return res.json();
     } catch (e) {

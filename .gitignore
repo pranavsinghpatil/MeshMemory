@@ -37,3 +37,10 @@ IMPACT.md/
 
 # Gemini
 .gemini/
+
+# Private / Work in Progress
+marketing/
+gemini.md
+filestructure.md
+IMPACT.md
+*.tmp.md

@@ -1,38 +1,108 @@
-# ⚙️ Configuration Guide
+# 🛠️ Setup & Configuration Guide
 
-## 🔌 Switching Weaviate Modes (Local vs Cloud)
+MeshMemory relies on two key components: the **Backend** (running the application logic + database) and the **Frontend** (the UI). You can configure these in two ways depending on your needs.
 
-MeshMemory is designed to work with both **Local Docker Weaviate** (Free, Unlimited, Private) and **Weaviate Cloud** (Managed, expires in 14 days on free tier).
+## 📊 Comparison
 
-### Option 1: Using Local Weaviate (Docker) - **RECOMMENDED**
-This is the default mode. It keeps all your data on your machine.
+| Feature | ☁️ Online (Production) | 🏠 Local (Development) |
+| :--- | :--- | :--- |
+| **Connectivity** | Connects to `meshmemory.onrender.com` | Connects to `localhost` |
+| **Requirements** | Node.js only | Docker + Python + Node.js + Ollama |
+| **Privacy** | Data managed on Cloud | 100% Private (Your machine) |
+| **Setup Time** | ~2 minutes | ~15 minutes |
+| **Best For** | Demos, Quick usage, checking UI | Full development, Privacy enthusiasts |
 
-1.  Ensure Docker is running.
-2.  Edit your `.env` file (in `mesh-core/backend`):
+---
+
+## ☁️ Option 1: Online Mode (Quick Start)
+*Perfect for demos or using the app without installing Docker.*
+
+### 1. Prerequisites
+- **Node.js 18+** installed.
+
+### 2. Configure Frontend
+1.  Navigate to the `ui` folder:
+    ```bash
+    cd ui
+    ```
+2.  Create or Edit `.env.local`:
+    ```ini
+    # Points to the live production server
+    NEXT_PUBLIC_API_URL="https://meshmemory.onrender.com"
+    ```
+    *(Note: The default fallback in the code is set to this URL, but setting it explicitly is best practice).*
+
+### 3. Run
+```bash
+npm install
+npm run dev
+```
+Open **http://localhost:3000**. You should see the "Online" indicator in green.
+
+---
+
+## 🏠 Option 2: Local Mode (Full Setup)
+*Perfect for developing the backend or keeping data private.*
+
+### 1. Prerequisites
+- **Docker Desktop** (Running)
+- **Python 3.10+**
+- **Node.js 18+**
+- **Ollama** (Running `ollama serve`)
+
+### 2. Backend Setup
+1.  Navigate to `mesh-core/backend`.
+2.  Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  Ensure your `.env` connects to Local Weaviate:
     ```ini
     WEAVIATE_URL=localhost
     WEAVIATE_PORT=8080
-    WEAVIATE_API_KEY=
     ```
-    *(Leave API KEY empty)*.
+4.  Start Weaviate:
+    ```bash
+    docker-compose up -d
+    ```
+5.  Start Backend:
+    ```bash
+    python -m uvicorn main:app --reload
+    ```
 
-### Option 2: Using Weaviate Cloud (WCS)
-Use this if you are deploying to Render/Vercel or want a managed database.
-
-1.  Create a cluster at [console.weaviate.cloud](https://console.weaviate.cloud).
-2.  Edit your `.env` file:
+### 3. Frontend Setup
+1.  Navigate to `ui`.
+2.  Update `.env.local` to point locally:
     ```ini
-    WEAVIATE_URL=https://your-cluster-url.weaviate.network
-    WEAVIATE_API_KEY=your-admin-api-key
+    NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"
     ```
-    *(Do NOT include `http://` or `https://` if using the local code, but our code handles it. Just paste the Cluster URL).*
+3.  Run:
+    ```bash
+    npm run dev
+    ```
 
-### ⚠️ Important Note on "14 Days"
-The free Weaviate Cloud sandbox expires after 14 days. If it expires:
-1.  **Export your data** (we can build a script for this) OR
-2.  **Switch to Local Docker** (Option 1) to keep your brain running forever for free.
+---
 
-## 🖥️ Frontend Configuration
-The frontend connects to the backend.
-- **Local**: `NEXT_PUBLIC_API_URL=http://127.0.0.1:8000`
-- **Production**: `NEXT_PUBLIC_API_URL=https://your-backend.onrender.com`
+## 🔑 Key Configuration (Environment Variables)
+
+### Backend (`mesh-core/backend/.env`)
+| Variable | Description |
+| :--- | :--- |
+| `WEAVIATE_URL` | URL of the vector database (e.g., `localhost` or `cluster.weaviate.network`). |
+| `WEAVIATE_API_KEY` | Admin key for Weaviate (Leave empty for local Docker). |
+| `GEMINI_API_KEY` | **Required** for file analysis (PDF/Image) even in local mode if using Gemini features. |
+| `OLLAMA_MODEL` | Local LLM to use (Default: `llama3`). |
+
+### Frontend (`ui/.env.local`)
+| Variable | Description |
+| :--- | :--- |
+| `NEXT_PUBLIC_API_URL` | The URL of the backend API. |
+| `NEXT_PUBLIC_READ_ONLY` | Set to `true` to disable editing/deleting (for public demos). |
+
+---
+
+## ⚠️ Important Troubleshooting
+
+### "Files URL/YouTube not showing up?"
+- **On Cloud**: The cloud server might be blocked by YouTube or websites. Also, you **must** enter a Gemini API Key in the UI Settings for file analysis to work.
+- **On Local**: Make sure Docker is running.
