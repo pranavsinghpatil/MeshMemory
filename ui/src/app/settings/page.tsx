@@ -42,7 +42,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#050505] p-8 max-w-3xl mx-auto w-full">
+    <div className="flex flex-col min-h-screen bg-[#050505] p-8 max-w-3xl mx-auto w-full overflow-y-auto">
       {/* Toast */}
       {toast && (
         <motion.div
