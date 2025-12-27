@@ -1,22 +1,10 @@
-## Never do any changes or look the code of oldstory folder
-
-Got error messaeg ->
-## Error Type
-Runtime TypeError
-
-## Error Message
-Failed to fetch
+||      MeshMemory     || - caption 1
+|| the font cover here || - cap... 2
 
 
-    at handleQA (src/app/page.tsx:29:21)
+cap 1 = <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium animate-pulse">
+                🚀 Live Vector Database System for LLMs and Data assistance
+            </div>
 
-## Code Frame
-  27 |
-  28 | const handleQA = async () => {
-> 29 |   const res = await fetch("http://localhost:8000/qa", {
-     |                     ^
-  30 |     method: "POST",
-  31 |     headers: { "Content-Type": "application/json" },
-  32 |     body: JSON.stringify({ query: qaQuery }),
-
-Next.js version: 15.5.2 (Turbopack)
+same to same 
+same ui for cap 2 
