@@ -64,7 +64,7 @@ export default function ChatPage() {
             {!isReadOnly && (
                 <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
                     <span className={`w-2 h-2 rounded-full ${mode === "cloud" ? "bg-purple-500" : "bg-blue-500"}`}></span>
-                    Using {mode === "cloud" ? "Gemini 1.5 Flash" : "Ollama Local"}
+                    Using {mode === "cloud" ? "Gemini 2.5 Flash" : "Ollama Local"}
                 </p>
             )}
         </div>

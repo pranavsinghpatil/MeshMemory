@@ -204,7 +204,7 @@ def ingest_generic_file(file_path: str, mime_type: str, api_key: str = "") -> st
         
     try:
         genai.configure(api_key=api_key)
-        # Use 1.5 Flash for multimodal speed/cost
+        # Use 2.5 Flash for multimodal speed/cost
         model = genai.GenerativeModel('gemini-2.5-flash') 
         
         print("Uploading to Gemini...")
@@ -459,9 +459,9 @@ def ask_brain(question: str, history: list = [], mode: str = "local", api_key: s
         print(f"!!! {error_msg}")
         return {"answer": error_msg, "sources": []}
 
-def get_graph_data():
+def get_graph_data(threshold: float = 0.7):
     """Retrieves nodes and creates semantic links."""
-    print("--- Fetching Graph Data (Semantic) ---")
+    print(f"--- Fetching Graph Data (Semantic, Threshold: {threshold}) ---")
     try:
         # Fetch notes with vectors
         response = notes_collection.query.fetch_objects(
@@ -521,20 +521,18 @@ def get_graph_data():
             # Compute similarity matrix (Dot product of normalized vectors)
             sim_matrix = np.dot(normalized_matrix, normalized_matrix.T)
             
-            # Create links for high similarity
-            # Higher threshold (0.70) means only very similar/related nodes connect
-            THRESHOLD = 0.7
+            # Create links for high similarity using configurable threshold
             for i in range(len(ids)):
                 for j in range(i + 1, len(ids)): # Upper triangle only
                     sim = sim_matrix[i][j]
-                    if sim > THRESHOLD:
+                    if sim > threshold:
                         links.append({
                             "source": ids[i],
                             "target": ids[j],
                             "value": float(sim) # Strength of link
                         })
                         
-        print(f"Generated {len(nodes)} nodes and {len(links)} semantic links (Threshold: {THRESHOLD}).")
+        print(f"Generated {len(nodes)} nodes and {len(links)} semantic links (Threshold: {threshold}).")
         return {"nodes": nodes, "links": links}
     except Exception as e:
         print(f"!!! Error in get_graph_data: {e}")

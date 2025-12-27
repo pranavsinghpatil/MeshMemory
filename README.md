@@ -17,7 +17,7 @@ Visualize your brain. Every memory is a node. Connections are created automatica
 ### ⚡ Neural Input
 Ingest anything.
 - **Notes**: Quick thoughts & ideas.
-- **Files**: Drag & drop PDFs, Images, Audio (processed by Gemini 1.5).
+- **Files**: Drag & drop PDFs, Images, Audio (processed by Gemini 2.5).
 - **Web**: Scrape articles or YouTube videos with one click.
 
 ### 🧠 Graph RAG (Retrieval Augmented Generation)
@@ -61,7 +61,7 @@ MeshMemory is built on a modern, scalable stack:
 - **Frontend**: Next.js 14, TailwindCSS, Framer Motion, React Force Graph.
 - **Backend**: Python FastAPI, BeautifulSoup, PyPDF.
 - **AI / Core**:
-    - **LLM**: Gemini 1.5 Flash (Multimodal) OR Ollama (Local Llama 3).
+    - **LLM**: Gemini 2.5 Flash (Multimodal) OR Ollama (Local Llama 3).
     - **Vector DB**: Weaviate (Hybrid Search enabled).
     - **Embeddings**: `all-MiniLM-L6-v2` (Local) or Weaviate-managed.
 

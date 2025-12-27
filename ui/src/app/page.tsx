@@ -88,7 +88,9 @@ export default function Home() {
 
   const refreshGraph = async () => {
     try {
-        const data = await getGraphData();
+        const savedThreshold = localStorage.getItem("graph_threshold");
+        const threshold = savedThreshold ? parseFloat(savedThreshold) : 0.7;
+        const data = await getGraphData(threshold);
         setGraphData(data);
     } catch (e) {
         console.error("Error refreshing graph:", e);

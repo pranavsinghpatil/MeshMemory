@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 export default function SettingsPage() {
   const [mode, setMode] = useState("local");
   const [apiKey, setApiKey] = useState("");
+  const [graphThreshold, setGraphThreshold] = useState(0.7);
   const [toast, setToast] = useState<string | null>(null);
 
   const router = useRouter(); // Import at top
@@ -20,8 +21,10 @@ export default function SettingsPage() {
 
     const savedKey = localStorage.getItem("gemini_api_key");
     const savedMode = localStorage.getItem("brain_mode");
+    const savedThreshold = localStorage.getItem("graph_threshold");
     if (savedKey) setApiKey(savedKey);
     if (savedMode) setMode(savedMode);
+    if (savedThreshold) setGraphThreshold(parseFloat(savedThreshold));
   }, []);
 
   useEffect(() => {
@@ -34,6 +37,7 @@ export default function SettingsPage() {
   const saveSettings = () => {
     localStorage.setItem("gemini_api_key", apiKey);
     localStorage.setItem("brain_mode", mode);
+    localStorage.setItem("graph_threshold", graphThreshold.toString());
     setToast("Settings Saved Successfully!");
   };
 
@@ -111,6 +115,50 @@ export default function SettingsPage() {
                 </div>
             </motion.div>
         )}
+
+        {/* Graph Settings */}
+        <div className="bg-[#0A0A0A] p-8 rounded-3xl border border-white/5">
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                🕸️ Knowledge Graph
+            </h2>
+            
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        Link Connection Threshold: {graphThreshold.toFixed(2)}
+                    </label>
+                    <input 
+                        type="range" 
+                        min="0.5" 
+                        max="0.9" 
+                        step="0.05"
+                        value={graphThreshold}
+                        onChange={(e) => setGraphThreshold(parseFloat(e.target.value))}
+                        className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer
+                                 [&::-webkit-slider-thumb]:appearance-none 
+                                 [&::-webkit-slider-thumb]:w-4 
+                                 [&::-webkit-slider-thumb]:h-4 
+                                 [&::-webkit-slider-thumb]:rounded-full 
+                                 [&::-webkit-slider-thumb]:bg-blue-500
+                                 [&::-webkit-slider-thumb]:cursor-pointer
+                                 [&::-moz-range-thumb]:w-4 
+                                 [&::-moz-range-thumb]:h-4 
+                                 [&::-moz-range-thumb]:rounded-full 
+                                 [&::-moz-range-thumb]:bg-blue-500
+                                 [&::-moz-range-thumb]:border-0
+                                 [&::-moz-range-thumb]:cursor-pointer"
+                    />
+                    <div className="flex justify-between text-xs text-gray-600 mt-2">
+                        <span>0.5 (More Links)</span>
+                        <span>0.9 (Fewer Links)</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-3">
+                        Higher values mean only very similar/related nodes will connect. 
+                        Lower values create more connections but may include less related topics.
+                    </p>
+                </div>
+            </div>
+        </div>
 
         {/* Save Button */}
         <div className="flex justify-end pt-6">

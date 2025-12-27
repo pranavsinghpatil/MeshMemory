@@ -130,9 +130,9 @@ async def search(request: Request, query: str):
     return {"results": results}
 
 @app.get("/graph")
-async def graph():
+async def graph(threshold: float = 0.7):
     """Get knowledge graph data."""
-    return get_graph_data()
+    return get_graph_data(threshold)
 
 @app.post("/qa")
 @limiter.limit("10/minute")
