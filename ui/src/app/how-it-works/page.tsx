@@ -82,6 +82,34 @@ export default function HowItWorks() {
             ))}
         </div>
 
+        {/* Tech Stack Overview */}
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-24"
+        >
+            <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold text-white mb-3">Complete Tech Stack</h2>
+                <p className="text-gray-400">Every technology powering MeshMemory</p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+                <TechCard icon="🗄️" name="Weaviate" desc="Vector Database" />
+                <TechCard icon="🦙" name="Ollama" desc="Local LLM (Llama 3)" />
+                <TechCard icon="✨" name="Gemini" desc="Cloud AI (Optional)" />
+                <TechCard icon="⚡" name="FastAPI" desc="Python Backend" />
+                <TechCard icon="⚛️" name="Next.js 14" desc="React Framework" />
+                <TechCard icon="🎨" name="TailwindCSS" desc="Styling" />
+                <TechCard icon="🕸️" name="Force Graph" desc="3D Visualization" />
+                <TechCard icon="🔌" name="MCP" desc="Claude Integration" />
+                <TechCard icon="🧮" name="NumPy" desc="Math Operations" />
+                <TechCard icon="📊" name="SentenceTransformers" desc="Embeddings" />
+                <TechCard icon="🐳" name="Docker" desc="Containerization" />
+                <TechCard icon="🐍" name="Python 3.10+" desc="Backend Language" />
+            </div>
+        </motion.div>
+
         <motion.div 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -112,15 +140,28 @@ export default function HowItWorks() {
                 >
                     📥 Download Config
                 </a>
-                <Link href="/">
-                    <button className="bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors shadow-xl shadow-white/10">
-                        Launch Control Center 🚀
-                    </button>
-                </Link>
+                <a 
+                    href="https://github.com/pranavsinghpatil/MeshMemory#mcp-setup" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors shadow-xl shadow-white/10"
+                >
+                    📖 MCP Setup Guide
+                </a>
             </div>
         </motion.div>
       </main>
       <Footer />
     </div>
   );
+}
+
+function TechCard({ icon, name, desc }: { icon: string, name: string, desc: string }) {
+    return (
+        <div className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 rounded-2xl p-6 transition-all duration-300 group cursor-default">
+            <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{icon}</div>
+            <h3 className="text-lg font-bold text-white mb-1">{name}</h3>
+            <p className="text-xs text-gray-400">{desc}</p>
+        </div>
+    );
 }

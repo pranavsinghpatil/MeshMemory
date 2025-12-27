@@ -40,9 +40,12 @@ export default function Home() {
   const router = useRouter(); // Added useRouter hook
 
   useEffect(() => {
-    // 1. Check if first time visitor
-    const hasVisited = localStorage.getItem("mesh_visited");
-    if (!hasVisited && process.env.NEXT_PUBLIC_READ_ONLY === "true") {
+    // Check if this is the owner/admin (bypass for local development or authorized access)
+    const isOwner = localStorage.getItem("mesh_owner") === "true";
+    const isReadOnly = process.env.NEXT_PUBLIC_READ_ONLY === "true";
+    
+    // If in read-only mode and not the owner, redirect to demo
+    if (isReadOnly && !isOwner) {
         router.push("/demo");
         return;
     }
@@ -77,7 +80,7 @@ export default function Home() {
     updateDimensions();
 
     return () => observer.disconnect();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (toast) {
