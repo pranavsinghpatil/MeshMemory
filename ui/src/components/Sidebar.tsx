@@ -10,7 +10,8 @@ export default function Sidebar() {
   const isReadOnly = process.env.NEXT_PUBLIC_READ_ONLY === "true";
 
   const menuItems = [
-    { icon: "🏠", label: "Dashboard", href: "/" },
+    // Show Demo for visitors, Dashboard for owner
+    ...(isReadOnly ? [{ icon: "🚀", label: "Demo", href: "/demo" }] : [{ icon: "🏠", label: "Dashboard", href: "/" }]),
     { icon: "💬", label: "Chat", href: "/chat" },
     { icon: "🧠", label: "Memories", href: "/memories" },
     // Only show Settings in Local Mode (Write Access)
@@ -21,7 +22,8 @@ export default function Sidebar() {
   return (
     <div className="w-20 h-screen bg-black/50 backdrop-blur-xl border-r border-white/5 flex flex-col items-center p-4 shrink-0 transition-all duration-300 z-50">
       <div className="flex items-center justify-center mb-8">
-        <Link href="/">
+        {/* Logo always links to /demo - official demo button */}
+        <Link href="/demo">
             <img src="/favicon.ico" alt="Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-blue-500/20 hover:scale-105 transition-transform" />
         </Link>
       </div>
