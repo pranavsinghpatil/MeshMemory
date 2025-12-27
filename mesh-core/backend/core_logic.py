@@ -205,7 +205,7 @@ def ingest_generic_file(file_path: str, mime_type: str, api_key: str = "") -> st
     try:
         genai.configure(api_key=api_key)
         # Use 1.5 Flash for multimodal speed/cost
-        model = genai.GenerativeModel('gemini-1.5-flash') 
+        model = genai.GenerativeModel('gemini-2.5-flash') 
         
         print("Uploading to Gemini...")
         uploaded_file = genai.upload_file(file_path, mime_type=mime_type)
@@ -359,7 +359,7 @@ def ask_gemini(question: str, context_text: str, history_text: str, api_key: str
     print(f"--- Asking Gemini (Cloud) ---")
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         prompt = f"""You are MeshMemory, an advanced knowledge engine.
         Answer strictly based on the context provided.
@@ -522,8 +522,8 @@ def get_graph_data():
             sim_matrix = np.dot(normalized_matrix, normalized_matrix.T)
             
             # Create links for high similarity
-            # Higher threshold (0.65) means only very similar/related nodes connect
-            THRESHOLD = 0.65
+            # Higher threshold (0.75) means only very similar/related nodes connect
+            THRESHOLD = 0.75
             for i in range(len(ids)):
                 for j in range(i + 1, len(ids)): # Upper triangle only
                     sim = sim_matrix[i][j]
