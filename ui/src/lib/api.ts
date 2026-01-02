@@ -100,7 +100,7 @@ export async function askBrain(query: string, history: Array<{ user: string, ai:
     return res.json();
 }
 
-export async function getGraphData(threshold: number = 0.7) {
+export async function getGraphData(threshold: number = 0.6) {
     try {
         const res = await fetch(`${API_URL}/graph?threshold=${threshold}&t=${Date.now()}`);
         if (!res.ok) throw new Error("Graph fetch failed");

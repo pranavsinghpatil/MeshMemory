@@ -8,9 +8,20 @@ echo ===================================================
 echo.
 
 echo [1/3] Checking for Weaviate...
-echo Starting Database...
-docker-compose up -d
-timeout /t 10 /nobreak >nul
+set "WEAVIATE_MODE=local"
+if exist .env (
+    for /f "tokens=1* delims==" %%A in (.env) do (
+        if /i "%%A"=="WEAVIATE_MODE" set "WEAVIATE_MODE=%%B"
+    )
+)
+
+if /i "%WEAVIATE_MODE%"=="cloud" (
+    echo [Cloud Mode] Skipping local Docker startup. Connects to Weaviate Cloud.
+) else (
+    echo [Local Mode] Starting Database...
+    docker-compose up -d
+    timeout /t 10 /nobreak >nul
+)
 echo.
 
 echo [2/3] Starting Backend (Port 8000)...

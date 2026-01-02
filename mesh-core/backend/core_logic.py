@@ -10,6 +10,9 @@ import numpy as np
 from ingest_logic import ingest_url, ingest_youtube
 import google.generativeai as genai
 from groq import Groq
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # --- Configuration ---
 WEAVIATE_URL = os.getenv("WEAVIATE_URL", "localhost")
@@ -27,17 +30,38 @@ import time
 def connect_to_weaviate(retries=5, delay=2):
     for i in range(retries):
         try:
-            if WEAVIATE_URL != "localhost" and WEAVIATE_API_KEY:
-                print(f"Connecting to Weaviate Cloud: {WEAVIATE_URL}")
-                return weaviate.connect_to_wcs(
+            # Determine mode
+            mode = os.getenv("WEAVIATE_MODE", "").lower()
+            
+            # If mode is explicitly set, use it. Otherwise, infer from URL.
+            if mode == "cloud" or mode == "remote":
+                is_remote = True
+            elif mode == "local":
+                is_remote = False
+            else:
+                # Fallback to inference
+                is_remote = WEAVIATE_URL.lower() not in ["localhost", "127.0.0.1", "0.0.0.0"]
+
+            if is_remote:
+                if "localhost" in WEAVIATE_URL or "127.0.0.1" in WEAVIATE_URL:
+                     print("⚠️  CONFIGURATION WARNING: WEAVIATE_MODE is 'cloud' but URL is 'localhost'. This will likely fail!")
+                     print("👉  ACTION: Set WEAVIATE_MODE=local in your .env file.")
+
+                print(f"Connecting to Remote Weaviate (Mode: {mode or 'inferred'}): {WEAVIATE_URL}")
+                auth = Auth.api_key(WEAVIATE_API_KEY) if WEAVIATE_API_KEY else None
+                
+                return weaviate.connect_to_weaviate_cloud(
                     cluster_url=WEAVIATE_URL,
-                    auth_credentials=Auth.api_key(WEAVIATE_API_KEY),
+                    auth_credentials=auth,
                     additional_config=AdditionalConfig(timeout=Timeout(init=30))
                 )
             else:
-                print(f"Connecting to Local Weaviate: {WEAVIATE_URL}:{WEAVIATE_PORT} (Attempt {i+1}/{retries})")
+                print(f"Connecting to Local Weaviate (Mode: {mode or 'inferred'}): localhost:{WEAVIATE_PORT} (Attempt {i+1}/{retries})")
+                auth = Auth.api_key(WEAVIATE_API_KEY) if WEAVIATE_API_KEY else None
+                
                 return weaviate.connect_to_local(
                     port=WEAVIATE_PORT,
+                    auth_credentials=auth,
                     skip_init_checks=True,
                     additional_config=AdditionalConfig(timeout=Timeout(init=30))
                 )
@@ -459,7 +483,7 @@ def ask_brain(question: str, history: list = [], mode: str = "local", api_key: s
         print(f"!!! {error_msg}")
         return {"answer": error_msg, "sources": []}
 
-def get_graph_data(threshold: float = 0.7):
+def get_graph_data(threshold: float = 0.6):
     """Retrieves nodes and creates semantic links."""
     print(f"--- Fetching Graph Data (Semantic, Threshold: {threshold}) ---")
     try:

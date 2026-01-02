@@ -16,7 +16,7 @@ export default function Footer() {
                 <a href="https://github.com/pranavsinghpatil/MeshMemory" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-white transition-colors flex items-center gap-1 ">
                     ⭐ Star on GitHub
                 </a>
-                <a href="https://x.com/pranavsinghpatil" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-white transition-colors flex items-center gap-1">
+                <a href="https://x.com/pranavenv" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-white transition-colors flex items-center gap-1">
                      Follow on X
                 </a>
                 {/* <a href="https://github.com/pranavsinghpatil/MeshMemory" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-white transition-colors flex items-center gap-1">
